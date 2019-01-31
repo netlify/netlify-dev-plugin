@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { flags } = require('@oclif/command')
-const Command = require('../../base')
+const Command = require('@netlify/cli-utils')
 
 const template = `async function hello() {
   return Promise.resolve('Hello, World')

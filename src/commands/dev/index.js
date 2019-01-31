@@ -4,9 +4,9 @@ const http = require('http')
 const httpProxy = require('http-proxy')
 const waitPort = require('wait-port')
 const getPort = require('get-port')
-const { serveFunctions } = require('zip-it-and-ship-it')
+const { serveFunctions } = require('@netlify/zip-it-and-ship-it')
 const { serverSettings } = require('../../utils/detect-server')
-const Command = require('../../base')
+const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
 
 function cleanExit() {

@@ -11,7 +11,7 @@
     "http-proxy": "^1.17.0",
     "netlify": "ssh+git://git@github.com:netlify/js-client-private",
     "netlify-rules-proxy": "ssh+git://git@github.com:netlify/netlify-rules-proxy",
-    "zip-it-and-ship-it": " ssh+git://git@github.com:netlify/zip-it-and-ship-it.git"
+    "@netlify/zip-it-and-ship-it": "^0.1.3"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
