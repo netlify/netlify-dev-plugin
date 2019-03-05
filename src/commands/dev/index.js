@@ -75,6 +75,23 @@ async function startProxy(settings, addonUrls) {
 }
 
 function startDevServer(settings, log, error) {
+  if (settings.noCmd) {
+    const StaticServer = require('static-dev-server')
+    const server = new StaticServer({
+      rootPath: settings.dist,
+      name: 'netlify-dev',
+      port: settings.proxyPort,
+      templates: {
+        notFound: '404.html',
+      },
+    })
+
+    server.start(function () {
+      log('Server listening to', settings.proxyPort)
+    })
+    return
+  }
+
   const ps = spawn(settings.cmd, settings.args, {env: settings.env})
 
   ps.stdout.on('data', data => {
@@ -112,12 +129,16 @@ class DevCommand extends Command {
         }
       })
     }
-    const settings = serverSettings()
+    let settings = serverSettings()
     if (!(settings && settings.cmd)) {
-      this.log('Dev server command not detected - exiting.')
-      process.exit(1)
+      this.log('No dev server detected, using simple static server')
+      settings = {
+        noCmd: true,
+        port: 8888,
+        proxyPort: 3999,
+        dist: config.build && config.build.publish,
+      }
     }
-
     startDevServer(settings, this.log, this.error)
     if (functionsDir) {
       const fnSettings = await serveFunctions({functionsDir})
