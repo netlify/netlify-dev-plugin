@@ -1,13 +1,13 @@
-const { flags } = require('@oclif/command')
-const { spawn } = require('child_process')
+const {flags} = require('@oclif/command')
+const {spawn} = require('child_process')
 const http = require('http')
 const httpProxy = require('http-proxy')
 const waitPort = require('wait-port')
 const getPort = require('get-port')
-const { serveFunctions } = require('@netlify/zip-it-and-ship-it')
-const { serverSettings } = require('../../utils/detect-server')
+const {serveFunctions} = require('@netlify/zip-it-and-ship-it')
+const {serverSettings} = require('../../detect-server')
 const Command = require('@netlify/cli-utils')
-const { getAddons } = require('netlify/src/addons')
+const {getAddons} = require('netlify/src/addons')
 
 function cleanExit() {
   process.exit()
@@ -26,45 +26,47 @@ function addonUrl(addonUrls, req) {
 async function startProxy(settings, addonUrls) {
   const rulesProxy = require('netlify-rules-proxy')
 
-  await waitPort({ port: settings.proxyPort })
+  await waitPort({port: settings.proxyPort})
   if (settings.functionsPort) {
-    await waitPort({ port: settings.functionsPort })
+    await waitPort({port: settings.functionsPort})
   }
-  const port = await getPort({ port: settings.port })
-  const functionsServer = settings.functionsPort ? `http://localhost:${settings.functionsPort}` : null
+  const port = await getPort({port: settings.port})
+  const functionsServer = settings.functionsPort ?
+    `http://localhost:${settings.functionsPort}` :
+    null
 
   const proxy = httpProxy.createProxyServer({
     target: {
       host: 'localhost',
-      port: settings.proxyPort
-    }
+      port: settings.proxyPort,
+    },
   })
 
-  const rewriter = rulesProxy({ publicFolder: settings.dist })
+  const rewriter = rulesProxy({publicFolder: settings.dist})
 
-  const server = http.createServer(function(req, res) {
+  const server = http.createServer(function (req, res) {
     if (isFunction(settings, req)) {
-      return proxy.web(req, res, { target: functionsServer })
+      return proxy.web(req, res, {target: functionsServer})
     }
     let url = addonUrl(addonUrls, req)
     if (url) {
-      return proxy.web(req, res, { target: url })
+      return proxy.web(req, res, {target: url})
     }
 
     rewriter(req, res, () => {
       if (isFunction(settings, req)) {
-        return proxy.web(req, res, { target: functionsServer })
+        return proxy.web(req, res, {target: functionsServer})
       }
       url = addonUrl(addonUrls, req)
       if (url) {
-        return proxy.web(req, res, { target: url })
+        return proxy.web(req, res, {target: url})
       }
 
-      proxy.web(req, res, { target: `http://localhost:${settings.proxyPort}` })
+      proxy.web(req, res, {target: `http://localhost:${settings.proxyPort}`})
     })
   })
 
-  server.on('upgrade', function(req, socket, head) {
+  server.on('upgrade', function (req, socket, head) {
     proxy.ws(req, socket, head)
   })
 
@@ -73,7 +75,7 @@ async function startProxy(settings, addonUrls) {
 }
 
 function startDevServer(settings, log, error) {
-  const ps = spawn(settings.cmd, settings.args, { env: settings.env })
+  const ps = spawn(settings.cmd, settings.args, {env: settings.env})
 
   ps.stdout.on('data', data => {
     log(`${data}`.replace(settings.urlRegexp, `$1$2${settings.port}$3`))
@@ -93,24 +95,32 @@ function startDevServer(settings, log, error) {
 
 class DevCommand extends Command {
   async run() {
-    const { flags, args } = this.parse(DevCommand)
-    const { api, site, config } = this.netlify
-    const functionsDir = flags.functions || (config.build && config.build.functions)
+    const {flags, args} = this.parse(DevCommand)
+    const {api, site, config} = this.netlify
+    const functionsDir =
+      flags.functions || (config.build && config.build.functions)
     const addonUrls = {}
     if (site.id && !flags.offline) {
       const accessToken = await this.authenticate()
       const addons = await getAddons(site.id, accessToken)
       addons.forEach(addon => {
-        addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${addon.slug}`
+        addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${
+          addon.slug
+        }`
         for (const key in addon.env) {
           process.env[key] = addon.env[key]
         }
       })
     }
     const settings = serverSettings()
+    if (!(settings && settings.cmd)) {
+      this.log('Dev server command not detected - exiting.')
+      process.exit(1)
+    }
+
     startDevServer(settings, this.log, this.error)
     if (functionsDir) {
-      const fnSettings = await serveFunctions({ functionsDir })
+      const fnSettings = await serveFunctions({functionsDir})
       settings.functionsPort = fnSettings.port
     }
 
@@ -123,20 +133,30 @@ DevCommand.description = `Local dev server
 The dev command will run a local dev server with Netlify's proxy and redirect rules
 `
 
-DevCommand.examples = ['$ netlify dev', '$ netlify dev -c "yarn start"', '$ netlify dev -c hugo']
+DevCommand.examples = [
+  '$ netlify dev',
+  '$ netlify dev -c "yarn start"',
+  '$ netlify dev -c hugo',
+]
 
 DevCommand.strict = false
 
 DevCommand.flags = {
-  cmd: flags.string({ char: 'c', description: 'command to run' }),
-  devport: flags.integer({ char: 'd', description: 'port of the dev server started by command' }),
-  port: flags.integer({ char: 'p', description: 'port of netlify dev' }),
-  dir: flags.integer({ char: 'd', description: 'dir with static files' }),
+  cmd: flags.string({char: 'c', description: 'command to run'}),
+  devport: flags.integer({
+    char: 'd',
+    description: 'port of the dev server started by command',
+  }),
+  port: flags.integer({char: 'p', description: 'port of netlify dev'}),
+  dir: flags.integer({char: 'd', description: 'dir with static files'}),
   functions: flags.string({
     char: 'f',
-    description: 'Specify a functions folder to serve'
+    description: 'Specify a functions folder to serve',
   }),
-  offline: flags.boolean({ char: 'o', description: 'disables any features that require network access' })
+  offline: flags.boolean({
+    char: 'o',
+    description: 'disables any features that require network access',
+  }),
 }
 
 module.exports = DevCommand

@@ -1,12 +1,12 @@
-netlify-dev-plugin
-==================
+# netlify-dev-plugin
 
 Netlify CLI plugin for local dev experience.
 
 ## Usage
 
-* `netlify dev` start a local dev server for the build tool you're using
-* `netlify dev:exec <command>` runs a shell command within the netlify dev environment
+- `netlify dev` start a local dev server for the build tool you're using
+- `netlify dev:exec <command>` runs a shell command within the netlify dev environment
+- `netlify functions:create` bootstrap a new function
 
 ## Using the beta
 
