@@ -125,9 +125,19 @@ class DevCommand extends Command {
           addon.slug
         }`
         for (const key in addon.env) {
-          process.env[key] = addon.env[key]
+          process.env[key] = process.env[key] || addon.env[key]
         }
       })
+      const api = this.netlify.api
+      const apiSite = await api.getSite({site_id: site.id})
+      // TODO: We should move the environment outside of build settings and possibly have a
+      // `/api/v1/sites/:site_id/environment` endpoint for it that we can also gate access to
+      // In the future and that we could make context dependend
+      if (apiSite.build_settings && apiSite.build_settings.env) {
+        for (const key in apiSite.build_settings.env) {
+          process.env[key] = process.env[key] || apiSite.build_settings.env[key]
+        }
+      }
     }
     let settings = serverSettings()
     if (!(settings && settings.cmd)) {
