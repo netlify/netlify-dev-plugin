@@ -139,6 +139,7 @@ class DevCommand extends Command {
         }
       }
     }
+    process.env.NETLIFY_DEV = 'true'
     let settings = serverSettings()
     if (!(settings && settings.cmd)) {
       this.log('No dev server detected, using simple static server')
