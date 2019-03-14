@@ -24,7 +24,7 @@ Then clone and activate the plugin:
 git clone git@github.com:netlify/netlify-dev-plugin.git
 cd netlify-dev-plugin
 npm install
-c
+netlify plugins:link .
 ```
 
 Now you're both ready to start testing netlify dev and to contribute to the project.
