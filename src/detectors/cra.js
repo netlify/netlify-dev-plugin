@@ -5,39 +5,27 @@ module.exports = function() {
     return false
   }
 
-  const package = JSON.parse(readFileSync('package.json', { encoding: 'utf8' }))
-  if (!(package.dependencies && package.dependencies['react-scripts'])) {
+  const packageSettings = JSON.parse(readFileSync('package.json', { encoding: 'utf8' }))
+  const { dependencies, scripts } = packageSettings
+  if (!(dependencies && dependencies['react-scripts'])) {
     return false
   }
 
-  const settings = {
+  const npmCommand = scripts && ((scripts.start && 'start') || (scripts.serve && 'serve') || (scripts.run && 'run'))
+
+  if (!npmCommand) {
+    console.error("Couldn't determine the script to run. Use the -c flag.")
+    process.exit(1)
+  }
+
+  const yarnExists = existsSync('yarn.lock')
+  return {
+    cmd: yarnExists ? 'yarn' : 'npm',
     port: 8888,
     proxyPort: 3000,
     env: { ...process.env, BROWSER: 'none', PORT: 3000 },
-    args: [],
+    args: yarnExists || npmCommand != 'start' ? ['run', npmCommand] : [npmCommand],
     urlRegexp: new RegExp(`(http://)([^:]+:)${3000}(/)?`, 'g'),
     dist: 'dist'
-  }
-
-  if (package) {
-    if (existsSync('yarn.lock')) {
-      settings.cmd = 'yarn'
-    } else {
-      settings.cmd = 'npm'
-      settings.args.push('run')
-    }
-
-    if (package.scripts.start) {
-      settings.args.push('start')
-    } else if (package.scripts.serve) {
-      settings.args.push('serve')
-    } else if (package.scripts.run) {
-      settings.args.push('run')
-    } else {
-      console.error("Couldn't determine the script to run. Use the -c flag.")
-      process.exit(1)
-    }
-
-    return settings
   }
 }

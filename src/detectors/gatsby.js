@@ -5,22 +5,14 @@ module.exports = function() {
     return false
   }
 
-  const settings = {
+  const yarnExists = existsSync('yarn.lock')
+  return {
+    cmd: yarnExists ? 'yarn' : 'npm',
     port: 8888,
     proxyPort: 8000,
     env: { ...process.env },
-    args: [],
+    args: yarnExists ? ['run', 'dev'] : ['dev'],
     urlRegexp: new RegExp(`(http://)([^:]+:)${8000}(/)?`, 'g'),
     dist: 'public'
   }
-
-  if (existsSync('yarn.lock')) {
-    settings.cmd = 'yarn'
-  } else {
-    settings.cmd = 'npm'
-    settings.args.push('run')
-  }
-  settings.args.push('dev')
-
-  return settings
 }

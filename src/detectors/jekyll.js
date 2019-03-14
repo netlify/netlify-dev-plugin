@@ -5,7 +5,7 @@ module.exports = function() {
     return false
   }
 
-  const settings = {
+  return {
     port: 8888,
     proxyPort: 4000,
     env: { ...process.env },
@@ -14,6 +14,4 @@ module.exports = function() {
     urlRegexp: new RegExp(`(http://)([^:]+:)${4000}(/)?`, 'g'),
     dist: '_site'
   }
-
-  return settings
 }
