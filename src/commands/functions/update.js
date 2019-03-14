@@ -12,7 +12,7 @@ Extra documentation goes here
 `
 
 FunctionsUpdateCommand.flags = {
-  name: flags.string({char: 'n', description: 'name to print'}),
+  name: flags.string({ char: 'n', description: 'name to print' })
 }
 
 // TODO make visible once implementation complete
