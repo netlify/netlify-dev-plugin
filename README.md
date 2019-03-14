@@ -23,6 +23,7 @@ Then clone and activate the plugin:
 ```
 git clone git@github.com:netlify/netlify-dev-plugin.git
 cd netlify-dev-plugin
+npm install
 netlify plugins:link .
 ```
 
