@@ -5,15 +5,38 @@ const hugoDetector = require('./detectors/hugo')
 const eleventyDetector = require('./detectors/eleventy')
 const jekyllDetector = require('./detectors/jekyll')
 
-const detectors = [gatsbyDetector, reactStaticDetector, hugoDetector, jekyllDetector, eleventyDetector, craDetector]
+const detectors = [
+  gatsbyDetector,
+  reactStaticDetector,
+  hugoDetector,
+  jekyllDetector,
+  eleventyDetector,
+  craDetector,
+]
 
-module.exports.serverSettings = () => {
+module.exports.serverSettings = devConfig => {
+  let settings = null
   for (const i in detectors) {
     const settings = detectors[i]()
     if (settings) {
-      return settings
+      break
     }
   }
 
-  return null
+  if (devConfig) {
+    settings = settings || {}
+    if (devConfig.cmd) {
+      settings.cmd = devConfig.cmd.split(/\s/)[0]
+      settings.args = devConfig.cmd.split(/\s/).slice(1)
+    }
+    if (devConfig.port) {
+      settings.proxyPort = devConfig.port
+      settings.urlRegexp =
+        devConfig.urlRegexp ||
+        new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
+    }
+    settings.dist = devConfig.publish || settings.dist
+  }
+
+  return settings
 }
