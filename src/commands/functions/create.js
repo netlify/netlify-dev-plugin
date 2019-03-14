@@ -8,6 +8,7 @@ const templatesDir = path.resolve(__dirname, '../../functions-templates')
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
+    const name = flags.name || args.name
     const { config } = this.netlify
     let templates = fs.readdirSync(templatesDir).filter(x => path.extname(x) === '.js') // only js templates for now
     templates = templates
@@ -96,6 +97,7 @@ FunctionsCreateCommand.description = `create a new function locally`
 FunctionsCreateCommand.examples = ['netlify functions:create hello-world']
 
 FunctionsCreateCommand.flags = {
+  name: flags.string({ char: 'n', description: 'function name' }),
   functions: flags.string({ char: 'f', description: 'functions folder' }),
   dir: flags.boolean({
     char: 'd',
