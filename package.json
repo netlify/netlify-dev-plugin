@@ -58,6 +58,8 @@
     "posttest": "eslint .",
     "prepack": "oclif-dev manifest && oclif-dev readme",
     "test": "nyc mocha --forbid-only \"test/**/*.test.js\"",
+    "format": "npm run format:prettier -- --write",
+    "format:prettier": "prettier \"{{src,test}/**/,}*.js\"",
     "version": "oclif-dev readme && git add README.md"
   }
 }
