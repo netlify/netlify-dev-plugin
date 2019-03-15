@@ -28,3 +28,8 @@ netlify plugins:link .
 ```
 
 Now you're both ready to start testing netlify dev and to contribute to the project.
+
+## Functionality
+
+- `netlify dev` now supports both `_redirects` and `netlify.toml` for redirects and has the same logic around loading order as our system (_redirects, toml in public folder, toml in base)
+-  `netlify dev` can be configured for projects we don’t detect out of the box with a `[dev]` block in the toml file
