@@ -77,6 +77,13 @@ async function startProxy(settings, addonUrls) {
 function startDevServer(settings, log, error) {
   if (settings.noCmd) {
     const StaticServer = require('static-dev-server')
+    if (!settings.dist) {
+      log(
+        'Unable to determine public folder for the dev server.\nSetup a netlify.toml file with a [dev] section to specify your dev server settings.'
+      )
+      process.exit(1)
+    }
+
     const server = new StaticServer({
       rootPath: settings.dist,
       name: 'netlify-dev',
