@@ -17,7 +17,7 @@ const detectors = [
 module.exports.serverSettings = devConfig => {
   let settings = null
   for (const i in detectors) {
-    const settings = detectors[i]()
+    settings = detectors[i]()
     if (settings) {
       break
     }
