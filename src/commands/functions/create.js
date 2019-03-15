@@ -4,13 +4,14 @@ const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
 const inquirer = require('inquirer')
 
+const templatesDir = path.resolve(__dirname, '../../functions-templates')
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
     const name = await getNameFromArgs(args)
     const { config } = this.netlify
     const templates = fs
-      .readdirSync(path.resolve(__dirname, '../../functions-templates'))
+      .readdirSync(templatesDir)
       .filter(x => path.extname(x) === '.js') // only js templates for now
     const { templatePath } = await inquirer.prompt([
       {
@@ -18,14 +19,14 @@ class FunctionsCreateCommand extends Command {
         message: 'pick a template',
         type: 'list',
         choices: templates.map(t => {
-          return require(path.resolve(__dirname, '../../functions-templates/', t)).metadata
+          return require(path.join(templatesDir, t)).metadata
           // ({ name: path.basename(t, '.js') })
         })
       }
     ])
 
     let template = fs
-      .readFileSync(path.resolve(__dirname, `../../functions-templates/${templatePath}.js`))
+      .readFileSync(path.join(templatesDir, `${templatePath}.js`))
       .toString()
       .split('// --- Netlify Template Below -- //')
     if (template.length !== 2) throw new Error('template ' + templatePath + ' badly formatted')
@@ -69,6 +70,9 @@ class FunctionsCreateCommand extends Command {
     }
 
     fs.writeFileSync(functionPath, template)
+
+    const onComplete = require(path.join(templatesDir, templatePath)).onComplete
+    if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
   }
 }
 
@@ -94,7 +98,6 @@ FunctionsCreateCommand.flags = {
 module.exports = FunctionsCreateCommand
 
 // prompt for a name if name not supplied
-// we tried using required:true in oclif args (see below) but the error msg was very ugly
 async function getNameFromArgs(args) {
   let { name } = args
   if (!name) {

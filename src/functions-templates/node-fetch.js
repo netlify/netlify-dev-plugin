@@ -4,6 +4,10 @@ exports.metadata = {
   value: 'node-fetch',
   short: 'node-fetch'
 }
+exports.onComplete = () => {
+  console.log(`node-fetch function created from template!`)
+  console.log('REMINDER: make sure to install `node-fetch` if you dont have it.')
+}
 // --- Netlify Template Below -- //
 const fetch = require('node-fetch')
 exports.handler = async function(event, context) {

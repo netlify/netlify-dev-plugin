@@ -4,6 +4,7 @@ exports.metadata = {
   value: 'hello-world',
   short: 'hello-world'
 }
+// exports.onComplete = () => {} // optional
 // --- Netlify Template Below -- //
 async function hello() {
   return Promise.resolve('Hello, World')
