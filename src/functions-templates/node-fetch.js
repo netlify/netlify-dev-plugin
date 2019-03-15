@@ -1,5 +1,12 @@
-import fetch from 'node-fetch'
-export async function handler(event, context) {
+// --- Netlify Template Metadata -- //
+exports.metadata = {
+  name: 'Fetch function: uses node-fetch to hit an external API without CORS issues',
+  value: 'node-fetch',
+  short: 'node-fetch'
+}
+// --- Netlify Template Below -- //
+const fetch = require('node-fetch')
+exports.handler = async function(event, context) {
   try {
     const response = await fetch('https://api.chucknorris.io/jokes/random')
     if (!response.ok) {

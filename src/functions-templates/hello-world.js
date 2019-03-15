@@ -1,3 +1,10 @@
+// --- Netlify Template Metadata -- //
+exports.metadata = {
+  name: 'Basic Hello World function: shows async/await usage, and proper formatting with statusCode and body',
+  value: 'hello-world',
+  short: 'hello-world'
+}
+// --- Netlify Template Below -- //
 async function hello() {
   return Promise.resolve('Hello, World')
 }

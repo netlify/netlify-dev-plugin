@@ -17,12 +17,20 @@ class FunctionsCreateCommand extends Command {
         name: 'templatePath',
         message: 'pick a template',
         type: 'list',
-        choices: templates.map(t => ({ name: path.basename(t, '.js') }))
+        choices: templates.map(t => {
+          return require(path.resolve(__dirname, '../../functions-templates/', t)).metadata
+          // ({ name: path.basename(t, '.js') })
+        })
       }
     ])
-    const template =
-      '// scaffolded from Netlify Dev \n\n' +
-      fs.readFileSync(path.resolve(__dirname, `../../functions-templates/${templatePath}.js`)).toString()
+
+    let template = fs
+      .readFileSync(path.resolve(__dirname, `../../functions-templates/${templatePath}.js`))
+      .toString()
+      .split('// --- Netlify Template Below -- //')
+    if (template.length !== 2) throw new Error('template ' + templatePath + ' badly formatted')
+    template = '// scaffolded from `netlify functions:create` \n' + template[1]
+
     this.log(`Creating function ${name}`)
 
     const functionsDir = flags.functions || (config.build && config.build.functions)
@@ -95,7 +103,9 @@ async function getNameFromArgs(args) {
         name: 'name',
         message: 'name your function: ',
         type: 'input',
-        validate: val => !!val && /^[a-z0-9]+$/i.test(val) // make sure it is not undefined and is alphanumeric
+        validate: val => !!val && /^[\w\-.]+$/i.test(val)
+        // make sure it is not undefined and is a valid filename.
+        // this has some nuance i have ignored, eg crossenv and i18n concerns
       }
     ])
     name = responses.name
