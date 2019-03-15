@@ -122,7 +122,9 @@ class DevCommand extends Command {
     const {flags, args} = this.parse(DevCommand)
     const {api, site, config} = this.netlify
     const functionsDir =
-      flags.functions || (config.build && config.build.functions)
+      flags.functions ||
+      (config.dev && config.dev.functions) ||
+      (config.build && config.build.functions)
     const addonUrls = {}
     if (site.id && !flags.offline) {
       const accessToken = await this.authenticate()
@@ -152,11 +154,14 @@ class DevCommand extends Command {
     let settings = serverSettings(config.dev)
     if (!(settings && settings.cmd)) {
       this.log('No dev server detected, using simple static server')
+      const dist =
+        (config.dev && config.dev.publish) ||
+        (config.build && config.build.publish)
       settings = {
         noCmd: true,
         port: 8888,
         proxyPort: 3999,
-        dist: config.build && config.build.publish,
+        dist,
       }
     }
     startDevServer(settings, this.log, this.error)
