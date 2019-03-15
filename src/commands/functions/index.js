@@ -1,8 +1,8 @@
 const chalk = require('chalk')
-const {Command} = require('@oclif/command')
+const { Command } = require('@oclif/command')
 
 function showHelp(command) {
-  execSync(`netlify ${command} --help`, {stdio: [0, 1, 2]})
+  execSync(`netlify ${command} --help`, { stdio: [0, 1, 2] })
 }
 
 function isEmptyCommand(flags, args) {
@@ -22,7 +22,7 @@ function hasArgs(args) {
 
 class FunctionsCommand extends Command {
   async run() {
-    const {flags, args} = this.parse(FunctionsCommand)
+    const { flags, args } = this.parse(FunctionsCommand)
     // run help command if no args passed
     if (isEmptyCommand(flags, args)) {
       showHelp(this.id)
@@ -38,7 +38,7 @@ The ${name} command will help you manage the functions in this site
 `
 FunctionsCommand.examples = [
   'netlify functions:create --name function-xyz --runtime nodejs',
-  'netlify functions:update --name function-abc --timeout 30s',
+  'netlify functions:update --name function-abc --timeout 30s'
 ]
 
 // TODO make visible once implementation complete
