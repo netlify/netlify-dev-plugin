@@ -99,7 +99,7 @@ function startDevServer(settings, log, error) {
   })
 
   ps.stderr.on('data', data => {
-    error(`${data}`)
+    log(`Error reading data: ${data}`)
   })
 
   ps.on('close', code => {
