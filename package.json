@@ -12,6 +12,7 @@
     "ascii-table": "0.0.9",
     "get-port": "^4.1.0",
     "http-proxy": "^1.17.0",
+    "inquirer": "^6.2.2",
     "netlify": "ssh+git://git@github.com:netlify/js-client-private",
     "netlify-rules-proxy": "git+ssh://git@github.com/netlify/netlify-rules-proxy.git",
     "static-dev-server": "^1.0.0",

@@ -2,26 +2,34 @@ const fs = require('fs')
 const path = require('path')
 const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
-
-const template = `async function hello() {
-  return Promise.resolve('Hello, World')
-}
-
-exports.handler = async function(event, context) {
-  try {
-    const body = await hello()
-    return { statusCode: 200, body }
-  } catch (err) {
-    return { statusCode: 500, body: err.toString() }
-  }
-}
-`
+const inquirer = require('inquirer')
 
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
-    const { name } = args
+    const name = await getNameFromArgs(args)
     const { config } = this.netlify
+    const templates = fs
+      .readdirSync(path.resolve(__dirname, '../../functions-templates'))
+      .filter(x => path.extname(x) === '.js') // only js templates for now
+    const { templatePath } = await inquirer.prompt([
+      {
+        name: 'templatePath',
+        message: 'pick a template',
+        type: 'list',
+        choices: templates.map(t => {
+          return require(path.resolve(__dirname, '../../functions-templates/', t)).metadata
+          // ({ name: path.basename(t, '.js') })
+        })
+      }
+    ])
+
+    let template = fs
+      .readFileSync(path.resolve(__dirname, `../../functions-templates/${templatePath}.js`))
+      .toString()
+      .split('// --- Netlify Template Below -- //')
+    if (template.length !== 2) throw new Error('template ' + templatePath + ' badly formatted')
+    template = '// scaffolded from `netlify functions:create` \n' + template[1]
 
     this.log(`Creating function ${name}`)
 
@@ -56,7 +64,7 @@ class FunctionsCreateCommand extends Command {
         // Ignore
       }
     } else if (fs.existsSync(functionPath.replace(/\.js/, ''))) {
-      this.log(`A folder version of the function ${name} alreadt exists at ${functionPath.replace(/\.js/, '')}`)
+      this.log(`A folder version of the function ${name} already exists at ${functionPath.replace(/\.js/, '')}`)
       process.exit(1)
     }
 
@@ -64,10 +72,15 @@ class FunctionsCreateCommand extends Command {
   }
 }
 
-FunctionsCreateCommand.args = [{ name: 'name' }]
+FunctionsCreateCommand.args = [
+  {
+    name: 'name',
+    // required: true, // tried this but the error message is very ugly
+    description: 'name of your new function file inside your functions folder'
+  }
+]
 
-FunctionsCreateCommand.description = `create a new function locally
-`
+FunctionsCreateCommand.description = `create a new function locally`
 
 FunctionsCreateCommand.examples = ['netlify functions:create hello-world']
 
@@ -79,3 +92,23 @@ FunctionsCreateCommand.flags = {
   })
 }
 module.exports = FunctionsCreateCommand
+
+// prompt for a name if name not supplied
+// we tried using required:true in oclif args (see below) but the error msg was very ugly
+async function getNameFromArgs(args) {
+  let { name } = args
+  if (!name) {
+    let responses = await inquirer.prompt([
+      {
+        name: 'name',
+        message: 'name your function: ',
+        type: 'input',
+        validate: val => !!val && /^[\w\-.]+$/i.test(val)
+        // make sure it is not undefined and is a valid filename.
+        // this has some nuance i have ignored, eg crossenv and i18n concerns
+      }
+    ])
+    name = responses.name
+  }
+  return name
+}
