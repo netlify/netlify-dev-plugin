@@ -1,6 +1,10 @@
 ## note to devs
 
-place new templates here and our CLI will pick it up. we dont colocate this inside `src/commands/functions` because oclif will think it's a new command.
+place new templates here and our CLI will pick it up. currently only works for single file `.js` templates.
+
+## why place it in this separate folder
+
+we dont colocate this inside `src/commands/functions` because oclif will think it's a new command.
 
 ## future dev thoughts
 

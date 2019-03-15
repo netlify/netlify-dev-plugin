@@ -66,15 +66,15 @@ class FunctionsCreateCommand extends Command {
 
 FunctionsCreateCommand.args = [
   {
-    name: 'name'
+    name: 'name',
     // required: true, // tried this but the error message is very ugly
-    // description: 'name of your new function file inside your functions folder'
+    description: 'name of your new function file inside your functions folder'
   }
 ]
 
 FunctionsCreateCommand.description = `create a new function locally`
 
-// FunctionsCreateCommand.examples = ['netlify functions:create hello-world']
+FunctionsCreateCommand.examples = ['netlify functions:create hello-world']
 
 FunctionsCreateCommand.flags = {
   functions: flags.string({ char: 'f', description: 'functions folder' }),
@@ -93,10 +93,9 @@ async function getNameFromArgs(args) {
     let responses = await inquirer.prompt([
       {
         name: 'name',
-        message: 'name your function',
+        message: 'name your function: ',
         type: 'input',
-        // validate: val => !!val // must be truthy. can put other conditions on this later
-        validate: val => !!val && /^[a-z0-9]+$/i.test(val) // is alphanumeric?
+        validate: val => !!val && /^[a-z0-9]+$/i.test(val) // make sure it is not undefined and is alphanumeric
       }
     ])
     name = responses.name
