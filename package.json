@@ -17,6 +17,8 @@
     "netlify": "ssh+git://git@github.com:netlify/js-client-private",
     "netlify-rules-proxy": "git+ssh://git@github.com/netlify/netlify-rules-proxy.git",
     "safe-join": "^0.1.1",
+    "node-fetch": "^2.3.0",
+    "opn": "^5.5.0",
     "static-dev-server": "^1.0.0",
     "wait-port": "^0.2.2"
   },

@@ -3,39 +3,18 @@ const path = require('path')
 const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
 const inquirer = require('inquirer')
-
+const readRepoURL = require('../../utils/readRepoURL')
 const templatesDir = path.resolve(__dirname, '../../functions-templates')
+const http = require('http')
+const fetch = require('node-fetch')
+const cp = require('child_process')
+
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
+
+    /* get functions dir (and make it if necessary) */
     const { config } = this.netlify
-    let templates = fs.readdirSync(templatesDir).filter(x => path.extname(x) === '.js') // only js templates for now
-    templates = templates
-      .map(t => require(path.join(templatesDir, t)))
-      .sort((a, b) => (a.priority || 999) - (b.priority || 999)) // doesnt scale but will be ok for now
-    const { templatePath } = await inquirer.prompt([
-      {
-        name: 'templatePath',
-        message: 'pick a template',
-        type: 'list',
-        choices: templates.map(t => t.metadata)
-      }
-    ])
-    // pull the rest of the metadata from the template
-    const { onComplete, copyAssets, templateCode } = require(path.join(templatesDir, templatePath))
-
-    let template
-    try {
-      template = templateCode() // we may pass in args in future to customize the template
-    } catch (err) {
-      console.error('an error occurred retrieving template code, please check ' + templatePath, err)
-      process.exit(0)
-    }
-
-    const name = await getNameFromArgs(args, flags, path.basename(templatePath, '.js'))
-
-    this.log(`Creating function ${name}`)
-
     const functionsDir = flags.functions || (config.build && config.build.functions)
     if (!functionsDir) {
       this.log('No functions folder specified in netlify.toml or as an argument')
@@ -48,14 +27,13 @@ class FunctionsCreateCommand extends Command {
       console.log(`functions folder ${functionsDir} created`)
     }
 
-    const functionPath = flags.dir ? path.join(functionsDir, name, name + '.js') : path.join(functionsDir, name + '.js')
-    if (fs.existsSync(functionPath)) {
-      this.log(`Function ${functionPath} already exists`)
-      process.exit(1)
-    }
-
-    if (flags.dir) {
-      const fnFolder = path.join(functionsDir, name)
+    /* either download from URL or scaffold from template */
+    if (flags.url) {
+      // // --url flag specified, download from there
+      const folderContents = await readRepoURL(flags.url)
+      const functionName = flags.url.split('/').slice(-1)[0]
+      const nameToUse = await getNameFromArgs(args, flags, functionName)
+      const fnFolder = path.join(functionsDir, nameToUse)
       if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
         this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
         process.exit(1)
@@ -66,21 +44,74 @@ class FunctionsCreateCommand extends Command {
       } catch (e) {
         // Ignore
       }
-    } else if (fs.existsSync(functionPath.replace(/\.js/, ''))) {
-      this.log(`A folder version of the function ${name} already exists at ${functionPath.replace(/\.js/, '')}`)
-      process.exit(1)
-    }
-
-    fs.writeFileSync(functionPath, template)
-    if (copyAssets) {
-      copyAssets.forEach(src =>
-        fs.copySync(path.join(templatesDir, 'assets', src), path.join(functionsDir, src), {
-          overwrite: false,
-          errorOnExist: false // went with this to make it idempotent, might change in future
+      await Promise.all(
+        folderContents.map(({ name, download_url }) => {
+          return fetch(download_url).then(res => {
+            const finalName = path.basename(name, '.js') === functionName ? nameToUse + '.js' : name
+            const dest = fs.createWriteStream(path.join(fnFolder, finalName))
+            res.body.pipe(dest)
+          })
         })
-      ) // copy assets if specified
+      )
+
+      console.log(`installing dependencies for ${nameToUse}...`)
+      cp.exec('npm i', { cwd: path.join(functionsDir, nameToUse) }, () => {
+        console.log(`installing dependencies for ${nameToUse} complete `)
+      })
+    } else {
+      // // no --url flag specified, pick from a provided template
+      const templatePath = await pickTemplate()
+      // pull the rest of the metadata from the template
+      const { onComplete, copyAssets, templateCode } = require(path.join(templatesDir, templatePath))
+
+      let template
+      try {
+        template = templateCode() // we may pass in args in future to customize the template
+      } catch (err) {
+        console.error('an error occurred retrieving template code, please check ' + templatePath, err)
+        process.exit(0)
+      }
+
+      const name = await getNameFromArgs(args, flags, path.basename(templatePath, '.js'))
+
+      this.log(`Creating function ${name}`)
+
+      const functionPath = flags.dir
+        ? path.join(functionsDir, name, name + '.js')
+        : path.join(functionsDir, name + '.js')
+      if (fs.existsSync(functionPath)) {
+        this.log(`Function ${functionPath} already exists`)
+        process.exit(1)
+      }
+
+      if (flags.dir) {
+        const fnFolder = path.join(functionsDir, name)
+        if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
+          this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
+          process.exit(1)
+        }
+
+        try {
+          fs.mkdirSync(fnFolder, { recursive: true })
+        } catch (e) {
+          // Ignore
+        }
+      } else if (fs.existsSync(functionPath.replace(/\.js/, ''))) {
+        this.log(`A folder version of the function ${name} already exists at ${functionPath.replace(/\.js/, '')}`)
+        process.exit(1)
+      }
+
+      fs.writeFileSync(functionPath, template)
+      if (copyAssets) {
+        copyAssets.forEach(src =>
+          fs.copySync(path.join(templatesDir, 'assets', src), path.join(functionsDir, src), {
+            overwrite: false,
+            errorOnExist: false // went with this to make it idempotent, might change in future
+          })
+        ) // copy assets if specified
+      }
+      if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
     }
-    if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
   }
 }
 
@@ -104,6 +135,7 @@ FunctionsCreateCommand.examples = [
 FunctionsCreateCommand.flags = {
   name: flags.string({ char: 'n', description: 'function name' }),
   functions: flags.string({ char: 'f', description: 'functions folder' }),
+  url: flags.string({ char: 'u', description: 'pull template from URL' }),
   dir: flags.boolean({
     char: 'd',
     description: 'create function as a directory'
@@ -135,4 +167,21 @@ async function getNameFromArgs(args, flags, defaultName) {
     name = responses.name
   }
   return name
+}
+
+// pick template from our existing templates
+async function pickTemplate() {
+  let templates = fs.readdirSync(templatesDir).filter(x => path.extname(x) === '.js') // only js templates for now
+  templates = templates
+    .map(t => require(path.join(templatesDir, t)))
+    .sort((a, b) => (a.priority || 999) - (b.priority || 999)) // doesnt scale but will be ok for now
+  const { templatePath } = await inquirer.prompt([
+    {
+      name: 'templatePath',
+      message: 'pick a template',
+      type: 'list',
+      choices: templates.map(t => t.metadata)
+    }
+  ])
+  return templatePath
 }
