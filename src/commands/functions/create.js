@@ -8,7 +8,6 @@ const templatesDir = path.resolve(__dirname, '../../functions-templates')
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
-    const name = flags.name || args.name
     const { config } = this.netlify
     let templates = fs.readdirSync(templatesDir).filter(x => path.extname(x) === '.js') // only js templates for now
     templates = templates
@@ -32,7 +31,8 @@ class FunctionsCreateCommand extends Command {
       console.error('an error occurred retrieving template code, please check ' + templatePath, err)
       process.exit(0)
     }
-    const name = await getNameFromArgs(args, path.basename(templatePath, '.js'))
+
+    const name = await getNameFromArgs(args, flags, path.basename(templatePath, '.js'))
 
     this.log(`Creating function ${name}`)
 
@@ -94,7 +94,12 @@ FunctionsCreateCommand.args = [
 
 FunctionsCreateCommand.description = `create a new function locally`
 
-FunctionsCreateCommand.examples = ['netlify functions:create hello-world']
+FunctionsCreateCommand.examples = [
+  'netlify functions:create',
+  'netlify functions:create hello-world',
+  'netlify functions:create --name hello-world',
+  'netlify functions:create hello-world --dir'
+]
 
 FunctionsCreateCommand.flags = {
   name: flags.string({ char: 'n', description: 'function name' }),
@@ -107,8 +112,14 @@ FunctionsCreateCommand.flags = {
 module.exports = FunctionsCreateCommand
 
 // prompt for a name if name not supplied
-async function getNameFromArgs(args, defaultName) {
-  let { name } = args
+async function getNameFromArgs(args, flags, defaultName) {
+  if (flags.name && args.name) throw new Error('function name specified in both flag and arg format, pick one')
+  let name
+  if (flags.name && !args.name) name = flags.name
+  // use flag if exists
+  else if (!flags.name && args.name) name = args.name
+
+  // if neither are specified, prompt for it
   if (!name) {
     let responses = await inquirer.prompt([
       {
