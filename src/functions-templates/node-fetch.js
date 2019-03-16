@@ -1,4 +1,3 @@
-// --- Netlify Template Metadata -- //
 exports.metadata = {
   name: 'Fetch function: uses node-fetch to hit an external API without CORS issues',
   value: 'node-fetch',
@@ -8,7 +7,9 @@ exports.onComplete = () => {
   console.log(`node-fetch function created from template!`)
   console.log('REMINDER: make sure to install `node-fetch` if you dont have it.')
 }
-// --- Netlify Template Below -- //
+
+exports.templateCode = () => {
+  return `
 const fetch = require('node-fetch')
 exports.handler = async function(event, context) {
   try {
@@ -30,4 +31,6 @@ exports.handler = async function(event, context) {
       body: JSON.stringify({ msg: err.message }) // Could be a custom message or object i.e. JSON.stringify(err)
     }
   }
+}
+`
 }

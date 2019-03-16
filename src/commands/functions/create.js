@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
@@ -8,29 +8,30 @@ const templatesDir = path.resolve(__dirname, '../../functions-templates')
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
-    const name = await getNameFromArgs(args)
     const { config } = this.netlify
-    const templates = fs
-      .readdirSync(templatesDir)
-      .filter(x => path.extname(x) === '.js') // only js templates for now
+    let templates = fs.readdirSync(templatesDir).filter(x => path.extname(x) === '.js') // only js templates for now
+    templates = templates
+      .map(t => require(path.join(templatesDir, t)))
+      .sort((a, b) => (a.priority || 999) - (b.priority || 999)) // doesnt scale but will be ok for now
     const { templatePath } = await inquirer.prompt([
       {
         name: 'templatePath',
         message: 'pick a template',
         type: 'list',
-        choices: templates.map(t => {
-          return require(path.join(templatesDir, t)).metadata
-          // ({ name: path.basename(t, '.js') })
-        })
+        choices: templates.map(t => t.metadata)
       }
     ])
+    // pull the rest of the metadata from the template
+    const { onComplete, copyAssets, templateCode } = require(path.join(templatesDir, templatePath))
 
-    let template = fs
-      .readFileSync(path.join(templatesDir, `${templatePath}.js`))
-      .toString()
-      .split('// --- Netlify Template Below -- //')
-    if (template.length !== 2) throw new Error('template ' + templatePath + ' badly formatted')
-    template = '// scaffolded from `netlify functions:create` \n' + template[1]
+    let template
+    try {
+      template = templateCode() // we may pass in args in future to customize the template
+    } catch (err) {
+      console.error('an error occurred retrieving template code, please check ' + templatePath, err)
+      process.exit(0)
+    }
+    const name = await getNameFromArgs(args, path.basename(templatePath, '.js'))
 
     this.log(`Creating function ${name}`)
 
@@ -70,8 +71,14 @@ class FunctionsCreateCommand extends Command {
     }
 
     fs.writeFileSync(functionPath, template)
-
-    const onComplete = require(path.join(templatesDir, templatePath)).onComplete
+    if (copyAssets) {
+      copyAssets.forEach(src =>
+        fs.copySync(path.join(templatesDir, 'assets', src), path.join(functionsDir, src), {
+          overwrite: false,
+          errorOnExist: false // went with this to make it idempotent, might change in future
+        })
+      ) // copy assets if specified
+    }
     if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
   }
 }
@@ -98,13 +105,14 @@ FunctionsCreateCommand.flags = {
 module.exports = FunctionsCreateCommand
 
 // prompt for a name if name not supplied
-async function getNameFromArgs(args) {
+async function getNameFromArgs(args, defaultName) {
   let { name } = args
   if (!name) {
     let responses = await inquirer.prompt([
       {
         name: 'name',
         message: 'name your function: ',
+        default: defaultName,
         type: 'input',
         validate: val => !!val && /^[\w\-.]+$/i.test(val)
         // make sure it is not undefined and is a valid filename.
