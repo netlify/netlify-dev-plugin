@@ -45,7 +45,9 @@ netlify functions:create
 netlify functions:create hello-world
 netlify functions:create --name hello-world
 netlify functions:create hello-world --dir
-
+netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware
 ```
 
 You can just call `netlify functions:create` and the prompts will guide you all the way, however you can also supply a first argument to name the function. By default it creates a single file, however you can also use a `--dir` flag to create a function as a directory.
+
+By passing a URL to a folder in a github repo to the `--url` flag, you can clone new templates. Dependencies are installed inside its own folder. Example: `netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware`

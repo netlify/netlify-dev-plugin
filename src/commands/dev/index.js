@@ -6,7 +6,7 @@ const waitPort = require('wait-port')
 const getPort = require('get-port')
 const { serveFunctions } = require('@netlify/zip-it-and-ship-it')
 const { serverSettings } = require('../../detect-server')
-const openBrowser = require('./openBrowser')
+const openBrowser = require('../../utils/openBrowser')
 const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
 
