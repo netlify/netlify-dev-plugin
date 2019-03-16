@@ -32,7 +32,8 @@ class FunctionsCreateCommand extends Command {
       // // --url flag specified, download from there
       const folderContents = await readRepoURL(flags.url)
       const functionName = flags.url.split('/').slice(-1)[0]
-      const fnFolder = path.join(functionsDir, functionName)
+      const nameToUse = await getNameFromArgs(args, flags, functionName)
+      const fnFolder = path.join(functionsDir, nameToUse)
       if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
         this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
         process.exit(1)
@@ -46,14 +47,16 @@ class FunctionsCreateCommand extends Command {
       await Promise.all(
         folderContents.map(({ name, download_url }) => {
           return fetch(download_url).then(res => {
-            const dest = fs.createWriteStream(path.join(fnFolder, name))
+            const finalName = path.basename(name, '.js') === functionName ? nameToUse + '.js' : name
+            const dest = fs.createWriteStream(path.join(fnFolder, finalName))
             res.body.pipe(dest)
           })
         })
       )
 
-      cp.exec('npm i', { cwd: path.join(functionsDir, functionName) }, () => {
-        console.log(`${functionName} dependencies installed`)
+      console.log(`installing dependencies for ${nameToUse}...`)
+      cp.exec('npm i', { cwd: path.join(functionsDir, nameToUse) }, () => {
+        console.log(`installing dependencies for ${nameToUse} complete `)
       })
     } else {
       // // no --url flag specified, pick from a provided template
