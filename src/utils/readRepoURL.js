@@ -1,8 +1,9 @@
-const url = require('url')
-const fetch = require('node-fetch')
+const url = require("url");
+const fetch = require("node-fetch");
+const safeJoin = require("safe-join");
 
 // supported repo host types
-const GITHUB = Symbol('GITHUB')
+const GITHUB = Symbol("GITHUB");
 // const BITBUCKET = Symbol('BITBUCKET')
 // const GITLAB = Symbol('GITLAB')
 
@@ -11,11 +12,15 @@ const GITHUB = Symbol('GITHUB')
  * and returns https://api.github.com/repos/netlify-labs/all-the-functions/contents/functions/9-using-middleware
  */
 async function readRepoURL(_url) {
-  const URL = url.parse(_url)
-  const repoHost = validateRepoURL(URL)
-  const [owner_and_repo, contents_path] = parseRepoURL(repoHost, URL)
-  const folderContents = await getRepoURLContents(repoHost, owner_and_repo, contents_path)
-  return folderContents
+  const URL = url.parse(_url);
+  const repoHost = validateRepoURL(URL);
+  const [owner_and_repo, contents_path] = parseRepoURL(repoHost, URL);
+  const folderContents = await getRepoURLContents(
+    repoHost,
+    owner_and_repo,
+    contents_path
+  );
+  return folderContents;
 }
 
 async function getRepoURLContents(repoHost, owner_and_repo, contents_path) {
@@ -23,40 +28,36 @@ async function getRepoURLContents(repoHost, owner_and_repo, contents_path) {
   if (repoHost === GITHUB) {
     // https://developer.github.com/v3/repos/contents/#get-contents
     const APIURL = safeJoin(
-      safeJoin(safeJoin('https://api.github.com/repos', owner_and_repo), 'contents'),
+      "https://api.github.com/repos",
+      owner_and_repo,
+      "contents",
       contents_path
-    )
+    );
     return fetch(APIURL)
       .then(x => x.json())
-      .catch(err => console.error('Error occurred while fetching ', APIURL, err))
+      .catch(err =>
+        console.error("Error occurred while fetching ", APIURL, err)
+      );
   } else {
-    throw new Error('unsupported host ', repoHost)
+    throw new Error("unsupported host ", repoHost);
   }
 }
 
-function safeJoin(a, b) {
-  let isTrailingSlash, isLeadingSlash
-  if (a.slice(-1)[0] === '/') isTrailingSlash = true
-  if (b[0] === '/') isLeadingSlash = true
-  if (isTrailingSlash && isLeadingSlash) return a + b.slice(1)
-  else if (!isTrailingSlash && !isLeadingSlash) return a + '/' + b
-  else return a + b
-}
-
 function validateRepoURL(URL) {
-  if (URL.host !== 'github.com') throw new Error('only github repos are supported for now')
+  if (URL.host !== "github.com")
+    throw new Error("only github repos are supported for now");
   // other validation logic here
-  return GITHUB
+  return GITHUB;
 }
 function parseRepoURL(repoHost, URL) {
   // naive splitting strategy for now
   if (repoHost === GITHUB) {
     // https://developer.github.com/v3/repos/contents/#get-contents
-    const [owner_and_repo, contents_path] = URL.path.split('/tree/master') // what if it's not master? note that our contents retrieval may assume it is master
-    return [owner_and_repo, contents_path]
+    const [owner_and_repo, contents_path] = URL.path.split("/tree/master"); // what if it's not master? note that our contents retrieval may assume it is master
+    return [owner_and_repo, contents_path];
   } else {
-    throw new Error('unsupported host ', repoHost)
+    throw new Error("unsupported host ", repoHost);
   }
 }
 
-module.exports = readRepoURL
+module.exports = readRepoURL;
