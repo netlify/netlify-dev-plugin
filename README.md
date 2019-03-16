@@ -29,7 +29,23 @@ netlify plugins:link .
 
 Now you're both ready to start testing netlify dev and to contribute to the project.
 
-## Functionality
+## Functionality Notes
 
-- `netlify dev` now supports both `_redirects` and `netlify.toml` for redirects and has the same logic around loading order as our system (_redirects, toml in public folder, toml in base)
--  `netlify dev` can be configured for projects we don’t detect out of the box with a `[dev]` block in the toml file
+- `netlify dev` now supports both `_redirects` and `netlify.toml` for redirects and has the same logic around loading order as our system (\_redirects, toml in public folder, toml in base)
+- `netlify dev` can be configured for projects we don’t detect out of the box with a `[dev]` block in the toml file
+
+## `netlify functions:create`
+
+Create a new function from a given template.
+
+Examples:
+
+```
+netlify functions:create
+netlify functions:create hello-world
+netlify functions:create --name hello-world
+netlify functions:create hello-world --dir
+
+```
+
+You can just call `netlify functions:create` and the prompts will guide you all the way, however you can also supply a first argument to name the function. By default it creates a single file, however you can also use a `--dir` flag to create a function as a directory.
