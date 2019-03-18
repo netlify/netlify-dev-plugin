@@ -16,7 +16,7 @@ class FunctionsCreateCommand extends Command {
     const { flags, args } = this.parse(FunctionsCreateCommand)
     const { config } = this.netlify
 
-    const functionsDir = ensureFunctionDirExists(flags, config)
+    const functionsDir = ensureFunctionDirExists(flags, config, this.log)
 
     /* either download from URL or scaffold from template */
     if (flags.url) {
@@ -103,16 +103,16 @@ async function pickTemplate() {
 }
 
 /* get functions dir (and make it if necessary) */
-function ensureFunctionDirExists(flags, config) {
+function ensureFunctionDirExists(flags, config, log) {
   const functionsDir = flags.functions || (config.build && config.build.functions)
   if (!functionsDir) {
-    this.log('No functions folder specified in netlify.toml or as an argument')
+    log('No functions folder specified in netlify.toml or as an argument')
     process.exit(1)
   }
   if (!fs.existsSync(functionsDir)) {
-    console.log(`functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`)
+    log(`functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`)
     fs.mkdirSync(functionsDir)
-    console.log(`functions folder ${functionsDir} created`)
+    log(`functions folder ${functionsDir} created`)
   }
   return functionsDir
 }
