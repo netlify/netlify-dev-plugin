@@ -1,116 +1,28 @@
 const fs = require('fs-extra')
 const path = require('path')
+const copy = require('copy-template-dir')
 const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
 const inquirer = require('inquirer')
 const readRepoURL = require('../../utils/readRepoURL')
-const templatesDir = path.resolve(__dirname, '../../functions-templates')
 const http = require('http')
 const fetch = require('node-fetch')
 const cp = require('child_process')
 
+const templatesDir = path.resolve(__dirname, '../../functions-templates')
+
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
-
-    /* get functions dir (and make it if necessary) */
     const { config } = this.netlify
-    const functionsDir = flags.functions || (config.build && config.build.functions)
-    if (!functionsDir) {
-      this.log('No functions folder specified in netlify.toml or as an argument')
-      process.exit(1)
-    }
 
-    if (!fs.existsSync(functionsDir)) {
-      console.log(`functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`)
-      fs.mkdirSync(functionsDir)
-      console.log(`functions folder ${functionsDir} created`)
-    }
+    const functionsDir = ensureFunctionDirExists(flags, config)
 
     /* either download from URL or scaffold from template */
     if (flags.url) {
-      // // --url flag specified, download from there
-      const folderContents = await readRepoURL(flags.url)
-      const functionName = flags.url.split('/').slice(-1)[0]
-      const nameToUse = await getNameFromArgs(args, flags, functionName)
-      const fnFolder = path.join(functionsDir, nameToUse)
-      if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
-        this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
-        process.exit(1)
-      }
-
-      try {
-        fs.mkdirSync(fnFolder, { recursive: true })
-      } catch (e) {
-        // Ignore
-      }
-      await Promise.all(
-        folderContents.map(({ name, download_url }) => {
-          return fetch(download_url).then(res => {
-            const finalName = path.basename(name, '.js') === functionName ? nameToUse + '.js' : name
-            const dest = fs.createWriteStream(path.join(fnFolder, finalName))
-            res.body.pipe(dest)
-          })
-        })
-      )
-
-      console.log(`installing dependencies for ${nameToUse}...`)
-      cp.exec('npm i', { cwd: path.join(functionsDir, nameToUse) }, () => {
-        console.log(`installing dependencies for ${nameToUse} complete `)
-      })
+      await downloadFromURL(flags, args, functionsDir)
     } else {
-      // // no --url flag specified, pick from a provided template
-      const templatePath = await pickTemplate()
-      // pull the rest of the metadata from the template
-      const { onComplete, copyAssets, templateCode } = require(path.join(templatesDir, templatePath))
-
-      let template
-      try {
-        template = templateCode() // we may pass in args in future to customize the template
-      } catch (err) {
-        console.error('an error occurred retrieving template code, please check ' + templatePath, err)
-        process.exit(0)
-      }
-
-      const name = await getNameFromArgs(args, flags, path.basename(templatePath, '.js'))
-
-      this.log(`Creating function ${name}`)
-
-      const functionPath = flags.dir
-        ? path.join(functionsDir, name, name + '.js')
-        : path.join(functionsDir, name + '.js')
-      if (fs.existsSync(functionPath)) {
-        this.log(`Function ${functionPath} already exists`)
-        process.exit(1)
-      }
-
-      if (flags.dir) {
-        const fnFolder = path.join(functionsDir, name)
-        if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
-          this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
-          process.exit(1)
-        }
-
-        try {
-          fs.mkdirSync(fnFolder, { recursive: true })
-        } catch (e) {
-          // Ignore
-        }
-      } else if (fs.existsSync(functionPath.replace(/\.js/, ''))) {
-        this.log(`A folder version of the function ${name} already exists at ${functionPath.replace(/\.js/, '')}`)
-        process.exit(1)
-      }
-
-      fs.writeFileSync(functionPath, template)
-      if (copyAssets) {
-        copyAssets.forEach(src =>
-          fs.copySync(path.join(templatesDir, 'assets', src), path.join(functionsDir, src), {
-            overwrite: false,
-            errorOnExist: false // went with this to make it idempotent, might change in future
-          })
-        ) // copy assets if specified
-      }
-      if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
+      await scaffoldFromTemplate(flags, args, functionsDir, this.log)
     }
   }
 }
@@ -171,17 +83,133 @@ async function getNameFromArgs(args, flags, defaultName) {
 
 // pick template from our existing templates
 async function pickTemplate() {
-  let templates = fs.readdirSync(templatesDir).filter(x => path.extname(x) === '.js') // only js templates for now
-  templates = templates
-    .map(t => require(path.join(templatesDir, t)))
-    .sort((a, b) => (a.priority || 999) - (b.priority || 999)) // doesnt scale but will be ok for now
-  const { templatePath } = await inquirer.prompt([
+  // let templates = fs.readdirSync(templatesDir).filter(x => x.split('.').length === 1) // only folders
+  const registry = require(path.join(templatesDir, 'template-registry.js'))
+  let templates = registry.sort((a, b) => (a.priority || 999) - (b.priority || 999)) // doesnt scale but will be ok for now
+  const { chosentemplate } = await inquirer.prompt([
     {
-      name: 'templatePath',
+      name: 'chosentemplate',
       message: 'pick a template',
       type: 'list',
-      choices: templates.map(t => t.metadata)
+      choices: templates.map(t => ({
+        // confusing but this is the format inquirer wants
+        name: t.description,
+        value: t.name,
+        short: t.name
+      }))
     }
   ])
-  return templatePath
+  return registry.find(x => x.name === chosentemplate)
+}
+
+/* get functions dir (and make it if necessary) */
+function ensureFunctionDirExists(flags, config) {
+  const functionsDir = flags.functions || (config.build && config.build.functions)
+  if (!functionsDir) {
+    this.log('No functions folder specified in netlify.toml or as an argument')
+    process.exit(1)
+  }
+  if (!fs.existsSync(functionsDir)) {
+    console.log(`functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`)
+    fs.mkdirSync(functionsDir)
+    console.log(`functions folder ${functionsDir} created`)
+  }
+  return functionsDir
+}
+
+// Download files from a given github URL
+async function downloadFromURL(flags, args, functionsDir) {
+  const folderContents = await readRepoURL(flags.url)
+  const functionName = flags.url.split('/').slice(-1)[0]
+  const nameToUse = await getNameFromArgs(args, flags, functionName)
+  const fnFolder = path.join(functionsDir, nameToUse)
+  if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
+    this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
+    process.exit(1)
+  }
+
+  try {
+    fs.mkdirSync(fnFolder, { recursive: true })
+  } catch (e) {
+    // Ignore
+  }
+  await Promise.all(
+    folderContents.map(({ name, download_url }) => {
+      return fetch(download_url).then(res => {
+        const finalName = path.basename(name, '.js') === functionName ? nameToUse + '.js' : name
+        const dest = fs.createWriteStream(path.join(fnFolder, finalName))
+        res.body.pipe(dest)
+      })
+    })
+  )
+
+  console.log(`installing dependencies for ${nameToUse}...`)
+  cp.exec('npm i', { cwd: path.join(functionsDir, nameToUse) }, () => {
+    console.log(`installing dependencies for ${nameToUse} complete `)
+  })
+}
+
+// no --url flag specified, pick from a provided template
+async function scaffoldFromTemplate(flags, args, functionsDir, log) {
+  const { onComplete, name: templateName } = await pickTemplate() // pull the rest of the metadata from the template
+
+  const pathToTemplate = path.join(templatesDir, templateName)
+  if (!fs.existsSync(pathToTemplate)) {
+    throw new Error(`there isnt a corresponding folder to the selected name, ${templateName} template is misconfigured`)
+  }
+
+  const name = await getNameFromArgs(args, flags, templateName)
+
+  log(`Creating function ${name}`)
+  const functionPath = ensureFunctionPathIsOk(functionsDir, flags, name)
+
+  log('from ', pathToTemplate, ' to ', functionPath)
+  const vars = { NETLIFY_STUFF_TO_REPLACTE: 'REPLACEMENT' } // SWYX: TODO
+  let hasPackageJSON = false
+  copy(pathToTemplate, functionPath, vars, (err, createdFiles) => {
+    if (err) throw err
+    createdFiles.forEach(filePath => {
+      log(`Created ${filePath}`)
+      if (filePath.includes('package.json')) hasPackageJSON = true
+    })
+    // rename functions with different names from default
+    if (name !== templateName) {
+      fs.renameSync(path.join(functionPath, templateName + '.js'), path.join(functionPath, name + '.js'))
+    }
+    // npm install
+    if (hasPackageJSON) {
+      console.log(`installing dependencies for ${name}...`)
+      cp.exec('npm i', { cwd: path.join(functionPath) }, () => {
+        console.log(`installing dependencies for ${name} complete `)
+      })
+    }
+
+    if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
+  })
+}
+
+function ensureFunctionPathIsOk(functionsDir, flags, name) {
+  // const functionPath = flags.dir ? path.join(functionsDir, name, name + '.js') : path.join(functionsDir, name + '.js')
+  const functionPath = path.join(functionsDir, name)
+  if (fs.existsSync(functionPath)) {
+    this.log(`Function ${functionPath} already exists, cancelling...`)
+    process.exit(1)
+  }
+  // if (flags.dir) {
+  //   const fnFolder = path.join(functionsDir, name)
+  //   if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
+  //     this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
+  //     process.exit(1)
+  //   }
+
+  //   try {
+  //     fs.mkdirSync(fnFolder, { recursive: true })
+  //   } catch (e) {
+  //     // Ignore
+  //   }
+  // } else if (fs.existsSync(functionPath.replace(/\.js/, ''))) {
+  //   this.log(`A folder version of the function ${name} already exists at ${functionPath.replace(/\.js/, '')}`)
+  //   process.exit(1)
+  // }
+  return functionPath
 }
