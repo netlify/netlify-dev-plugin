@@ -57,7 +57,7 @@ COMMANDS
 
 ### Redirects
 
-Netlify Dev has the ability emulate the redirect capability Netlify offered on our [ADN](https://netlify.com/features/adn) in your local environment. The same redirect rules which you configure to run on the edge, will also work in your local builds.
+Netlify Dev has the ability emulate the [redirect capability](https://www.netlify.com/docs/redirects/) Netlify provide on the [ADN](https://netlify.com/features/adn) in your local environment. The same redirect rules which you configure to run on the edge, will also work in your local builds.
 
 Netlify dev supports redirect rules defined in either `_redirects` or `netlify.toml` files.
 
