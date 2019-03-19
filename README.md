@@ -29,25 +29,112 @@ netlify plugins:link .
 
 Now you're both ready to start testing netlify dev and to contribute to the project.
 
-## Functionality Notes
 
-- `netlify dev` now supports both `_redirects` and `netlify.toml` for redirects and has the same logic around loading order as our system (\_redirects, toml in public folder, toml in base)
-- `netlify dev` can be configured for projects we don’t detect out of the box with a `[dev]` block in the toml file
+```bash
+USAGE
+  $ netlify dev
 
-## `netlify functions:create`
+OPTIONS
+  -c, --cmd=cmd              command to run
+  -d, --devport=devport      port of the dev server started by command
+  -d, --dir=dir              dir with static files
+  -f, --functions=functions  Specify a functions folder to serve
+  -o, --offline              disables any features that require network access
+  -p, --port=port            port of netlify dev
 
-Create a new function from a given template.
+DESCRIPTION
+  The dev command will run a local dev server with Netlify's proxy and redirect rules
 
-Examples:
+EXAMPLES
+  $ netlify dev
+  $ netlify dev -c "yarn start"
+  $ netlify dev -c hugo
+
+COMMANDS
+  dev:exec  Exec command
+```
+
+### Redirects
+
+Netlify Dev has the ability emulate the redirect capability Netlify offered on our [ADN](https://netlify.com/features/adn) in your local environment. The same redirect rules which you configure to run on the edge, will also work in your local builds.
+
+Netlify dev supports redirect rules defined in either `_redirects` or `netlify.toml` files.
+
+The order of precedence for applying redirect rules are:
+
+1. `_redirects` file (in the project's publish folder)
+1. `netlify.toml` file (in the project's publish folder)
+1. `netlify.toml` file (in the project's root folder)
+
+See the [Redirects Documentation](https://www.netlify.com/docs/redirects/) for more information on Netlify's redirect and proxying capabilities.
+
+
+#### Running the project and accessing redirects
+```bash
+# Build, serve and hot-reload changes
+$ snetlify dev
+```
+
+
+### Project detection
+
+Netlify Dev will attempt to detect the SSG or build command that you are using, and run these on your behalf, while adding other development utilities.
+
+The number of project types which Netlify Dev can detect is growing, but if yours is not yet supported automatically, you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
+
+```toml
+
+#sample dev block in the toml
+[dev]
+  #TODO: what does this look like?
 
 ```
-netlify functions:create
-netlify functions:create hello-world
-netlify functions:create --name hello-world
-netlify functions:create hello-world --dir
-netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware
+
+
+### Netlify Functions
+
+Netlify can also create serverless functions for you locally as part of Netlify Functions. The serverless functions can then be run by Netlify Dev in the same way that wold be when deployed to the cloud.
+
+A number of function templates are available to get you started, and you can add your own utility functions to suit your own project development needs.
+
+Create a new function 
+
+```bash
+$ netlify functions:create
 ```
 
-You can just call `netlify functions:create` and the prompts will guide you all the way, however you can also supply a first argument to name the function. By default it creates a single file, however you can also use a `--dir` flag to create a function as a directory.
+More detailed usage examples:
 
-By passing a URL to a folder in a github repo to the `--url` flag, you can clone new templates. Dependencies are installed inside its own folder. Example: `netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware`
+```bash
+# Create a new function from one of the
+# available templates offered when prompted
+$ netlify functions:create
+
+# Create a new function with a given name
+$ netlify functions:create hello-world
+# or 
+$ netlify functions:create --name hello-world
+
+# Create a new function in a subdirectory
+# rather than as a single file
+$ netlify functions:create hello-world --dir
+
+# Create a new function by cloning a template from a remote url
+# organised with dependencies installed into a subdirectory
+$ netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware
+```
+
+#### Executing Netlify Functions
+
+After creating serverless functions, Netlify Dev can serve thes to you as part of your local build. This emulates the behaviour of Netlify Functions when deployed to Netlify.
+
+```bash
+# Build, serve and hot-reload changes
+$ netlify dev
+```
+
+Each serverless function will be exposed on a URL corresponding to its path and file name.
+
+
+`./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
+`./functions/my-api/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/my-api/hello-world`
