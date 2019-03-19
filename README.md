@@ -61,7 +61,7 @@ Netlify Dev has the ability emulate the [redirect capability](https://www.netlif
 
 Netlify dev supports redirect rules defined in either `_redirects` or `netlify.toml` files.
 
-The order of precedence for applying redirect rules are:
+The order of precedence for applying redirect rules is:
 
 1. `_redirects` file (in the project's publish folder)
 1. `netlify.toml` file (in the project's publish folder)
@@ -73,7 +73,7 @@ See the [Redirects Documentation](https://www.netlify.com/docs/redirects/) for m
 #### Running the project and accessing redirects
 ```bash
 # Build, serve and hot-reload changes
-$ snetlify dev
+$ netlify dev
 ```
 
 
