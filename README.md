@@ -29,6 +29,7 @@ netlify plugins:link .
 
 Now you're both ready to start testing netlify dev and to contribute to the project.
 
+### Netlify Dev usage
 
 ```bash
 USAGE
@@ -137,4 +138,5 @@ Each serverless function will be exposed on a URL corresponding to its path and 
 
 
 `./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
+
 `./functions/my-api/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/my-api/hello-world`
