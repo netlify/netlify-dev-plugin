@@ -20,7 +20,7 @@ class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
     const { config } = this.netlify
-    const functionsDir = ensureFunctionDirExists.call(flags, config)
+    const functionsDir = ensureFunctionDirExists.call(this, flags, config)
 
     /* either download from URL or scaffold from template */
     if (flags.url) {
@@ -198,7 +198,9 @@ async function downloadFromURL(flags, args, functionsDir) {
           const dest = fs.createWriteStream(path.join(fnFolder, finalName))
           res.body.pipe(dest)
         })
-        .catch(err => console.error(err) || throw new Error('Error while retrieving ' + download_url))
+        .catch(err => {
+          throw new Error('Error while retrieving ' + download_url)
+        })
     })
   )
 
