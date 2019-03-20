@@ -19,15 +19,14 @@ const templatesDir = path.resolve(__dirname, '../../functions-templates')
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
-    const { config, api, site } = this.netlify
-    const accessToken = await this.authenticate()
-    const functionsDir = ensureFunctionDirExists(flags, config, this.log)
+    const { config } = this.netlify
+    const functionsDir = ensureFunctionDirExists.call(flags, config)
 
     /* either download from URL or scaffold from template */
     if (flags.url) {
-      await downloadFromURL(flags, args, functionsDir)
+      await downloadFromURL.call(this, flags, args, functionsDir)
     } else {
-      await scaffoldFromTemplate(flags, args, functionsDir, api, site, accessToken, this.log)
+      await scaffoldFromTemplate.call(this, flags, args, functionsDir)
     }
   }
 }
@@ -35,7 +34,6 @@ class FunctionsCreateCommand extends Command {
 FunctionsCreateCommand.args = [
   {
     name: 'name',
-    // required: true, // tried this but the error message is very ugly
     description: 'name of your new function file inside your functions folder'
   }
 ]
@@ -45,20 +43,24 @@ FunctionsCreateCommand.description = `create a new function locally`
 FunctionsCreateCommand.examples = [
   'netlify functions:create',
   'netlify functions:create hello-world',
-  'netlify functions:create --name hello-world',
-  'netlify functions:create hello-world --dir'
+  'netlify functions:create --name hello-world'
 ]
 
 FunctionsCreateCommand.flags = {
   name: flags.string({ char: 'n', description: 'function name' }),
   functions: flags.string({ char: 'f', description: 'functions folder' }),
-  url: flags.string({ char: 'u', description: 'pull template from URL' }),
-  dir: flags.boolean({
-    char: 'd',
-    description: 'create function as a directory'
-  })
+  url: flags.string({ char: 'u', description: 'pull template from URL' })
+  // // SWYX: deprecated; every scaffolded function is a directory now
+  // dir: flags.boolean({
+  //   char: 'd',
+  //   description: 'create function as a directory'
+  // })
 }
 module.exports = FunctionsCreateCommand
+
+/**
+ * all subsections of code called from the main logic flow above
+ */
 
 // prompt for a name if name not supplied
 async function getNameFromArgs(args, flags, defaultName) {
@@ -88,17 +90,59 @@ async function getNameFromArgs(args, flags, defaultName) {
 
 // pick template from our existing templates
 async function pickTemplate() {
+  // lazy loading on purpose
+  inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
+  const fuzzy = require('fuzzy')
   // doesnt scale but will be ok for now
-  const registries = ['js', 'ts', 'go'].flatMap(formatRegistryArrayForInquirer)
-  const { chosentemplate } = await inquirer.prompt([
-    {
-      name: 'chosentemplate',
-      message: 'pick a template',
-      type: 'list',
-      choices: registries
+  const [
+    jsreg
+    // tsreg, goreg
+  ] = [
+    'js'
+    // 'ts', 'go'
+  ].map(formatRegistryArrayForInquirer)
+  const { chosentemplate } = await inquirer.prompt({
+    name: 'chosentemplate',
+    message: 'Pick a template',
+    type: 'autocomplete',
+    // suggestOnly: true, // we can explore this for entering URL in future
+    source: async function(answersSoFar, input) {
+      if (!input || input === '') {
+        // show separators
+        return [
+          new inquirer.Separator(`----[JS]----`),
+          ...jsreg
+          // new inquirer.Separator(`----[TS]----`),
+          // ...tsreg,
+          // new inquirer.Separator(`----[GO]----`),
+          // ...goreg
+        ]
+      } else {
+        // only show filtered results sorted by score
+        let ans = [
+          ...filterRegistry(jsreg, input)
+          // ...filterRegistry(tsreg, input),
+          // ...filterRegistry(goreg, input)
+        ].sort((a, b) => b.score - a.score)
+        return ans
+      }
     }
-  ])
+  })
   return chosentemplate
+  function filterRegistry(registry, input) {
+    const temp = registry.map(x => x.name + x.description)
+    const filteredTemplates = fuzzy.filter(input, temp)
+    const filteredTemplateNames = filteredTemplates.map(x => (input ? x.string : x))
+    // console.log({ filteredTemplateNames })
+    return registry
+      .filter(t => filteredTemplateNames.includes(t.name + t.description))
+      .map(t => {
+        // add the score
+        const { score } = filteredTemplates.find(f => f.string === t.name + t.description)
+        t.score = score
+        return t
+      })
+  }
   function formatRegistryArrayForInquirer(lang) {
     const registry = require(path.join(templatesDir, lang, 'template-registry.js'))
       .sort((a, b) => (a.priority || 999) - (b.priority || 999))
@@ -106,26 +150,26 @@ async function pickTemplate() {
         t.lang = lang
         return {
           // confusing but this is the format inquirer wants
-          name: `[${lang}] ` + t.description,
+          name: `[${t.name}] ` + t.description,
           value: t,
           short: lang + '-' + t.name
         }
       })
-    return [new inquirer.Separator(`----[${lang.toUpperCase()}]----`), ...registry]
+    return registry
   }
 }
 
 /* get functions dir (and make it if necessary) */
-function ensureFunctionDirExists(flags, config, log) {
+function ensureFunctionDirExists(flags, config) {
   const functionsDir = flags.functions || (config.build && config.build.functions)
   if (!functionsDir) {
-    log('No functions folder specified in netlify.toml or as an argument')
+    this.log('No functions folder specified in netlify.toml or as an argument')
     process.exit(1)
   }
   if (!fs.existsSync(functionsDir)) {
-    log(`functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`)
+    this.log(`functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`)
     fs.mkdirSync(functionsDir)
-    log(`functions folder ${functionsDir} created`)
+    this.log(`functions folder ${functionsDir} created`)
   }
   return functionsDir
 }
@@ -148,41 +192,42 @@ async function downloadFromURL(flags, args, functionsDir) {
   }
   await Promise.all(
     folderContents.map(({ name, download_url }) => {
-      return fetch(download_url).then(res => {
-        const finalName = path.basename(name, '.js') === functionName ? nameToUse + '.js' : name
-        const dest = fs.createWriteStream(path.join(fnFolder, finalName))
-        res.body.pipe(dest)
-      })
+      return fetch(download_url)
+        .then(res => {
+          const finalName = path.basename(name, '.js') === functionName ? nameToUse + '.js' : name
+          const dest = fs.createWriteStream(path.join(fnFolder, finalName))
+          res.body.pipe(dest)
+        })
+        .catch(err => console.error(err) || throw new Error('Error while retrieving ' + download_url))
     })
   )
 
-  console.log(`installing dependencies for ${nameToUse}...`)
+  this.log(`installing dependencies for ${nameToUse}...`)
   cp.exec('npm i', { cwd: path.join(functionsDir, nameToUse) }, () => {
-    console.log(`installing dependencies for ${nameToUse} complete `)
+    this.log(`installing dependencies for ${nameToUse} complete `)
   })
 }
 
 // no --url flag specified, pick from a provided template
-async function scaffoldFromTemplate(flags, args, functionsDir, api, site, accessToken, log) {
+async function scaffoldFromTemplate(flags, args, functionsDir) {
   const { onComplete, name: templateName, lang, addons = [] } = await pickTemplate() // pull the rest of the metadata from the template
-
   const pathToTemplate = path.join(templatesDir, lang, templateName)
   if (!fs.existsSync(pathToTemplate)) {
     throw new Error(`there isnt a corresponding folder to the selected name, ${templateName} template is misconfigured`)
   }
 
   const name = await getNameFromArgs(args, flags, templateName)
-
-  log(`Creating function ${name}`)
+  this.log(`Creating function ${name}`)
   const functionPath = ensureFunctionPathIsOk(functionsDir, flags, name)
 
-  log('from ', pathToTemplate, ' to ', functionPath)
-  const vars = { NETLIFY_STUFF_TO_REPLACTE: 'REPLACEMENT' } // SWYX: TODO
+  // // SWYX: note to future devs - useful for debugging source to output issues
+  // this.log('from ', pathToTemplate, ' to ', functionPath)
+  const vars = { NETLIFY_STUFF_TO_REPLACE: 'REPLACEMENT' } // SWYX: TODO
   let hasPackageJSON = false
   copy(pathToTemplate, functionPath, vars, (err, createdFiles) => {
     if (err) throw err
     createdFiles.forEach(filePath => {
-      log(`Created ${filePath}`)
+      this.log(`Created ${filePath}`)
       if (filePath.includes('package.json')) hasPackageJSON = true
     })
     // rename functions with different names from default
@@ -191,21 +236,24 @@ async function scaffoldFromTemplate(flags, args, functionsDir, api, site, access
     }
     // npm install
     if (hasPackageJSON) {
-      console.log(`installing dependencies for ${name}...`)
+      this.log(`installing dependencies for ${name}...`)
       cp.exec('npm i', { cwd: path.join(functionPath) }, () => {
-        console.log(`installing dependencies for ${name} complete `)
+        this.log(`installing dependencies for ${name} complete `)
       })
     }
 
     if (addons.length) {
+      const { api, site } = this.netlify
       const siteId = site.id
       if (!siteId) {
         this.log('No site id found, please run inside a site folder or `netlify link`')
         return false
       }
       api.getSite({ siteId }).then(async siteData => {
+        const accessToken = await this.authenticate()
         const arr = addons.map(addonName => {
-          log('installing addon: ' + addonName)
+          this.log('installing addon: ' + addonName)
+          // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
           return createSiteAddon(accessToken, addonName, siteId, siteData, log)
         })
         return Promise.all(arr)
@@ -215,28 +263,13 @@ async function scaffoldFromTemplate(flags, args, functionsDir, api, site, access
   })
 }
 
+// we used to allow for a --dir command,
+// but have retired that to force every scaffolded function to be a folder
 function ensureFunctionPathIsOk(functionsDir, flags, name) {
-  // const functionPath = flags.dir ? path.join(functionsDir, name, name + '.js') : path.join(functionsDir, name + '.js')
   const functionPath = path.join(functionsDir, name)
   if (fs.existsSync(functionPath)) {
     this.log(`Function ${functionPath} already exists, cancelling...`)
     process.exit(1)
   }
-  // if (flags.dir) {
-  //   const fnFolder = path.join(functionsDir, name)
-  //   if (fs.existsSync(fnFolder + '.js') && fs.lstatSync(fnFolder + '.js').isFile()) {
-  //     this.log(`A single file version of the function ${name} already exists at ${fnFolder}.js`)
-  //     process.exit(1)
-  //   }
-
-  //   try {
-  //     fs.mkdirSync(fnFolder, { recursive: true })
-  //   } catch (e) {
-  //     // Ignore
-  //   }
-  // } else if (fs.existsSync(functionPath.replace(/\.js/, ''))) {
-  //   this.log(`A folder version of the function ${name} already exists at ${functionPath.replace(/\.js/, '')}`)
-  //   process.exit(1)
-  // }
   return functionPath
 }

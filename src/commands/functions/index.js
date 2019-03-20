@@ -38,7 +38,7 @@ FunctionsCommand.description = `Manage netlify functions
 The ${name} command will help you manage the functions in this site
 `
 FunctionsCommand.examples = [
-  'netlify functions:create --name function-xyz --runtime nodejs',
+  'netlify functions:create --name function-xyz',
   'netlify functions:update --name function-abc --timeout 30s'
 ]
 
