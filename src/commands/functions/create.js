@@ -5,24 +5,29 @@ const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
 const inquirer = require('inquirer')
 const readRepoURL = require('../../utils/readRepoURL')
+const { createSiteAddon } = require('../../utils/addons')
 const http = require('http')
 const fetch = require('node-fetch')
 const cp = require('child_process')
+const { createAddon } = require('netlify/src/addons')
 
 const templatesDir = path.resolve(__dirname, '../../functions-templates')
 
+/**
+ * Be very clear what is the SOURCE (templates dir) vs the DEST (functions dir)
+ */
 class FunctionsCreateCommand extends Command {
   async run() {
     const { flags, args } = this.parse(FunctionsCreateCommand)
-    const { config } = this.netlify
-
+    const { config, api, site } = this.netlify
+    const accessToken = await this.authenticate()
     const functionsDir = ensureFunctionDirExists(flags, config, this.log)
 
     /* either download from URL or scaffold from template */
     if (flags.url) {
       await downloadFromURL(flags, args, functionsDir)
     } else {
-      await scaffoldFromTemplate(flags, args, functionsDir, this.log)
+      await scaffoldFromTemplate(flags, args, functionsDir, api, site, accessToken, this.log)
     }
   }
 }
@@ -83,23 +88,31 @@ async function getNameFromArgs(args, flags, defaultName) {
 
 // pick template from our existing templates
 async function pickTemplate() {
-  // let templates = fs.readdirSync(templatesDir).filter(x => x.split('.').length === 1) // only folders
-  const registry = require(path.join(templatesDir, 'template-registry.js'))
-  let templates = registry.sort((a, b) => (a.priority || 999) - (b.priority || 999)) // doesnt scale but will be ok for now
+  // doesnt scale but will be ok for now
+  const registries = ['js', 'ts', 'go'].flatMap(formatRegistryArrayForInquirer)
   const { chosentemplate } = await inquirer.prompt([
     {
       name: 'chosentemplate',
       message: 'pick a template',
       type: 'list',
-      choices: templates.map(t => ({
-        // confusing but this is the format inquirer wants
-        name: t.description,
-        value: t.name,
-        short: t.name
-      }))
+      choices: registries
     }
   ])
-  return registry.find(x => x.name === chosentemplate)
+  return chosentemplate
+  function formatRegistryArrayForInquirer(lang) {
+    const registry = require(path.join(templatesDir, lang, 'template-registry.js'))
+      .sort((a, b) => (a.priority || 999) - (b.priority || 999))
+      .map(t => {
+        t.lang = lang
+        return {
+          // confusing but this is the format inquirer wants
+          name: `[${lang}] ` + t.description,
+          value: t,
+          short: lang + '-' + t.name
+        }
+      })
+    return [new inquirer.Separator(`----[${lang.toUpperCase()}]----`), ...registry]
+  }
 }
 
 /* get functions dir (and make it if necessary) */
@@ -150,10 +163,10 @@ async function downloadFromURL(flags, args, functionsDir) {
 }
 
 // no --url flag specified, pick from a provided template
-async function scaffoldFromTemplate(flags, args, functionsDir, log) {
-  const { onComplete, name: templateName } = await pickTemplate() // pull the rest of the metadata from the template
+async function scaffoldFromTemplate(flags, args, functionsDir, api, site, accessToken, log) {
+  const { onComplete, name: templateName, lang, addons = [] } = await pickTemplate() // pull the rest of the metadata from the template
 
-  const pathToTemplate = path.join(templatesDir, templateName)
+  const pathToTemplate = path.join(templatesDir, lang, templateName)
   if (!fs.existsSync(pathToTemplate)) {
     throw new Error(`there isnt a corresponding folder to the selected name, ${templateName} template is misconfigured`)
   }
@@ -184,6 +197,20 @@ async function scaffoldFromTemplate(flags, args, functionsDir, log) {
       })
     }
 
+    if (addons.length) {
+      const siteId = site.id
+      if (!siteId) {
+        this.log('No site id found, please run inside a site folder or `netlify link`')
+        return false
+      }
+      api.getSite({ siteId }).then(async siteData => {
+        const arr = addons.map(addonName => {
+          log('installing addon: ' + addonName)
+          return createSiteAddon(accessToken, addonName, siteId, siteData, log)
+        })
+        return Promise.all(arr)
+      })
+    }
     if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
   })
 }
