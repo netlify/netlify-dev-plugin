@@ -32,5 +32,34 @@ module.exports = [
     onComplete() {
       console.log(`serverless-ssr function created from template!`)
     }
+  },
+  {
+    name: 'set-cookie',
+    description: 'Set Cookie: set a cookie alongside your function',
+    onComplete() {
+      console.log(`set-cookie function created from template!`)
+    }
+  },
+  {
+    name: 'protected-function',
+    description: 'Protected Function: Function behind Netlify Identity',
+    onComplete() {
+      console.log(`protected-function function created from template!`)
+    }
+  },
+  {
+    name: 'using-middleware',
+    description: 'Using Middleware: with middy',
+    onComplete() {
+      console.log(`using-middleware function created from template!`)
+    }
+  },
+  {
+    name: 'fauna-crud',
+    description: 'CRUD function: using Fauna DB!',
+    addons: ['fauna'], // in future we'll want to pass/prompt args to addons
+    onComplete() {
+      console.log(`fauna-crud function created from template!`)
+    }
   }
 ]
