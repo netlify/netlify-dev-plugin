@@ -1,9 +1,9 @@
-const {spawn} = require('child_process')
 const fetch = require('node-fetch')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-const {fetchLatest} = require('gh-release-fetch')
+const { fetchLatest } = require('gh-release-fetch')
+const { runProcess }  = require('./run-process')
 
 async function createTunnel(siteId, netlifyApiToken) {
   await installTunnelClient()
@@ -32,19 +32,12 @@ async function createTunnel(siteId, netlifyApiToken) {
 async function connectTunnel(session, netlifyApiToken, localPort, log, error) {
   const execPath = path.join(os.homedir(), '.netlify', 'tunnel', 'bin', 'live-tunnel-client')
 
-  const ps = spawn(execPath, ['connect', '-s', session.id, '-t', netlifyApiToken, '-l', localPort]);
+  const proc = {
+    cmd: execPath,
+    args: ['connect', '-s', session.id, '-t', netlifyApiToken, '-l', localPort]
+  }
 
-  ps.stdout.on('data', data => {
-    log(`INFO: ${data}`)
-  })
-
-  ps.stderr.on('data', data => {
-    error(`ERROR: ${data}`)
-  })
-
-  ps.on('close', code => process.exit(code))
-  ps.on('SIGINT', () => process.exit())
-  ps.on('SIGTERM', () => process.exit())
+  runProcess(cmd, log, error)
 }
 
 async function installTunnelClient() {
