@@ -120,9 +120,6 @@ async function pickTemplate() {
         return [
           // ...recentTemplates,
           new inquirer.Separator(`----[JS]----`),
-          new inquirer.Separator(`----[JsdS]----`),
-          new inquirer.Separator(`----[JwqS]----`),
-          new inquirer.Separator(`----[JdwS]----`),
           ...jsreg
           // new inquirer.Separator(`----[TS]----`),
           // ...tsreg,
