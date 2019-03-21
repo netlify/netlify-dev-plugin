@@ -38,7 +38,6 @@ USAGE
 OPTIONS
   -c, --cmd=cmd              command to run
   -d, --devport=devport      port of the dev server started by command
-  -d, --dir=dir              dir with static files
   -f, --functions=functions  Specify a functions folder to serve
   -o, --offline              disables any features that require network access
   -p, --port=port            port of netlify dev
@@ -69,13 +68,12 @@ The order of precedence for applying redirect rules is:
 
 See the [Redirects Documentation](https://www.netlify.com/docs/redirects/) for more information on Netlify's redirect and proxying capabilities.
 
-
 #### Running the project and accessing redirects
+
 ```bash
 # Build, serve and hot-reload changes
 $ netlify dev
 ```
-
 
 ### Project detection
 
@@ -91,14 +89,13 @@ The number of project types which Netlify Dev can detect is growing, but if your
 
 ```
 
-
 ### Netlify Functions
 
 Netlify can also create serverless functions for you locally as part of Netlify Functions. The serverless functions can then be run by Netlify Dev in the same way that wold be when deployed to the cloud.
 
 A number of function templates are available to get you started, and you can add your own utility functions to suit your own project development needs.
 
-Create a new function 
+Create a new function
 
 ```bash
 $ netlify functions:create
@@ -113,12 +110,8 @@ $ netlify functions:create
 
 # Create a new function with a given name
 $ netlify functions:create hello-world
-# or 
+# or
 $ netlify functions:create --name hello-world
-
-# Create a new function in a subdirectory
-# rather than as a single file
-$ netlify functions:create hello-world --dir
 
 # Create a new function by cloning a template from a remote url
 # organised with dependencies installed into a subdirectory
@@ -135,7 +128,6 @@ $ netlify dev
 ```
 
 Each serverless function will be exposed on a URL corresponding to its path and file name.
-
 
 `./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
 

@@ -6,9 +6,9 @@
 module.exports = [
   {
     name: 'auth-fetch',
-    description: 'Authenticated Fetch: uses node-fetch and Netlify Identity to access APIs',
+    description: 'Use `node-fetch` library and Netlify Identity to access APIs',
     onComplete() {
-      console.log(`authenticated node-fetch function created from template!`)
+      console.log(`auth-fetch function created from template!`)
       console.log(
         'REMINDER: Make sure to call this function with the Netlify Identity JWT. See https://netlify-gotrue-in-react.netlify.com/ for demo'
       )
@@ -17,7 +17,7 @@ module.exports = [
   {
     name: 'hello-world',
     priority: 1,
-    description: 'Basic Hello World function: shows async/await usage, and response formatting'
+    description: 'Basic function that shows async/await usage, and response formatting'
   },
   {
     name: 'node-fetch',
@@ -28,35 +28,35 @@ module.exports = [
   },
   {
     name: 'serverless-ssr',
-    description: 'Serverless SSR: dynamic serverside rendering via functions',
+    description: 'Dynamic serverside rendering via functions',
     onComplete() {
       console.log(`serverless-ssr function created from template!`)
     }
   },
   {
     name: 'set-cookie',
-    description: 'Set Cookie: set a cookie alongside your function',
+    description: 'Set a cookie alongside your function',
     onComplete() {
       console.log(`set-cookie function created from template!`)
     }
   },
   {
     name: 'protected-function',
-    description: 'Protected Function: Function behind Netlify Identity',
+    description: 'Function protected Netlify Identity authentication',
     onComplete() {
       console.log(`protected-function function created from template!`)
     }
   },
   {
     name: 'using-middleware',
-    description: 'Using Middleware: with middy',
+    description: 'Using Middleware with middy',
     onComplete() {
       console.log(`using-middleware function created from template!`)
     }
   },
   {
     name: 'fauna-crud',
-    description: 'CRUD function: using Fauna DB!',
+    description: 'CRUD function using Fauna DB',
     addons: ['fauna'], // in future we'll want to pass/prompt args to addons
     onComplete() {
       console.log(`fauna-crud function created from template!`)
@@ -64,7 +64,7 @@ module.exports = [
   },
   {
     name: 'apollo-graphql',
-    description: 'GraphQL function: using Apollo-Server-Lambda!',
+    description: 'GraphQL function using Apollo-Server-Lambda!',
     onComplete() {
       console.log(`apollo-graphql function created from template!`)
     }
