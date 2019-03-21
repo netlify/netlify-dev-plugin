@@ -101,6 +101,13 @@ async function pickTemplate() {
     'js'
     // 'ts', 'go'
   ].map(formatRegistryArrayForInquirer)
+  const memory = rememberChoices(jsreg) // in future spread the other language registries here
+  let recentTemplates = memory.read()
+  recentTemplates =
+    recentTemplates && recentTemplates.length
+      ? [new inquirer.Separator(`----[Recent]----`), ...recentTemplates]
+      : [undefined]
+  console.log({ recentTemplates })
   const { chosentemplate } = await inquirer.prompt({
     name: 'chosentemplate',
     message: 'Pick a template',
@@ -108,16 +115,22 @@ async function pickTemplate() {
     // suggestOnly: true, // we can explore this for entering URL in future
     source: async function(answersSoFar, input) {
       if (!input || input === '') {
+        console.log('hellooooooo start here')
         // show separators
         return [
+          // ...recentTemplates,
           new inquirer.Separator(`----[JS]----`),
+          new inquirer.Separator(`----[JsdS]----`),
+          new inquirer.Separator(`----[JwqS]----`),
+          new inquirer.Separator(`----[JdwS]----`),
           ...jsreg
           // new inquirer.Separator(`----[TS]----`),
           // ...tsreg,
           // new inquirer.Separator(`----[GO]----`),
           // ...goreg
-        ]
+        ] //.filter(x => x !== undefined)
       } else {
+        console.log('dont start here')
         // only show filtered results sorted by score
         let ans = [
           ...filterRegistry(jsreg, input)
@@ -128,17 +141,17 @@ async function pickTemplate() {
       }
     }
   })
+  memory.log(stringifyTemplate(chosentemplate))
   return chosentemplate
   function filterRegistry(registry, input) {
-    const temp = registry.map(x => x.name + x.description)
+    const temp = registry.map(x => stringifyTemplate(x))
     const filteredTemplates = fuzzy.filter(input, temp)
     const filteredTemplateNames = filteredTemplates.map(x => (input ? x.string : x))
-    // console.log({ filteredTemplateNames })
     return registry
-      .filter(t => filteredTemplateNames.includes(t.name + t.description))
+      .filter(t => filteredTemplateNames.includes(stringifyTemplate(t)))
       .map(t => {
-        // add the score
-        const { score } = filteredTemplates.find(f => f.string === t.name + t.description)
+        // add the score for sorting
+        const { score } = filteredTemplates.find(f => f.string === stringifyTemplate(t))
         t.score = score
         return t
       })
@@ -274,4 +287,32 @@ function ensureFunctionPathIsOk(functionsDir, flags, name) {
     process.exit(1)
   }
   return functionPath
+}
+
+function stringifyTemplate(template) {
+  // so we can match templates
+  return template.name + template.description
+}
+// add memory
+function rememberChoices(registry) {
+  const globalConfig = require('../../utils/global-config')
+  return {
+    read: () => {
+      const last5templates = globalConfig.get('last5templates') || []
+      console.log('reading...', last5templates)
+      // just in case some templates in the registry have been deprecated
+      return registry.filter(registryTemplate =>
+        last5templates.includes(t => stringifyTemplate(t) === stringifyTemplate(registryTemplate))
+      )
+    },
+    log(newTemplate) {
+      console.log('logging...', newTemplate)
+      const last5templates = globalConfig.get('last5templates') || []
+      if (last5templates[0] === stringifyTemplate(newTemplate)) {
+        return null // nothing to do
+      } else {
+        globalConfig.set('last5templates', [newTemplate, ...last5templates].slice(0, 5))
+      }
+    }
+  }
 }
