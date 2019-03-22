@@ -4,7 +4,7 @@ const copy = require('copy-template-dir')
 const { flags } = require('@oclif/command')
 const Command = require('@netlify/cli-utils')
 const inquirer = require('inquirer')
-const readRepoURL = require('../../utils/readRepoURL')
+const { readRepoURL, validateRepoURL } = require('../../utils/readRepoURL')
 const { createSiteAddon } = require('../../utils/addons')
 const http = require('http')
 const fetch = require('node-fetch')
@@ -111,11 +111,22 @@ async function pickTemplate() {
         // show separators
         return [
           new inquirer.Separator(`----[JS]----`),
-          ...jsreg
+          ...jsreg,
           // new inquirer.Separator(`----[TS]----`),
           // ...tsreg,
           // new inquirer.Separator(`----[GO]----`),
           // ...goreg
+          new inquirer.Separator(`----[Special Commands]----`),
+          {
+            name: `*** Clone template from Github URL ***`,
+            value: 'url',
+            short: 'gh-url'
+          },
+          {
+            name: `*** Report issue with, or suggest a new template ***`,
+            value: 'report',
+            short: 'gh-report'
+          }
         ]
       } else {
         // only show filtered results sorted by score
@@ -144,7 +155,9 @@ async function pickTemplate() {
       })
   }
   function formatRegistryArrayForInquirer(lang) {
-    const registry = require(path.join(templatesDir, lang, 'template-registry.js'))
+    const folderNames = fs.readdirSync(path.join(templatesDir, lang))
+    const registry = folderNames
+      .map(name => require(path.join(templatesDir, lang, name, '.netlify-function-template.js')))
       .sort((a, b) => (a.priority || 999) - (b.priority || 999))
       .map(t => {
         t.lang = lang
@@ -208,61 +221,103 @@ async function downloadFromURL(flags, args, functionsDir) {
   cp.exec('npm i', { cwd: path.join(functionsDir, nameToUse) }, () => {
     this.log(`installing dependencies for ${nameToUse} complete `)
   })
+
+  // read, execute, and delete function template file if exists
+  const fnTemplateFile = path.join(fnFolder, '.netlify-function-template.js')
+  if (fs.existsSync(fnTemplateFile)) {
+    const { onComplete, addons = [] } = require(fnTemplateFile)
+    installAddons.call(this, addons)
+    if (onComplete) onComplete()
+    fs.unlinkSync(fnTemplateFile) // delete
+  }
 }
 
 // no --url flag specified, pick from a provided template
 async function scaffoldFromTemplate(flags, args, functionsDir) {
-  const { onComplete, name: templateName, lang, addons = [] } = await pickTemplate() // pull the rest of the metadata from the template
-  const pathToTemplate = path.join(templatesDir, lang, templateName)
-  if (!fs.existsSync(pathToTemplate)) {
-    throw new Error(`there isnt a corresponding folder to the selected name, ${templateName} template is misconfigured`)
-  }
-
-  const name = await getNameFromArgs(args, flags, templateName)
-  this.log(`Creating function ${name}`)
-  const functionPath = ensureFunctionPathIsOk(functionsDir, flags, name)
-
-  // // SWYX: note to future devs - useful for debugging source to output issues
-  // this.log('from ', pathToTemplate, ' to ', functionPath)
-  const vars = { NETLIFY_STUFF_TO_REPLACE: 'REPLACEMENT' } // SWYX: TODO
-  let hasPackageJSON = false
-  copy(pathToTemplate, functionPath, vars, (err, createdFiles) => {
-    if (err) throw err
-    createdFiles.forEach(filePath => {
-      this.log(`Created ${filePath}`)
-      if (filePath.includes('package.json')) hasPackageJSON = true
-    })
-    // rename functions with different names from default
-    if (name !== templateName) {
-      fs.renameSync(path.join(functionPath, templateName + '.js'), path.join(functionPath, name + '.js'))
-    }
-    // npm install
-    if (hasPackageJSON) {
-      this.log(`installing dependencies for ${name}...`)
-      cp.exec('npm i', { cwd: path.join(functionPath) }, () => {
-        this.log(`installing dependencies for ${name} complete `)
-      })
-    }
-
-    if (addons.length) {
-      const { api, site } = this.netlify
-      const siteId = site.id
-      if (!siteId) {
-        this.log('No site id found, please run inside a site folder or `netlify link`')
-        return false
+  const chosentemplate = await pickTemplate() // pull the rest of the metadata from the template
+  if (chosentemplate === 'url') {
+    const { chosenurl } = await inquirer.prompt([
+      {
+        name: 'chosenurl',
+        message: 'URL to clone: ',
+        type: 'input',
+        validate: val => !!validateRepoURL(val)
+        // make sure it is not undefined and is a valid filename.
+        // this has some nuance i have ignored, eg crossenv and i18n concerns
       }
-      api.getSite({ siteId }).then(async siteData => {
-        const accessToken = await this.authenticate()
-        const arr = addons.map(addonName => {
-          this.log('installing addon: ' + addonName)
-          // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
-          return createSiteAddon(accessToken, addonName, siteId, siteData, log)
-        })
-        return Promise.all(arr)
-      })
+    ])
+    flags.url = chosenurl.trim()
+    try {
+      await downloadFromURL.call(this, flags, args, functionsDir)
+    } catch (err) {
+      console.error('Error downloading from URL: ' + flags.url)
+      console.error(err)
+      process.exit(1)
     }
-    if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
-  })
+  } else if (chosentemplate === 'report') {
+    console.log('opening in browser: https://github.com/netlify/netlify-dev-plugin/issues/new')
+    require('../../utils/openBrowser.js')('https://github.com/netlify/netlify-dev-plugin/issues/new')
+  } else {
+    const { onComplete, name: templateName, lang, addons = [] } = chosentemplate
+
+    const pathToTemplate = path.join(templatesDir, lang, templateName)
+    if (!fs.existsSync(pathToTemplate)) {
+      throw new Error(
+        `there isnt a corresponding folder to the selected name, ${templateName} template is misconfigured`
+      )
+    }
+
+    const name = await getNameFromArgs(args, flags, templateName)
+    this.log(`Creating function ${name}`)
+    const functionPath = ensureFunctionPathIsOk(functionsDir, flags, name)
+
+    // // SWYX: note to future devs - useful for debugging source to output issues
+    // this.log('from ', pathToTemplate, ' to ', functionPath)
+    const vars = { NETLIFY_STUFF_TO_REPLACE: 'REPLACEMENT' } // SWYX: TODO
+    let hasPackageJSON = false
+    copy(pathToTemplate, functionPath, vars, (err, createdFiles) => {
+      if (err) throw err
+      createdFiles.forEach(filePath => {
+        this.log(`Created ${filePath}`)
+        if (filePath.includes('package.json')) hasPackageJSON = true
+      })
+      // rename functions with different names from default
+      if (name !== templateName) {
+        fs.renameSync(path.join(functionPath, templateName + '.js'), path.join(functionPath, name + '.js'))
+      }
+      // delete function template file
+      fs.unlinkSync(path.join(functionPath, '.netlify-function-template.js'))
+      // npm install
+      if (hasPackageJSON) {
+        this.log(`installing dependencies for ${name}...`)
+        cp.exec('npm i', { cwd: path.join(functionPath) }, () => {
+          this.log(`installing dependencies for ${name} complete `)
+        })
+      }
+      installAddons.call(this, addons)
+      if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
+    })
+  }
+}
+
+async function installAddons(addons = []) {
+  if (addons.length) {
+    const { api, site } = this.netlify
+    const siteId = site.id
+    if (!siteId) {
+      this.log('No site id found, please run inside a site folder or `netlify link`')
+      return false
+    }
+    return api.getSite({ siteId }).then(async siteData => {
+      const accessToken = await this.authenticate()
+      const arr = addons.map(addonName => {
+        this.log('installing addon: ' + addonName)
+        // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
+        return createSiteAddon(accessToken, addonName, siteId, siteData, this.log)
+      })
+      return Promise.all(arr)
+    })
+  }
 }
 
 // we used to allow for a --dir command,
