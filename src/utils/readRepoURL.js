@@ -13,7 +13,8 @@ const GITHUB = Symbol('GITHUB')
  */
 async function readRepoURL(_url) {
   const URL = url.parse(_url)
-  const repoHost = validateRepoURL(URL)
+  const repoHost = validateRepoURL(_url)
+  if (repoHost !== GITHUB) throw new Error('only github repos are supported for now')
   const [owner_and_repo, contents_path] = parseRepoURL(repoHost, URL)
   const folderContents = await getRepoURLContents(repoHost, owner_and_repo, contents_path)
   return folderContents
@@ -32,8 +33,9 @@ async function getRepoURLContents(repoHost, owner_and_repo, contents_path) {
   }
 }
 
-function validateRepoURL(URL) {
-  if (URL.host !== 'github.com') throw new Error('only github repos are supported for now')
+function validateRepoURL(_url) {
+  const URL = url.parse(_url)
+  if (URL.host !== 'github.com') return null
   // other validation logic here
   return GITHUB
 }
@@ -48,4 +50,7 @@ function parseRepoURL(repoHost, URL) {
   }
 }
 
-module.exports = readRepoURL
+module.exports = {
+  readRepoURL,
+  validateRepoURL
+}

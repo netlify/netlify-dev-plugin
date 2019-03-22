@@ -118,6 +118,20 @@ $ netlify functions:create --name hello-world
 $ netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware
 ```
 
+**Function Templates**
+
+Function templates can specify `addons` that they rely on as well as execute arbitrary code after installation in an `onComplete` hook, if a special `.netlify-function-template.js` file exists in the directory:
+
+```js
+// .netlify-function-template.js
+module.exports = {
+  addons: ['fauna'],
+  onComplete() {
+    console.log(`custom-template function created from template!`)
+  }
+}
+```
+
 #### Executing Netlify Functions
 
 After creating serverless functions, Netlify Dev can serve thes to you as part of your local build. This emulates the behaviour of Netlify Functions when deployed to Netlify.
