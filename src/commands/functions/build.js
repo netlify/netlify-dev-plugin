@@ -16,13 +16,12 @@ class FunctionsBuildCommand extends Command {
       process.exit(1)
     }
 
-    if (!src) {
-      this.log('You must specify a source folder')
-      process.exit(1)
-    }
-
-    if (!dst) {
-      this.log('You must specify a functions folder')
+    if (!src || !dst) {
+      if (!src) this.log('You must specify a source folder with a --src flag or a functionsSource field in your config')
+      if (!dst)
+        this.log(
+          'You must specify a destination functions folder with a --functions flag or a functions field in your config'
+        )
       process.exit(1)
     }
 
@@ -30,7 +29,7 @@ class FunctionsBuildCommand extends Command {
 
     this.log('Building functions')
     zipFunctions(src, dst, { skipGo: true })
-    this.log('Functions buildt to ', dst)
+    this.log('Functions built to ', dst)
   }
 }
 

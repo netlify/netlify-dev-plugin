@@ -101,6 +101,19 @@ async function pickTemplate() {
     'js'
     // 'ts', 'go'
   ].map(formatRegistryArrayForInquirer)
+  const specialCommands = [
+    new inquirer.Separator(`----[Special Commands]----`),
+    {
+      name: `*** Clone template from Github URL ***`,
+      value: 'url',
+      short: 'gh-url'
+    },
+    {
+      name: `*** Report issue with, or suggest a new template ***`,
+      value: 'report',
+      short: 'gh-report'
+    }
+  ]
   const { chosentemplate } = await inquirer.prompt({
     name: 'chosentemplate',
     message: 'Pick a template',
@@ -116,24 +129,15 @@ async function pickTemplate() {
           // ...tsreg,
           // new inquirer.Separator(`----[GO]----`),
           // ...goreg
-          new inquirer.Separator(`----[Special Commands]----`),
-          {
-            name: `*** Clone template from Github URL ***`,
-            value: 'url',
-            short: 'gh-url'
-          },
-          {
-            name: `*** Report issue with, or suggest a new template ***`,
-            value: 'report',
-            short: 'gh-report'
-          }
+          ...specialCommands
         ]
       } else {
         // only show filtered results sorted by score
         let ans = [
-          ...filterRegistry(jsreg, input)
+          ...filterRegistry(jsreg, input),
           // ...filterRegistry(tsreg, input),
           // ...filterRegistry(goreg, input)
+          ...specialCommands
         ].sort((a, b) => b.score - a.score)
         return ans
       }
