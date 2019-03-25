@@ -152,3 +152,22 @@ Each serverless function will be exposed on a URL corresponding to its path and 
 `./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
 
 `./functions/my-api/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/my-api/hello-world`
+
+
+### Using Add-ons
+
+Add-ons are a way for Netlify users to extend the functionality of their Jamstack site/app.
+
+[Add-on docs](https://www.netlify.com/docs/partner-add-ons/).
+
+To try out an add-on with Netlify dev, run the `netlify addons:create` command:
+
+```
+netlify addons:create fauna
+```
+
+The above command will install the FaunaDB add-on and provision a noSQL database for your site to leverage. The FaunaDB add-on injects environment variables into your site's build process and the serverless functions.
+
+Or install this [one click example](https://github.com/netlify/fauna-one-click).
+
+After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory.
