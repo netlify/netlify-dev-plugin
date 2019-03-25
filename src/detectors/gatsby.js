@@ -11,7 +11,7 @@ module.exports = function() {
     port: 8888,
     proxyPort: 8000,
     env: { ...process.env },
-    args: yarnExists ? ['run', 'dev'] : ['dev'],
+    args: yarnExists ? ['run', 'develop'] : ['develop'],
     urlRegexp: new RegExp(`(http://)([^:]+:)${8000}(/)?`, 'g'),
     dist: 'public'
   }
