@@ -4,7 +4,7 @@ Netlify CLI plugin for local dev experience.
 
 ## What is Netlify Dev?
 
-Netlify Dev brings the power of Netlify's Edge Logic layer, serverless functions and add-on ecosystem to your local laptop. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
+Netlify Dev brings the power of Netlify's Edge Logic layer, serverless functions and [add-on ecosystem](#using-add-ons) to your local laptop. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
 
 It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them.
 
