@@ -2,6 +2,12 @@
 
 Netlify CLI plugin for local dev experience.
 
+## What is Netlify Dev?
+
+Netlify Dev brings the power of Netlify's Edge Logic layer, serverless functions and [add-on ecosystem](#using-add-ons) to your local laptop. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
+
+It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them.
+
 ## Usage
 
 - `netlify dev` start a local dev server for the build tool you're using
@@ -146,3 +152,22 @@ Each serverless function will be exposed on a URL corresponding to its path and 
 `./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
 
 `./functions/my-api/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/my-api/hello-world`
+
+
+### Using Add-ons
+
+Add-ons are a way for Netlify users to extend the functionality of their Jamstack site/app.
+
+[Add-on docs](https://www.netlify.com/docs/partner-add-ons/).
+
+To try out an add-on with Netlify dev, run the `netlify addons:create` command:
+
+```
+netlify addons:create fauna
+```
+
+The above command will install the FaunaDB add-on and provision a noSQL database for your site to leverage. The FaunaDB add-on injects environment variables into your site's build process and the serverless functions.
+
+Or install this [one click example](https://github.com/netlify/fauna-one-click).
+
+After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory.
