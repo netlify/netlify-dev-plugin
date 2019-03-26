@@ -91,8 +91,9 @@ The number of project types which Netlify Dev can detect is growing, but if your
 
 #sample dev block in the toml
 [dev]
-  #TODO: what does this look like?
-
+  cmd = "yarn start" # Command to start your dev server
+  port = 3000 # Port that the dev server will be listening on
+  publish = "dist" # Folder with the static content for _redirect file
 ```
 
 ### Netlify Functions
