@@ -5,10 +5,10 @@ const path = require('path')
 const { fetchLatest } = require('gh-release-fetch')
 const { runProcess }  = require('./run-process')
 
-async function createTunnel(siteId, netlifyApiToken) {
-  await installTunnelClient()
+async function createTunnel(siteId, netlifyApiToken, log) {
+  await installTunnelClient(log)
 
-  console.log('Creating Live tunnel')
+  log('Creating Live tunnel')
   const url = `https://api.netlify.com/api/v1/live_sessions?site_id=${siteId}`
 
   const response = await fetch(url, {
@@ -31,23 +31,23 @@ async function createTunnel(siteId, netlifyApiToken) {
 
 async function connectTunnel(session, netlifyApiToken, localPort, log, error) {
   const execPath = path.join(os.homedir(), '.netlify', 'tunnel', 'bin', 'live-tunnel-client')
-
-  const proc = {
-    cmd: execPath,
-    args: ['connect', '-s', session.id, '-t', netlifyApiToken, '-l', localPort]
+  const args = ['connect', '-s', session.id, '-t', netlifyApiToken, '-l', localPort]
+  if (process.env.DEBUG) {
+    args.push('-v')
   }
 
-  runProcess(cmd, log, error)
+  log(execPath, args)
+  runProcess({ cmd: execPath, args: args }, log, error)
 }
 
-async function installTunnelClient() {
+async function installTunnelClient(log) {
   const binPath = path.join(os.homedir(), '.netlify', 'tunnel', 'bin')
   const execPath = path.join(binPath, 'live-tunnel-client')
   if (execExist(execPath)) {
     return
   }
 
-  console.log('Installing Live Tunnel Client')
+  log('Installing Live Tunnel Client')
 
   const win = isWindows()
   const platform = win ? 'windows' : process.platform

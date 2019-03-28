@@ -151,7 +151,7 @@ class DevCommand extends Command {
 
     let url;
     if (flags.live) {
-      const liveSession = await createTunnel(site.id, accessToken)
+      const liveSession = await createTunnel(site.id, accessToken, this.log)
       url = liveSession.session_url
       process.env.BASE_URL = url
 
