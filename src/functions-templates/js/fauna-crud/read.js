@@ -8,9 +8,9 @@ const client = new faunadb.Client({
 
 exports.handler = async (event, context) => {
   const id = event.id
-  console.log(`Function 'todo-read' invoked. Read id: ${id}`)
+  console.log(`Function 'read' invoked. Read id: ${id}`)
   return client
-    .query(q.Get(q.Ref(`classes/todos/${id}`)))
+    .query(q.Get(q.Ref(`classes/items/${id}`)))
     .then(response => {
       console.log('success', response)
       return {

@@ -10,13 +10,13 @@ const client = new faunadb.Client({
 exports.handler = async (event, context) => {
   /* parse the string body into a useable JS object */
   const data = JSON.parse(event.body)
-  console.log('Function `todo-create` invoked', data)
-  const todoItem = {
+  console.log('Function `create` invoked', data)
+  const item = {
     data: data
   }
   /* construct the fauna query */
   return client
-    .query(q.Create(q.Ref('classes/todos'), todoItem))
+    .query(q.Create(q.Ref('classes/items'), item))
     .then(response => {
       console.log('success', response)
       /* Success! return the response with statusCode 200 */

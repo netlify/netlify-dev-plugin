@@ -8,9 +8,9 @@ const client = new faunadb.Client({
 
 exports.handler = async (event, context) => {
   const id = event.id
-  console.log(`Function 'todo-delete' invoked. delete id: ${id}`)
+  console.log(`Function 'delete' invoked. delete id: ${id}`)
   return client
-    .query(q.Delete(q.Ref(`classes/todos/${id}`)))
+    .query(q.Delete(q.Ref(`classes/items/${id}`)))
     .then(response => {
       console.log('success', response)
       return {

@@ -7,19 +7,17 @@ const client = new faunadb.Client({
 })
 
 exports.handler = async (event, context) => {
-  console.log('Function `todo-read-all` invoked')
+  console.log('Function `read-all` invoked')
   return client
-    .query(q.Paginate(q.Match(q.Ref('indexes/all_todos'))))
+    .query(q.Paginate(q.Match(q.Ref('indexes/all_items'))))
     .then(response => {
-      const todoRefs = response.data
-      console.log('Todo refs', todoRefs)
-      console.log(`${todoRefs.length} todos found`)
-      // create new query out of todo refs. http://bit.ly/2LG3MLg
-      const getAllTodoDataQuery = todoRefs.map(ref => {
+      const itemRefs = response.data
+      // create new query out of item refs. http://bit.ly/2LG3MLg
+      const getAllItemsDataQuery = itemRefs.map(ref => {
         return q.Get(ref)
       })
       // then query the refs
-      return client.query(getAllTodoDataQuery).then(ret => {
+      return client.query(getAllItemsDataQuery).then(ret => {
         return {
           statusCode: 200,
           body: JSON.stringify(ret)
