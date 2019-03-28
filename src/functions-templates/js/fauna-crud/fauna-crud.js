@@ -24,5 +24,5 @@ exports.handler = async (event, context) => {
         return require('./delete').handler(event, context)
       }
   }
-  return { statusCode: 500, body: 'unrecognized action' }
+  return { statusCode: 500, body: 'unrecognized HTTP Method, must be one of GET/POST/PUT/DELETE' }
 }
