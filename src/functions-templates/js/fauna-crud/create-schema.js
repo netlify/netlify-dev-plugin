@@ -18,7 +18,7 @@ function createFaunaDB() {
   return client
     .query(q.Create(q.Ref('classes'), { name: 'items' }))
     .then(() => {
-      console.log('Created comments class')
+      console.log('Created items class')
       return client.query(
         q.Create(q.Ref('indexes'), {
           name: 'all_items',
