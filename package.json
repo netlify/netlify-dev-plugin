@@ -17,7 +17,7 @@
     "http-proxy": "^1.17.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.0.1",
-    "netlify": "ssh+git://git@github.com:netlify/js-client-private",
+    "netlify": "2.4.1",
     "netlify-rules-proxy": "git+ssh://git@github.com/netlify/netlify-rules-proxy.git",
     "node-fetch": "^2.3.0",
     "opn": "^5.5.0",
