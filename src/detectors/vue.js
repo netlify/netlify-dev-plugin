@@ -7,18 +7,26 @@ module.exports = function() {
 
   const packageSettings = JSON.parse(readFileSync('package.json', { encoding: 'utf8' }))
   const { dependencies, scripts } = packageSettings
-  if (!(dependencies && dependencies.vuepress)) {
+  if (!(dependencies && dependencies.vue)) {
+    console.log('dependendies', dependencies)
     return false
+  }
+
+  const npmCommand = scripts && ((scripts.serve && 'serve') || (scripts.start && 'start') || (scripts.run && 'run'))
+
+  if (!npmCommand) {
+    console.error("Couldn't determine the script to run. Use the -c flag.")
+    process.exit(1)
   }
 
   const yarnExists = existsSync('yarn.lock')
   return {
-    cmd: 'vuepress',
+    cmd: yarnExists ? 'yarn' : 'npm',
     port: 8888,
     proxyPort: 8080,
     env: { ...process.env },
-    args: ['dev'],
+    args: yarnExists || npmCommand != 'start' ? ['run', npmCommand] : [npmCommand],
     urlRegexp: new RegExp(`(http://)([^:]+:)${8080}(/)?`, 'g'),
-    dist: '.vuepress/dist'
+    dist: 'dist'
   }
 }

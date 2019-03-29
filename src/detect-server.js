@@ -4,7 +4,7 @@ const craDetector = require('./detectors/cra')
 const hugoDetector = require('./detectors/hugo')
 const eleventyDetector = require('./detectors/eleventy')
 const jekyllDetector = require('./detectors/jekyll')
-const vuepressDetector = require('./detectors/vuepress')
+const vueDetector = require('./detectors/vue')
 
 const detectors = [
   gatsbyDetector,
@@ -13,7 +13,7 @@ const detectors = [
   jekyllDetector,
   eleventyDetector,
   craDetector,
-  vuepressDetector
+  vueDetector
 ]
 
 module.exports.serverSettings = devConfig => {
