@@ -45,7 +45,7 @@ FunctionsCreateCommand.examples = [
   'netlify functions:create hello-world',
   'netlify functions:create --name hello-world'
 ]
-
+FunctionsCreateCommand.aliases = ['function:create']
 FunctionsCreateCommand.flags = {
   name: flags.string({ char: 'n', description: 'function name' }),
   functions: flags.string({ char: 'f', description: 'functions folder' }),

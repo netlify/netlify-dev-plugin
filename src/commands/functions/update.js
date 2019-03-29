@@ -10,7 +10,7 @@ FunctionsUpdateCommand.description = `update a function
 ...
 Extra documentation goes here
 `
-
+FunctionsUpdateCommand.aliases = ['function:update']
 FunctionsUpdateCommand.flags = {
   name: flags.string({ char: 'n', description: 'name to print' })
 }
