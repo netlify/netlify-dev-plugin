@@ -25,7 +25,7 @@ function addonUrl(addonUrls, req) {
 }
 
 async function startProxy(settings, addonUrls) {
-  const rulesProxy = require('netlify-rules-proxy')
+  const rulesProxy = require('@netlify/rules-proxy')
 
   await waitPort({ port: settings.proxyPort })
   if (settings.functionsPort) {
