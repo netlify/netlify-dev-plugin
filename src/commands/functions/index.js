@@ -33,7 +33,7 @@ class FunctionsCommand extends Command {
 }
 
 const name = chalk.greenBright('`functions`')
-
+FunctionsCommand.aliases = ['function']
 FunctionsCommand.description = `Manage netlify functions
 The ${name} command will help you manage the functions in this site
 `

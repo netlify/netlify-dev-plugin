@@ -35,7 +35,7 @@ class FunctionsBuildCommand extends Command {
 
 FunctionsBuildCommand.description = `build functions locally
 `
-
+FunctionsBuildCommand.aliases = ['function:build']
 FunctionsBuildCommand.flags = {
   functions: flags.string({
     char: 'f',
