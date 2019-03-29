@@ -2,7 +2,7 @@ const fetch = require('node-fetch')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
-const { fetchLatest } = require('gh-release-fetch')
+const { fetchLatest, updateAvailable } = require('gh-release-fetch')
 const { runProcess }  = require('./run-process')
 
 async function createTunnel(siteId, netlifyApiToken, log) {
@@ -43,7 +43,8 @@ async function connectTunnel(session, netlifyApiToken, localPort, log, error) {
 async function installTunnelClient(log) {
   const binPath = path.join(os.homedir(), '.netlify', 'tunnel', 'bin')
   const execPath = path.join(binPath, 'live-tunnel-client')
-  if (execExist(execPath)) {
+  const newVersion = fetchTunnelClient(execPath)
+  if (!newVersion) {
     return
   }
 
@@ -59,6 +60,24 @@ async function installTunnelClient(log) {
     extract: true
   }
   await fetchLatest(release)
+}
+
+async function fetchTunnelClient(execPath) {
+  if (!execExist(execPath)) {
+    return true
+  }
+
+  const { stdout } = await execa(execPath, ['version'])
+  if (!stdout) {
+    return false
+  }
+
+  const match = stdout.match(/^live-tunnel-client\/v([^\s]+)/)
+  if (!match) {
+    return false
+  }
+
+  return updateAvailable(match[1])
 }
 
 function execExist(binPath) {
