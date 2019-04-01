@@ -37,7 +37,7 @@ function getBrowserEnv() {
 
 function executeNodeScript(scriptPath, url) {
   const extraArgs = process.argv.slice(2)
-  const child = spawn('node', [scriptPath, ...extraArgs, url], { stdio: 'inherit' })
+  const child = execa('node', [scriptPath, ...extraArgs, url], { stdio: 'inherit' })
   child.on('close', code => {
     if (code !== 0) {
       console.log()
