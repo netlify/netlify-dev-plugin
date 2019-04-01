@@ -8,7 +8,6 @@ module.exports = function() {
   const packageSettings = JSON.parse(readFileSync('package.json', { encoding: 'utf8' }))
   const { dependencies, scripts } = packageSettings
   if (!(dependencies && dependencies.vue)) {
-    console.log('dependendies', dependencies)
     return false
   }
 
