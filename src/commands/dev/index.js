@@ -10,6 +10,8 @@ const openBrowser = require('../../utils/openBrowser')
 const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
 const { track } = require('@netlify/cli-utils/src/utils/telemetry')
+const chalk = require('chalk')
+const boxen = require('boxen')
 
 function isFunction(settings, req) {
   return settings.functionsPort && req.url.match(/^\/.netlify\/functions\/.+/)
@@ -150,11 +152,14 @@ class DevCommand extends Command {
     }
 
     const url = await startProxy(settings, addonUrls)
-    this.log(`Netlify dev server is now ready on ${url}`)
     // Todo hoist this telemetry `command` to CLI hook
     track('command', {
       command: 'dev'
     })
+
+    const banner = chalk.bold(`Netlify dev server is now ready on ${url}`)
+    this.log(boxen(banner, { padding: 1, margin: 1, align: 'center', borderColor: '#00c7b7' }))
+
     openBrowser(url)
   }
 }

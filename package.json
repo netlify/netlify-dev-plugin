@@ -11,6 +11,7 @@
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "ascii-table": "0.0.9",
+    "boxen": "^3.0.0",
     "copy-template-dir": "^1.4.0",
     "execa": "^1.0.0",
     "fs-extra": "^7.0.1",
