@@ -1,8 +1,30 @@
-const { existsSync } = require('fs')
+const { existsSync, readFileSync } = require('fs')
 
 module.exports = function() {
-  if (!existsSync('static.config.js')) {
+  if (!existsSync('static.config.js') || !existsSync('package.json')) {
     return false
+  }
+
+  const packageSettings = JSON.parse(readFileSync('package.json', { encoding: 'utf8' }))
+  const { dependencies, scripts } = packageSettings
+  if (!(dependencies && dependencies['react-static'])) {
+    return false
+  }
+
+  const npmCommand = scripts && ((scripts.start && 'start') || (scripts.dev && 'dev'))
+  if (!npmCommand) {
+    // search all the scripts for something that starts with 'gatsby develop'
+    Object.entries(scripts).forEach(([k, v]) => {
+      if (v.startsWith('react-static start')) {
+        npmCommand = k
+      }
+    })
+    if (!npmCommand) {
+      console.error("Couldn't determine the package.json script to run for this React-Static project. Use the -c flag.")
+      process.exit(1)
+    } else {
+      console.log('using npm script starting with react-static start: ', k)
+    }
   }
 
   const yarnExists = existsSync('yarn.lock')
@@ -11,7 +33,7 @@ module.exports = function() {
     port: 8888,
     proxyPort: 3000,
     env: { ...process.env },
-    args: yarnExists ? ['run', 'start'] : ['start'],
+    args: yarnExists || npmCommand != 'start' ? ['run', npmCommand] : [npmCommand],
     urlRegexp: new RegExp(`(http://)([^:]+:)${3000}(/)?`, 'g'),
     dist: 'dist'
   }
