@@ -4,6 +4,7 @@ const craDetector = require('./detectors/cra')
 const hugoDetector = require('./detectors/hugo')
 const eleventyDetector = require('./detectors/eleventy')
 const jekyllDetector = require('./detectors/jekyll')
+const vueDetector = require('./detectors/vue')
 
 const detectors = [
   gatsbyDetector,
@@ -12,6 +13,7 @@ const detectors = [
   jekyllDetector,
   eleventyDetector,
   craDetector,
+  vueDetector
 ]
 
 module.exports.serverSettings = devConfig => {
@@ -31,9 +33,7 @@ module.exports.serverSettings = devConfig => {
     }
     if (devConfig.port) {
       settings.proxyPort = devConfig.port
-      settings.urlRegexp =
-        devConfig.urlRegexp ||
-        new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
+      settings.urlRegexp = devConfig.urlRegexp || new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
     }
     settings.dist = devConfig.publish || settings.dist
   }
