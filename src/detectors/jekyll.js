@@ -9,7 +9,7 @@ module.exports = function() {
     port: 8888,
     proxyPort: 4000,
     env: { ...process.env },
-    cmd: 'bundle',
+    command: 'bundle',
     args: ['exec', 'jekyll', 'serve', '-w', '-l'],
     urlRegexp: new RegExp(`(http://)([^:]+:)${4000}(/)?`, 'g'),
     dist: '_site'

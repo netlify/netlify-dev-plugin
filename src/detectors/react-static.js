@@ -7,7 +7,7 @@ module.exports = function() {
 
   const yarnExists = existsSync('yarn.lock')
   return {
-    cmd: yarnExists ? 'yarn' : 'npm',
+    command: yarnExists ? 'yarn' : 'npm',
     port: 8888,
     proxyPort: 3000,
     env: { ...process.env },

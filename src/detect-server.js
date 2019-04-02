@@ -1,20 +1,8 @@
-const gatsbyDetector = require('./detectors/gatsby')
-const reactStaticDetector = require('./detectors/react-static')
-const craDetector = require('./detectors/cra')
-const hugoDetector = require('./detectors/hugo')
-const eleventyDetector = require('./detectors/eleventy')
-const jekyllDetector = require('./detectors/jekyll')
-const vueDetector = require('./detectors/vue')
-
-const detectors = [
-  gatsbyDetector,
-  reactStaticDetector,
-  hugoDetector,
-  jekyllDetector,
-  eleventyDetector,
-  craDetector,
-  vueDetector
-]
+const path = require('path')
+const detectors = require('fs')
+  .readdirSync(path.join(__dirname, 'detectors'))
+  .filter(x => x.endsWith('.js')) // only accept .js detector files
+  .map(det => require(path.join(__dirname, `detectors/${det}`)))
 
 module.exports.serverSettings = devConfig => {
   let settings = null
@@ -27,16 +15,28 @@ module.exports.serverSettings = devConfig => {
 
   if (devConfig) {
     settings = settings || {}
-    if (devConfig.cmd) {
-      settings.cmd = devConfig.cmd.split(/\s/)[0]
-      settings.args = devConfig.cmd.split(/\s/).slice(1)
+    if (devConfig.command) {
+      settings.command = devConfig.command.split(/\s/)[0]
+      assignLoudly(devConfig, 'command', settings, 'command')
+      settings.args = devConfig.command.split(/\s/).slice(1)
+      assignLoudly(devConfig, 'args', settings, 'args')
     }
     if (devConfig.port) {
-      settings.proxyPort = devConfig.port
+      assignLoudly(devConfig, 'port', settings, 'proxyPort')
       settings.urlRegexp = devConfig.urlRegexp || new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
     }
-    settings.dist = devConfig.publish || settings.dist
+    assignLoudly(devConfig, 'publish', settings, 'dist')
   }
 
   return settings
+}
+
+// does assignAndTellUserIfNetlifyTomlDevBlockOverride
+// mutates the settings field
+function assignLoudly(devConfig, field, settings, settingsField) {
+  if (settings[settingsField] !== devConfig[field]) {
+    // silent if command is exactly same
+    console.log(`Using ${field} from netlify.toml [dev] block: `, devConfig[field])
+    settings[settingsField] === devConfig[field]
+  }
 }

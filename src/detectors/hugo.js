@@ -9,7 +9,7 @@ module.exports = function() {
     port: 8888,
     proxyPort: 1313,
     env: { ...process.env },
-    cmd: 'hugo',
+    command: 'hugo',
     args: ['server', '-w'],
     urlRegexp: new RegExp(`(http://)([^:]+:)${1313}(/)?`, 'g'),
     dist: 'public'
