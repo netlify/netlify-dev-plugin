@@ -6,7 +6,6 @@ const waitPort = require('wait-port')
 const getPort = require('get-port')
 const { serveFunctions } = require('@netlify/zip-it-and-ship-it')
 const { serverSettings } = require('../../detect-server')
-const openBrowser = require('../../utils/openBrowser')
 const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
 const { track } = require('@netlify/cli-utils/src/utils/telemetry')
@@ -159,8 +158,6 @@ class DevCommand extends Command {
 
     const banner = chalk.bold(`Netlify dev server is now ready on ${url}`)
     this.log(boxen(banner, { padding: 1, margin: 1, align: 'center', borderColor: '#00c7b7' }))
-
-    openBrowser(url)
   }
 }
 
