@@ -27,7 +27,6 @@ module.exports = function() {
     }
   }
 
-  console.log({ npmCommand, scripts })
   const yarnExists = existsSync('yarn.lock')
   return {
     command: yarnExists ? 'yarn' : 'npm',
