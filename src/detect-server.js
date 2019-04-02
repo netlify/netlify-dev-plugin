@@ -17,23 +17,21 @@ module.exports.serverSettings = devConfig => {
     settings = settings || {}
     if (devConfig.command) {
       settings.command = devConfig.command.split(/\s/)[0]
-      assignLoudly(devConfig, 'command', settings, 'command')
+      assignLoudly(settings, 'command', devConfig, 'command')
       settings.args = devConfig.command.split(/\s/).slice(1)
-      assignLoudly(devConfig, 'args', settings, 'args')
     }
     if (devConfig.port) {
-      assignLoudly(devConfig, 'port', settings, 'proxyPort')
+      assignLoudly(settings, 'proxyPort', devConfig, 'port')
       settings.urlRegexp = devConfig.urlRegexp || new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
     }
-    assignLoudly(devConfig, 'publish', settings, 'dist')
+    assignLoudly(settings, 'dist', devConfig, 'publish')
   }
 
   return settings
 }
 
-// does assignAndTellUserIfNetlifyTomlDevBlockOverride
-// mutates the settings field
-function assignLoudly(devConfig, field, settings, settingsField) {
+// mutates the settings field from the devConfig field, but tell the user if it does
+function assignLoudly(settings, settingsField, devConfig, field) {
   if (settings[settingsField] !== devConfig[field]) {
     // silent if command is exactly same
     console.log(`Using ${field} from netlify.toml [dev] block: `, devConfig[field])

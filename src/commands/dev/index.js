@@ -96,7 +96,7 @@ function startDevServer(settings, log, error) {
     return
   }
 
-  const ps = execa(settings.cmd, settings.args, { env: settings.env, stdio: 'inherit', shell: true })
+  const ps = execa(settings.command, settings.args, { env: settings.env, stdio: 'inherit', shell: true })
   ps.on('close', code => process.exit(code))
   ps.on('SIGINT', process.exit)
   ps.on('SIGTERM', process.exit)
@@ -133,7 +133,7 @@ class DevCommand extends Command {
     }
     process.env.NETLIFY_DEV = 'true'
     let settings = serverSettings(config.dev)
-    if (!(settings && settings.cmd)) {
+    if (!(settings && settings.command)) {
       this.log('No dev server detected, using simple static server')
       const dist = (config.dev && config.dev.publish) || (config.build && config.build.publish)
       settings = {
