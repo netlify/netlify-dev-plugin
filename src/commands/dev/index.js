@@ -152,9 +152,11 @@ class DevCommand extends Command {
     }
 
     const url = await startProxy(settings, addonUrls)
+
     // Todo hoist this telemetry `command` to CLI hook
     track('command', {
-      command: 'dev'
+      command: 'dev',
+      projectType: settings.type || 'custom'
     })
 
     const banner = chalk.bold(`Netlify dev server is now ready on ${url}`)
