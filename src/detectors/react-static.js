@@ -11,9 +11,9 @@ module.exports = function() {
     return false
   }
 
-  const npmCommand = scripts && ((scripts.start && 'start') || (scripts.dev && 'dev'))
+  const npmCommand = scripts && ((scripts.start && 'start') || (scripts.develop && 'develop') || (scripts.dev && 'dev'))
   if (!npmCommand) {
-    // search all the scripts for something that starts with 'gatsby develop'
+    // search all the scripts for something that starts with 'react-static start'
     Object.entries(scripts).forEach(([k, v]) => {
       if (v.startsWith('react-static start')) {
         npmCommand = k

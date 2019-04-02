@@ -11,7 +11,7 @@ module.exports = function() {
     return false
   }
 
-  const npmCommand = scripts && ((scripts.start && 'develop') || (scripts.serve && 'dev') || (scripts.run && 'start'))
+  const npmCommand = scripts && ((scripts.develop && 'develop') || (scripts.dev && 'dev'))
   if (!npmCommand) {
     // search all the scripts for something that starts with 'gatsby develop'
     Object.entries(scripts).forEach(([k, v]) => {
@@ -27,6 +27,7 @@ module.exports = function() {
     }
   }
 
+  console.log({ npmCommand, scripts })
   const yarnExists = existsSync('yarn.lock')
   return {
     command: yarnExists ? 'yarn' : 'npm',
