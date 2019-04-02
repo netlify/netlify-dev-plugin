@@ -6,7 +6,7 @@
 
 ```ts
 {
-    cmd: String, // e.g. yarn, npm
+    command: String, // e.g. yarn, npm
     port: Number, // e.g. 8888
     proxyPort: Number, // e.g. 3000
     env: Object, // env variables, see examples
