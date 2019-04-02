@@ -146,7 +146,7 @@ class DevCommand extends Command {
     startDevServer(settings, this.log, this.error)
 
     if (functionsDir) {
-      const fnSettings = await serveFunctions({ functionsDir })
+      const fnSettings = await serveFunctions({ ...settings, functionsDir })
       settings.functionsPort = fnSettings.port
     }
 
