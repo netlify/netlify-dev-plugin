@@ -29,6 +29,7 @@ module.exports = function() {
 
   const yarnExists = existsSync('yarn.lock')
   return {
+    type: 'react-static',
     command: yarnExists ? 'yarn' : 'npm',
     port: 8888,
     proxyPort: 3000,

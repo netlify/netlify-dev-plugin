@@ -6,6 +6,7 @@
 
 ```ts
 {
+    type: String, // e.g. gatsby, vue-cli
     command: String, // e.g. yarn, npm
     port: Number, // e.g. 8888
     proxyPort: Number, // e.g. 3000

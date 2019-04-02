@@ -6,6 +6,7 @@ module.exports = function() {
   }
 
   return {
+    type: 'eleventy',
     port: 8888,
     proxyPort: 8080,
     env: { ...process.env },

@@ -6,6 +6,7 @@ module.exports = function() {
   }
 
   return {
+    type: 'hugo',
     port: 8888,
     proxyPort: 1313,
     env: { ...process.env },
