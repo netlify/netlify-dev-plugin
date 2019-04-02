@@ -9,6 +9,7 @@ const { serverSettings } = require('../../detect-server')
 const openBrowser = require('../../utils/openBrowser')
 const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
+const { track } = require('@netlify/cli-utils/src/utils/telemetry')
 
 function cleanExit() {
   process.exit()
@@ -158,6 +159,7 @@ class DevCommand extends Command {
       }
     }
     startDevServer(settings, this.log, this.error)
+
     if (functionsDir) {
       const fnSettings = await serveFunctions({ functionsDir })
       settings.functionsPort = fnSettings.port
@@ -165,6 +167,10 @@ class DevCommand extends Command {
 
     const url = await startProxy(settings, addonUrls)
     this.log(`Netlify dev server is now ready on ${url}`)
+    // Todo hoist this telemetry `command` to CLI hook
+    track('command', {
+      command: 'dev'
+    })
     openBrowser(url)
   }
 }
