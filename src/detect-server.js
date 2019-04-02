@@ -16,25 +16,28 @@ module.exports.serverSettings = devConfig => {
   if (devConfig) {
     settings = settings || {}
     if (devConfig.command) {
-      settings.command = devConfig.command.split(/\s/)[0]
-      assignLoudly(settings, 'command', devConfig, 'command')
-      settings.args = devConfig.command.split(/\s/).slice(1)
+      assignLoudly(settings, 'command', devConfig.command.split(/\s/)[0])
+      assignLoudly(settings, 'args', devConfig.command.split(/\s/).slice(1))
     }
     if (devConfig.port) {
-      assignLoudly(settings, 'proxyPort', devConfig, 'port')
-      settings.urlRegexp = devConfig.urlRegexp || new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
+      assignLoudly(settings, 'proxyPort', devConfig['port'])
+      assignLoudly(
+        settings,
+        'urlRegexp',
+        devConfig.urlRegexp || new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, 'g')
+      )
     }
-    assignLoudly(settings, 'dist', devConfig, 'publish')
+    assignLoudly(settings, 'dist', devConfig['publish'])
   }
 
   return settings
 }
 
-// mutates the settings field from the devConfig field, but tell the user if it does
-function assignLoudly(settings, settingsField, devConfig, field) {
-  if (settings[settingsField] !== devConfig[field]) {
+// mutates the settings field, but tell the user if it does
+function assignLoudly(settings, settingsField, newValue) {
+  if (settings[settingsField] !== newValue) {
     // silent if command is exactly same
-    console.log(`Using ${field} from netlify.toml [dev] block: `, devConfig[field])
-    settings[settingsField] === devConfig[field]
+    console.log(`Overriding ${settingsField} with setting derived from netlify.toml [dev] block: `, newValue)
+    settings[settingsField] === newValue
   }
 }
