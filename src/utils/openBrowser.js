@@ -4,7 +4,7 @@
 
 var chalk = require('chalk')
 var execSync = require('child_process').execSync
-var spawn = require('cross-spawn')
+var execa = require('execa')
 var opn = require('opn')
 
 // https://github.com/sindresorhus/opn#app
@@ -37,9 +37,7 @@ function getBrowserEnv() {
 
 function executeNodeScript(scriptPath, url) {
   const extraArgs = process.argv.slice(2)
-  const child = spawn('node', [scriptPath, ...extraArgs, url], {
-    stdio: 'inherit'
-  })
+  const child = execa('node', [scriptPath, ...extraArgs, url], { stdio: 'inherit' })
   child.on('close', code => {
     if (code !== 0) {
       console.log()

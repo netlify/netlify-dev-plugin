@@ -1,5 +1,5 @@
 const { flags } = require('@oclif/command')
-const { spawn } = require('child_process')
+const execa = require('execa')
 const http = require('http')
 const httpProxy = require('http-proxy')
 const waitPort = require('wait-port')
@@ -10,10 +10,8 @@ const openBrowser = require('../../utils/openBrowser')
 const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
 const { track } = require('@netlify/cli-utils/src/utils/telemetry')
-
-function cleanExit() {
-  process.exit()
-}
+const chalk = require('chalk')
+const boxen = require('boxen')
 
 function isFunction(settings, req) {
   return settings.functionsPort && req.url.match(/^\/.netlify\/functions\/.+/)
@@ -99,22 +97,10 @@ function startDevServer(settings, log, error) {
     return
   }
 
-  const ps = spawn(settings.cmd, settings.args, { env: settings.env })
-
-  ps.stdout.on('data', data => {
-    log(`${data}`.replace(settings.urlRegexp, `$1$2${settings.port}$3`))
-  })
-
-  ps.stderr.on('data', data => {
-    log(`Error reading data: ${data}`)
-  })
-
-  ps.on('close', code => {
-    process.exit(code)
-  })
-
-  ps.on('SIGINT', cleanExit)
-  ps.on('SIGTERM', cleanExit)
+  const ps = execa(settings.cmd, settings.args, { env: settings.env, stdio: 'inherit', shell: true })
+  ps.on('close', code => process.exit(code))
+  ps.on('SIGINT', process.exit)
+  ps.on('SIGTERM', process.exit)
 }
 
 class DevCommand extends Command {
@@ -166,11 +152,14 @@ class DevCommand extends Command {
     }
 
     const url = await startProxy(settings, addonUrls)
-    this.log(`Netlify dev server is now ready on ${url}`)
     // Todo hoist this telemetry `command` to CLI hook
     track('command', {
       command: 'dev'
     })
+
+    const banner = chalk.bold(`Netlify dev server is now ready on ${url}`)
+    this.log(boxen(banner, { padding: 1, margin: 1, align: 'center', borderColor: '#00c7b7' }))
+
     openBrowser(url)
   }
 }

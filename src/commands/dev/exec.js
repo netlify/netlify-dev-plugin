@@ -1,4 +1,4 @@
-const { spawn } = require('child_process')
+const execa = require('execa')
 const Command = require('@netlify/cli-utils')
 const { getAddons } = require('netlify/src/addons')
 
@@ -15,7 +15,7 @@ class ExecCommand extends Command {
         }
       })
     }
-    spawn(this.argv[0], this.argv.slice(1), { env: process.env, stdio: 'inherit' })
+    execa(this.argv[0], this.argv.slice(1), { env: process.env, stdio: 'inherit' })
   }
 }
 
