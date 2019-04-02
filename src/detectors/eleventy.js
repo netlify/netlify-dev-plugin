@@ -9,7 +9,7 @@ module.exports = function() {
     port: 8888,
     proxyPort: 8080,
     env: { ...process.env },
-    cmd: 'npx',
+    command: 'npx',
     args: ['eleventy', '--serve', '--watch'],
     urlRegexp: new RegExp(`(http://)([^:]+:)${8080}(/)?`, 'g'),
     dist: '_site'
