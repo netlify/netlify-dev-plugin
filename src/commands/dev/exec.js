@@ -1,12 +1,12 @@
 const execa = require('execa')
 const Command = require('@netlify/cli-utils')
-const { addEnvVarsFromAddons } = require('../utils/dev-exec')
 
 class ExecCommand extends Command {
   async run() {
     const { site } = this.netlify
     if (site.id) {
       const accessToken = await this.authenticate()
+      const { addEnvVarsFromAddons } = require('../../utils/dev-exec')
       await addEnvVarsFromAddons(site, accessToken)
     }
     execa(this.argv[0], this.argv.slice(1), { env: process.env, stdio: 'inherit' })

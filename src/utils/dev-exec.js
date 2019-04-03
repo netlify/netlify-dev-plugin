@@ -14,11 +14,15 @@ const { getAddons } = require('netlify/src/addons')
  * }
  * ```
  */
-export async function addEnvVarsFromAddons(site, accessToken) {
+async function addEnvVarsFromAddons(site, accessToken) {
   const addons = await getAddons(site.id, accessToken)
   addons.forEach(addon => {
     for (const key in addon.env) {
       process.env[key] = addon.env[key]
     }
   })
+}
+
+module.exports = {
+  addEnvVarsFromAddons
 }

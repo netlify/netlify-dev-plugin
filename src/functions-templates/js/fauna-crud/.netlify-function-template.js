@@ -1,12 +1,13 @@
+const execa = require('execa')
 module.exports = {
   name: 'fauna-crud',
   description: 'CRUD function using Fauna DB',
   addons: [
     {
       addonName: 'fauna',
-      addonDidInstall() {
-        console.log('process.env', process.env)
-        require('./create-schema.js')
+      addonDidInstall(fnPath) {
+        require('fs').chmodSync(fnPath + '/create-schema.js', 0o777)
+        execa.sync(fnPath + '/create-schema.js', undefined, { env: process.env, stdio: 'inherit' })
       }
     }
   ],

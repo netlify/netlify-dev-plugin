@@ -230,15 +230,8 @@ async function downloadFromURL(flags, args, functionsDir) {
   const fnTemplateFile = path.join(fnFolder, '.netlify-function-template.js')
   if (fs.existsSync(fnTemplateFile)) {
     const { onComplete, addons = [] } = require(fnTemplateFile)
-    await installAddons.call(this, addons)
-    // if (templateDidInstallAddons) {
-    //   const { addEnvVarsFromAddons } = require('../../utils/dev-exec')
-    //   const { site } = this.netlify
-    //   if (site.id) {
-    //     const accessToken = await this.authenticate()
-    //     await addEnvVarsFromAddons(site, accessToken)
-    //   }
-    // }
+
+    await installAddons.call(this, addons, path.resolve(fnFolder))
     if (onComplete) onComplete()
     fs.unlinkSync(fnTemplateFile) // delete
   }
@@ -281,7 +274,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
 
     const name = await getNameFromArgs(args, flags, templateName)
     this.log(`Creating function ${name}`)
-    const functionPath = ensureFunctionPathIsOk(functionsDir, flags, name)
+    const functionPath = ensureFunctionPathIsOk.call(this, functionsDir, flags, name)
 
     // // SWYX: note to future devs - useful for debugging source to output issues
     // this.log('from ', pathToTemplate, ' to ', functionPath)
@@ -306,14 +299,13 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
           this.log(`installing dependencies for ${name} complete `)
         })
       }
-      installAddons.call(this, addons)
+      installAddons.call(this, addons, path.resolve(functionPath))
       if (onComplete) onComplete() // do whatever the template wants to do after it is scaffolded
     })
   }
 }
 
-const noop = () => {}
-async function installAddons(addons = []) {
+async function installAddons(addons = [], fnPath) {
   if (addons.length) {
     const { api, site } = this.netlify
     const siteId = site.id
@@ -323,10 +315,16 @@ async function installAddons(addons = []) {
     }
     return api.getSite({ siteId }).then(async siteData => {
       const accessToken = await this.authenticate()
-      const arr = addons.map(({ addonName, addonDidInstall = noop }) => {
+      const arr = addons.map(({ addonName, addonDidInstall }) => {
         this.log('installing addon: ' + addonName)
         // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
-        return createSiteAddon(accessToken, addonName, siteId, siteData, this.log).then(addonDidInstall)
+        return createSiteAddon(accessToken, addonName, siteId, siteData, this.log).then(async addonCreateMsg => {
+          if (addonCreateMsg && addonDidInstall) {
+            const { addEnvVarsFromAddons } = require('../../utils/dev-exec')
+            await addEnvVarsFromAddons(site, accessToken)
+            addonDidInstall(fnPath)
+          }
+        })
       })
       return Promise.all(arr)
     })
