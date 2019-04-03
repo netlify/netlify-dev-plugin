@@ -1,26 +1,20 @@
 const execa = require('execa')
 const Command = require('@netlify/cli-utils')
-const { getAddons } = require('netlify/src/addons')
+const { addEnvVarsFromAddons } = require('../utils/dev-exec')
 
 class ExecCommand extends Command {
   async run() {
     const { site } = this.netlify
-
     if (site.id) {
       const accessToken = await this.authenticate()
-      const addons = await getAddons(site.id, accessToken)
-      addons.forEach(addon => {
-        for (const key in addon.env) {
-          process.env[key] = addon.env[key]
-        }
-      })
+      await addEnvVarsFromAddons(site, accessToken)
     }
     execa(this.argv[0], this.argv.slice(1), { env: process.env, stdio: 'inherit' })
   }
 }
 
 ExecCommand.description = `Exec command
-Runs a command within the netlify dev environment
+Runs a command within the netlify dev environment, e.g. with env variables from any installed addons
 `
 
 ExecCommand.examples = ['$ netlify exec npm run bootstrap']

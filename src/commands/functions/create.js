@@ -230,7 +230,15 @@ async function downloadFromURL(flags, args, functionsDir) {
   const fnTemplateFile = path.join(fnFolder, '.netlify-function-template.js')
   if (fs.existsSync(fnTemplateFile)) {
     const { onComplete, addons = [] } = require(fnTemplateFile)
-    installAddons.call(this, addons)
+    await installAddons.call(this, addons)
+    // if (templateDidInstallAddons) {
+    //   const { addEnvVarsFromAddons } = require('../../utils/dev-exec')
+    //   const { site } = this.netlify
+    //   if (site.id) {
+    //     const accessToken = await this.authenticate()
+    //     await addEnvVarsFromAddons(site, accessToken)
+    //   }
+    // }
     if (onComplete) onComplete()
     fs.unlinkSync(fnTemplateFile) // delete
   }
@@ -304,6 +312,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
   }
 }
 
+const noop = () => {}
 async function installAddons(addons = []) {
   if (addons.length) {
     const { api, site } = this.netlify
@@ -314,10 +323,10 @@ async function installAddons(addons = []) {
     }
     return api.getSite({ siteId }).then(async siteData => {
       const accessToken = await this.authenticate()
-      const arr = addons.map(addonName => {
+      const arr = addons.map(({ addonName, addonDidInstall = noop }) => {
         this.log('installing addon: ' + addonName)
         // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
-        return createSiteAddon(accessToken, addonName, siteId, siteData, this.log)
+        return createSiteAddon(accessToken, addonName, siteId, siteData, this.log).then(addonDidInstall)
       })
       return Promise.all(arr)
     })

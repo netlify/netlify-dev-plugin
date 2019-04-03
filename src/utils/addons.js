@@ -5,7 +5,7 @@ const inquirer = require('inquirer')
 const fetch = require('node-fetch')
 
 /** main section - shamelessly adapted from CLI. we can extract and dedupe later. */
-/** i know, i know. i felt bad too. but we can DRY things up later. */
+/** but we can DRY things up later. */
 module.exports.createSiteAddon = async function createSiteAddon(accessToken, addonName, siteId, siteData, log) {
   const addons = await getAddons(siteId, accessToken)
   if (typeof addons === 'object' && addons.error) {
@@ -14,8 +14,6 @@ module.exports.createSiteAddon = async function createSiteAddon(accessToken, add
   }
   // Filter down addons to current args.name
   const currentAddon = addons.find(addon => addon.service_path === `/.netlify/${addonName}`)
-  // // GET flags from `raw` data
-  // const rawFlags = parseRawFlags(raw)
   const rawFlags = {}
 
   if (currentAddon && currentAddon.id) {
@@ -109,6 +107,7 @@ module.exports.createSiteAddon = async function createSiteAddon(accessToken, add
     accessToken,
     siteData
   })
+  return addonName // we dont really use this right now but may be helpful to know that an addon installation was successful
 }
 
 async function actuallyCreateSiteAddon({ addonName, settings, accessToken, siteData }) {
