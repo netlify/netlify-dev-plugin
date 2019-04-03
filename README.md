@@ -46,7 +46,8 @@ OPTIONS
   -d, --devport=devport      port of the dev server started by command
   -f, --functions=functions  Specify a functions folder to serve
   -o, --offline              disables any features that require network access
-  -p, --port=port            port of netlify dev
+  -p, --port=port            Specify port of netlify dev
+  -l, --live                 Start a public live session
 
 DESCRIPTION
   The dev command will run a local dev server with Netlify's proxy and redirect rules
@@ -112,13 +113,12 @@ More detailed usage examples:
 
 ```bash
 # Create a new function from one of the
-# available templates offered when prompted
+# available templates offered when prompted (see below)
 $ netlify functions:create
 
-# Create a new function with a given name
-$ netlify functions:create hello-world
-# or
-$ netlify functions:create --name hello-world
+# alternatives
+$ netlify functions:create hello-world # Create a new function with a given name
+$ netlify functions:create --name hello-world # same
 
 # Create a new function by cloning a template from a remote url
 # organised with dependencies installed into a subdirectory
@@ -141,7 +141,7 @@ module.exports = {
 
 #### Executing Netlify Functions
 
-After creating serverless functions, Netlify Dev can serve thes to you as part of your local build. This emulates the behaviour of Netlify Functions when deployed to Netlify.
+After creating serverless functions, Netlify Dev can serve them to you as part of your local build. This emulates the behaviour of Netlify Functions when deployed to Netlify.
 
 ```bash
 # Build, serve and hot-reload changes
@@ -153,7 +153,6 @@ Each serverless function will be exposed on a URL corresponding to its path and 
 `./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
 
 `./functions/my-api/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/my-api/hello-world`
-
 
 ### Using Add-ons
 
@@ -172,3 +171,13 @@ The above command will install the FaunaDB add-on and provision a noSQL database
 Or install this [one click example](https://github.com/netlify/fauna-one-click).
 
 After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory.
+
+## Live Share
+
+To share your ongoing dev session with a coworker, just run Netlify Dev with a `--live` flag:
+
+```
+netlify dev --live
+```
+
+You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
