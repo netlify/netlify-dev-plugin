@@ -11,6 +11,7 @@ const { getAddons } = require('netlify/src/addons')
 const { track } = require('@netlify/cli-utils/src/utils/telemetry')
 const chalk = require('chalk')
 const boxen = require('boxen')
+const { createTunnel, connectTunnel } = require('../../live-tunnel')
 
 function isFunction(settings, req) {
   return settings.functionsPort && req.url.match(/^\/.netlify\/functions\/.+/)
@@ -110,8 +111,10 @@ class DevCommand extends Command {
     const functionsDir =
       flags.functions || (config.dev && config.dev.functions) || (config.build && config.build.functions)
     const addonUrls = {}
+
+    let accessToken = api.accessToken
     if (site.id && !flags.offline) {
-      const accessToken = await this.authenticate()
+      accessToken = await this.authenticate()
       const addons = await getAddons(site.id, accessToken)
       if (Array.isArray(addons)) {
         addons.forEach(addon => {
@@ -133,6 +136,7 @@ class DevCommand extends Command {
       }
     }
     process.env.NETLIFY_DEV = 'true'
+
     let settings = serverSettings(config.dev)
     if (!(settings && settings.command)) {
       this.log('No dev server detected, using simple static server')
@@ -144,6 +148,16 @@ class DevCommand extends Command {
         dist
       }
     }
+
+    let url;
+    if (flags.live) {
+      const liveSession = await createTunnel(site.id, accessToken, this.log)
+      url = liveSession.session_url
+      process.env.BASE_URL = url
+
+      await connectTunnel(liveSession, accessToken, settings.port, this.log, this.error)
+    }
+
     startDevServer(settings, this.log, this.error)
 
     if (functionsDir) {
@@ -151,8 +165,10 @@ class DevCommand extends Command {
       settings.functionsPort = fnSettings.port
     }
 
-    const url = await startProxy(settings, addonUrls)
-
+    const proxyUrl = await startProxy(settings, addonUrls)
+    if (!url) {
+      url = proxyUrl
+    }
     // Todo hoist this telemetry `command` to CLI hook
     track('command', {
       command: 'dev',
@@ -180,14 +196,9 @@ DevCommand.flags = {
   }),
   port: flags.integer({ char: 'p', description: 'port of netlify dev' }),
   dir: flags.integer({ char: 'd', description: 'dir with static files' }),
-  functions: flags.string({
-    char: 'f',
-    description: 'Specify a functions folder to serve'
-  }),
-  offline: flags.boolean({
-    char: 'o',
-    description: 'disables any features that require network access'
-  })
+  functions: flags.string({ char: 'f', description: 'Specify a functions folder to serve' }),
+  offline: flags.boolean({ char: 'o', description: 'disables any features that require network access' }),
+  live: flags.boolean({char: 'l', description: 'Start a public live session'})
 }
 
 module.exports = DevCommand
