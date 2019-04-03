@@ -94,12 +94,13 @@ function startDevServer(settings, log, error) {
       log('Server listening to', settings.proxyPort)
     })
     return
+  } else {
+    log(`Starting netlify dev with ${settings.type}`)
+    const ps = execa(settings.command, settings.args, { env: settings.env, stdio: 'inherit', shell: true })
+    ps.on('close', code => process.exit(code))
+    ps.on('SIGINT', process.exit)
+    ps.on('SIGTERM', process.exit)
   }
-
-  const ps = execa(settings.command, settings.args, { env: settings.env, stdio: 'inherit', shell: true })
-  ps.on('close', code => process.exit(code))
-  ps.on('SIGINT', process.exit)
-  ps.on('SIGTERM', process.exit)
 }
 
 class DevCommand extends Command {
@@ -151,9 +152,11 @@ class DevCommand extends Command {
     }
 
     const url = await startProxy(settings, addonUrls)
+
     // Todo hoist this telemetry `command` to CLI hook
     track('command', {
-      command: 'dev'
+      command: 'dev',
+      projectType: settings.type || 'custom'
     })
 
     const banner = chalk.bold(`Netlify dev server is now ready on ${url}`)
