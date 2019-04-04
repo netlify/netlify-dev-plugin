@@ -8,7 +8,13 @@ const { fetchLatest, updateAvailable } = require("gh-release-fetch");
 async function createTunnel(siteId, netlifyApiToken, log) {
   await installTunnelClient(log);
 
-  log("Creating Live Tunnel");
+  if (!siteId) {
+    console.error(
+      "Error: no siteId defined, did you forget to run `netlify init` or `netlify link`?"
+    );
+    process.exit(1);
+  }
+  log("Creating Live Tunnel for " + siteId);
   const url = `https://api.netlify.com/api/v1/live_sessions?site_id=${siteId}`;
 
   const response = await fetch(url, {
