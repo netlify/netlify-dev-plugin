@@ -81,7 +81,7 @@ async function getNameFromArgs(args, flags, defaultName) {
         message: "name your function: ",
         default: defaultName,
         type: "input",
-        validate: val => !!val && /^[\w\-.]+$/i.test(val)
+        validate: val => Boolean(val) && /^[\w\-.]+$/i.test(val)
         // make sure it is not undefined and is a valid filename.
         // this has some nuance i have ignored, eg crossenv and i18n concerns
       }
@@ -137,16 +137,15 @@ async function pickTemplate() {
           // ...goreg
           ...specialCommands
         ];
-      } else {
-        // only show filtered results sorted by score
-        let ans = [
-          ...filterRegistry(jsreg, input),
-          // ...filterRegistry(tsreg, input),
-          // ...filterRegistry(goreg, input)
-          ...specialCommands
-        ].sort((a, b) => b.score - a.score);
-        return ans;
       }
+      // only show filtered results sorted by score
+      let ans = [
+        ...filterRegistry(jsreg, input),
+        // ...filterRegistry(tsreg, input),
+        // ...filterRegistry(goreg, input)
+        ...specialCommands
+      ].sort((a, b) => b.score - a.score);
+      return ans;
     }
   });
   return chosentemplate;
@@ -265,6 +264,14 @@ async function downloadFromURL(flags, args, functionsDir) {
   }
 }
 
+async function installDeps(functionPath) {
+  return new Promise((resolve, reject) => {
+    cp.exec("npm i", { cwd: path.join(functionPath) }, () => {
+      resolve();
+    });
+  });
+}
+
 // no --url flag specified, pick from a provided template
 async function scaffoldFromTemplate(flags, args, functionsDir) {
   const chosentemplate = await pickTemplate(); // pull the rest of the metadata from the template
@@ -274,7 +281,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
         name: "chosenurl",
         message: "URL to clone: ",
         type: "input",
-        validate: val => !!validateRepoURL(val)
+        validate: val => Boolean(validateRepoURL(val))
         // make sure it is not undefined and is a valid filename.
         // this has some nuance i have ignored, eg crossenv and i18n concerns
       }
@@ -322,7 +329,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     // this.log('from ', pathToTemplate, ' to ', functionPath)
     const vars = { NETLIFY_STUFF_TO_REPLACE: "REPLACEMENT" }; // SWYX: TODO
     let hasPackageJSON = false;
-    copy(pathToTemplate, functionPath, vars, (err, createdFiles) => {
+    copy(pathToTemplate, functionPath, vars, async (err, createdFiles) => {
       if (err) throw err;
       createdFiles.forEach(filePath => {
         this.log(`Created ${filePath}`);
@@ -340,10 +347,10 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
       // npm install
       if (hasPackageJSON) {
         this.log(`installing dependencies for ${name}...`);
-        cp.exec("npm i", { cwd: path.join(functionPath) }, () => {
-          this.log(`installing dependencies for ${name} complete `);
-        });
+        await installDeps(functionPath);
+        this.log(`installing dependencies for ${name} complete `);
       }
+
       installAddons.call(this, addons, path.resolve(functionPath));
       if (onComplete) onComplete(); // do whatever the template wants to do after it is scaffolded
     });
