@@ -24,6 +24,7 @@
     "netlify": "2.4.1",
     "node-fetch": "^2.3.0",
     "opn": "^5.5.0",
+    "ora": "^3.4.0",
     "safe-join": "^0.1.2",
     "static-server": "^2.2.1",
     "wait-port": "^0.2.2"

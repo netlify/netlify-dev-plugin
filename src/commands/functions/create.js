@@ -10,6 +10,7 @@ const http = require("http");
 const fetch = require("node-fetch");
 const cp = require("child_process");
 const { createAddon } = require("netlify/src/addons");
+const ora = require("ora");
 
 const templatesDir = path.resolve(__dirname, "../../functions-templates");
 
@@ -346,9 +347,12 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
       fs.unlinkSync(path.join(functionPath, ".netlify-function-template.js"));
       // npm install
       if (hasPackageJSON) {
-        this.log(`installing dependencies for ${name}...`);
+        const spinner = ora({
+          text: `installing dependencies for ${name}`,
+          spinner: "moon"
+        }).start();
         await installDeps(functionPath);
-        this.log(`installing dependencies for ${name} complete `);
+        spinner.succeed(`installed dependencies for ${name}`);
       }
 
       installAddons.call(this, addons, path.resolve(functionPath));
@@ -367,10 +371,12 @@ async function installAddons(addons = [], fnPath) {
       );
       return false;
     }
+    console.log("checking Netlify APIs...");
+
     return api.getSite({ siteId }).then(async siteData => {
       const accessToken = await this.authenticate();
       const arr = addons.map(({ addonName, addonDidInstall }) => {
-        this.log("installing addon: " + addonName);
+        console.log("installing addon: " + addonName);
         // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
         return createSiteAddon(
           accessToken,
@@ -378,13 +384,30 @@ async function installAddons(addons = [], fnPath) {
           siteId,
           siteData,
           this.log
-        ).then(async addonCreateMsg => {
-          if (addonCreateMsg && addonDidInstall) {
-            const { addEnvVarsFromAddons } = require("../../utils/dev-exec");
-            await addEnvVarsFromAddons(site, accessToken);
-            addonDidInstall(fnPath);
-          }
-        });
+        )
+          .then(async addonCreateMsg => {
+            if (addonCreateMsg) {
+              // spinner.success("installed addon: " + addonName);
+              if (addonDidInstall) {
+                const {
+                  addEnvVarsFromAddons
+                } = require("../../utils/dev-exec");
+                await addEnvVarsFromAddons(site, accessToken);
+                const { confirmPostInstall } = await inquirer.prompt([
+                  {
+                    type: "confirm",
+                    name: "confirmPostInstall",
+                    message: `This template has an optional setup script that runs after addon install. This can be helpful for first time users to try out templates. Run the script?`,
+                    default: false
+                  }
+                ]);
+                if (confirmPostInstall) addonDidInstall(fnPath);
+              }
+            }
+          })
+          .catch(err => {
+            console.error("Error installing addon: ", err);
+          });
       });
       return Promise.all(arr);
     });
