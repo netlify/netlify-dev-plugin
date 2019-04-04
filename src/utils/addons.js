@@ -1,23 +1,31 @@
-const { getAddons, createAddon } = require('netlify/src/addons')
-const chalk = require('chalk')
-const inquirer = require('inquirer')
+const { getAddons, createAddon } = require("netlify/src/addons");
+const chalk = require("chalk");
+const inquirer = require("inquirer");
 
-const fetch = require('node-fetch')
+const fetch = require("node-fetch");
 
 /** main section - shamelessly adapted from CLI. we can extract and dedupe later. */
 /** but we can DRY things up later. */
-module.exports.createSiteAddon = async function createSiteAddon(accessToken, addonName, siteId, siteData, log) {
-  const addons = await getAddons(siteId, accessToken)
-  if (typeof addons === 'object' && addons.error) {
-    log('API Error', addons)
-    return false
+module.exports.createSiteAddon = async function createSiteAddon(
+  accessToken,
+  addonName,
+  siteId,
+  siteData,
+  log
+) {
+  const addons = await getAddons(siteId, accessToken);
+  if (typeof addons === "object" && addons.error) {
+    log("API Error", addons);
+    return false;
   }
   // Filter down addons to current args.name
-  const currentAddon = addons.find(addon => addon.service_path === `/.netlify/${addonName}`)
-  const rawFlags = {}
+  const currentAddon = addons.find(
+    addon => addon.service_path === `/.netlify/${addonName}`
+  );
+  const rawFlags = {};
 
   if (currentAddon && currentAddon.id) {
-    log(`The "${addonName} add-on" already exists for ${siteData.name}`)
+    log(`The "${addonName} add-on" already exists for ${siteData.name}`);
     // // just exit
     // log()
     // const cmd = chalk.cyan(`\`netlify addons:config ${addonName}\``)
@@ -25,17 +33,17 @@ module.exports.createSiteAddon = async function createSiteAddon(accessToken, add
     // const deleteCmd = chalk.cyan(`\`netlify addons:delete ${addonName}\``)
     // log(`- To remove this add-on run: ${deleteCmd}`)
     // log()
-    return false
+    return false;
   }
 
-  const manifest = await getAddonManifest(addonName, accessToken)
+  const manifest = await getAddonManifest(addonName, accessToken);
 
-  let configValues = rawFlags
+  let configValues = rawFlags;
   if (manifest.config) {
-    const required = requiredConfigValues(manifest.config)
-    const missingValues = missingConfigValues(required, rawFlags)
-    console.log(`Starting the setup for "${addonName} add-on"`)
-    console.log()
+    const required = requiredConfigValues(manifest.config);
+    const missingValues = missingConfigValues(required, rawFlags);
+    console.log(`Starting the setup for "${addonName} add-on"`);
+    console.log();
 
     // if (Object.keys(rawFlags).length) {
     //   const newConfig = updateConfigValues(manifest.config, {}, rawFlags)
@@ -69,31 +77,37 @@ module.exports.createSiteAddon = async function createSiteAddon(accessToken, add
     //   return false
     // }
 
-    const words = `The ${addonName} add-on has the following configurable options:`
-    console.log(` ${chalk.yellowBright.bold(words)}`)
-    render.configValues(addonName, manifest.config)
-    console.log()
-    console.log(` ${chalk.greenBright.bold('Lets configure those!')}`)
+    const words = `The ${addonName} add-on has the following configurable options:`;
+    console.log(` ${chalk.yellowBright.bold(words)}`);
+    render.configValues(addonName, manifest.config);
+    console.log();
+    console.log(` ${chalk.greenBright.bold("Lets configure those!")}`);
 
-    console.log()
-    console.log(` - Hit ${chalk.white.bold('enter')} to confirm value or set empty value`)
-    console.log(` - Hit ${chalk.white.bold('ctrl + C')} to cancel & exit configuration`)
-    console.log()
+    console.log();
+    console.log(
+      ` - Hit ${chalk.white.bold("enter")} to confirm value or set empty value`
+    );
+    console.log(
+      ` - Hit ${chalk.white.bold("ctrl + C")} to cancel & exit configuration`
+    );
+    console.log();
 
     const prompts = generatePrompts({
       config: manifest.config,
       configValues: rawFlags
-    })
+    });
 
-    const userInput = await inquirer.prompt(prompts)
+    const userInput = await inquirer.prompt(prompts);
     // Merge user input with the flags specified
-    configValues = updateConfigValues(manifest.config, rawFlags, userInput)
-    const missingRequiredValues = missingConfigValues(required, configValues)
+    configValues = updateConfigValues(manifest.config, rawFlags, userInput);
+    const missingRequiredValues = missingConfigValues(required, configValues);
     if (missingRequiredValues && missingRequiredValues.length) {
       missingRequiredValues.forEach(val => {
-        console.log(`Missing required value "${val}". Please run the command again`)
-      })
-      return false
+        console.log(
+          `Missing required value "${val}". Please run the command again`
+        );
+      });
+      return false;
     }
   }
 
@@ -106,197 +120,216 @@ module.exports.createSiteAddon = async function createSiteAddon(accessToken, add
     },
     accessToken,
     siteData
-  })
-  return addonName // we dont really use this right now but may be helpful to know that an addon installation was successful
-}
+  });
+  return addonName; // we dont really use this right now but may be helpful to know that an addon installation was successful
+};
 
-async function actuallyCreateSiteAddon({ addonName, settings, accessToken, siteData }) {
-  const addonResponse = await createAddon(settings, accessToken)
+async function actuallyCreateSiteAddon({
+  addonName,
+  settings,
+  accessToken,
+  siteData
+}) {
+  const addonResponse = await createAddon(settings, accessToken);
 
   if (addonResponse.code === 404) {
-    console.log(`No add-on "${addonName}" found. Please double check your add-on name and try again`)
-    return false
+    console.log(
+      `No add-on "${addonName}" found. Please double check your add-on name and try again`
+    );
+    return false;
   }
-  console.log(`Add-on "${addonName}" created for ${siteData.name}`)
+  console.log(`Add-on "${addonName}" created for ${siteData.name}`);
   if (addonResponse.config && addonResponse.config.message) {
-    console.log()
-    console.log(`${addonResponse.config.message}`)
+    console.log();
+    console.log(`${addonResponse.config.message}`);
   }
-  return addonResponse
+  return addonResponse;
 }
 
 /** all the utils used in the main section */
 
 async function getAddonManifest(addonName, netlifyApiToken) {
-  const url = `https://api.netlify.com/api/v1/services/${addonName}/manifest`
+  const url = `https://api.netlify.com/api/v1/services/${addonName}/manifest`;
   const response = await fetch(url, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${netlifyApiToken}`
     }
-  })
+  });
 
-  const data = await response.json()
+  const data = await response.json();
 
   if (response.status === 422) {
-    throw new Error(`Error ${JSON.stringify(data)}`)
+    throw new Error(`Error ${JSON.stringify(data)}`);
   }
 
-  return data
+  return data;
 }
 
 function requiredConfigValues(config) {
   return Object.keys(config).filter(key => {
-    return config[key].required
-  })
+    return config[key].required;
+  });
 }
 
 function missingConfigValues(requiredConfig, providedConfig) {
   return requiredConfig.filter(key => {
-    return !providedConfig[key]
-  })
+    return !providedConfig[key];
+  });
 }
 
 function missingConfigValues(allowedConfig, currentConfig, newConfig) {
   return Object.keys(allowedConfig).reduce((acc, key) => {
     if (newConfig[key]) {
-      acc[key] = newConfig[key]
-      return acc
+      acc[key] = newConfig[key];
+      return acc;
     }
-    acc[key] = currentConfig[key]
-    return acc
-  }, {})
+    acc[key] = currentConfig[key];
+    return acc;
+  }, {});
 }
 
 // const chalk = require('chalk')
 
 /* programmatically generate CLI prompts */
 function generatePrompts(settings) {
-  const { config, configValues } = settings
-  const configItems = Object.keys(config)
+  const { config, configValues } = settings;
+  const configItems = Object.keys(config);
 
   const prompts = configItems
     .map((key, i) => {
-      const setting = config[key]
+      const setting = config[key];
       // const { type, displayName } = setting
-      let prompt
+      let prompt;
       // Tell user to use types
       if (!setting.type) {
-        console.log(`⚠️   ${chalk.yellowBright(`Warning: no \`type\` is set for config key: ${configItems[i]}`)}`)
+        console.log(
+          `⚠️   ${chalk.yellowBright(
+            `Warning: no \`type\` is set for config key: ${configItems[i]}`
+          )}`
+        );
         console.log(
           `It's highly recommended that you type your configuration values. It will help with automatic documentation, sharing of your services, and make your services configurable through a GUI`
-        )
-        console.log('')
+        );
+        console.log("");
       }
 
       // Handle shorthand config. Probably will be removed. Severly limited + not great UX
-      if (typeof setting === 'string' || typeof setting === 'boolean') {
-        if (typeof setting === 'string') {
+      if (typeof setting === "string" || typeof setting === "boolean") {
+        if (typeof setting === "string") {
           prompt = {
-            type: 'input',
+            type: "input",
             name: key,
             message: `Enter string value for '${key}':`
-          }
+          };
           // if current stage value set show as default
           if (configValues[key]) {
-            prompt.default = configValues[key]
+            prompt.default = configValues[key];
           }
-        } else if (typeof setting === 'boolean') {
+        } else if (typeof setting === "boolean") {
           prompt = {
-            type: 'confirm',
+            type: "confirm",
             name: key,
             message: `Do you want '${key}':`
-          }
+          };
         }
-        return prompt
+        return prompt;
       }
 
       // For future use. Once UX is decided
       // const defaultValidation = (setting.required) ? validateRequired : noValidate
-      const defaultValidation = noValidate
-      const validateFunction = setting.pattern ? validate(setting.pattern) : defaultValidation
-      const isRequiredText = setting.required ? ` (${chalk.yellow('required')})` : ''
-      if (setting.type === 'string' || setting.type.match(/string/)) {
+      const defaultValidation = noValidate;
+      const validateFunction = setting.pattern
+        ? validate(setting.pattern)
+        : defaultValidation;
+      const isRequiredText = setting.required
+        ? ` (${chalk.yellow("required")})`
+        : "";
+      if (setting.type === "string" || setting.type.match(/string/)) {
         prompt = {
-          type: 'input',
+          type: "input",
           name: key,
-          message: `${chalk.white(key)}${isRequiredText} - ${setting.displayName}` || `Please enter value for ${key}`,
+          message:
+            `${chalk.white(key)}${isRequiredText} - ${setting.displayName}` ||
+            `Please enter value for ${key}`,
           validate: validateFunction
-        }
+        };
         // if value previously set show it
         if (configValues[key]) {
-          prompt.default = configValues[key]
+          prompt.default = configValues[key];
           // else show default value if provided
         } else if (setting.default) {
-          prompt.default = setting.default
+          prompt.default = setting.default;
         }
-        return prompt
+        return prompt;
       }
     })
     .filter(item => {
-      return typeof item !== 'undefined'
-    })
-  return prompts
+      return typeof item !== "undefined";
+    });
+  return prompts;
 }
 
 function noValidate() {
-  return true
+  return true;
 }
 
 // Will use this soon
 function validateRequired(value) {
   // eslint-disable-line
   if (value) {
-    return true
+    return true;
   }
-  return `Please enter a value this field is required`
+  return `Please enter a value this field is required`;
 }
 
 function validate(pattern) {
   return function(value) {
-    const regex = new RegExp(pattern)
+    const regex = new RegExp(pattern);
     if (value.match(regex)) {
-      return true
+      return true;
     }
-    return `Please enter a value matching regex pattern: /${chalk.yellowBright(pattern)}/`
-  }
+    return `Please enter a value matching regex pattern: /${chalk.yellowBright(
+      pattern
+    )}/`;
+  };
 }
 
 // const chalk = require('chalk')
-const AsciiTable = require('ascii-table')
+const AsciiTable = require("ascii-table");
 
 function missingValues(values, manifest) {
   const display = values
     .map(item => {
-      const itemDisplay = chalk.redBright.bold(`${item}`)
-      const niceNameDisplay = manifest.config[item].displayName
-      return ` - ${itemDisplay} ${niceNameDisplay}`
+      const itemDisplay = chalk.redBright.bold(`${item}`);
+      const niceNameDisplay = manifest.config[item].displayName;
+      return ` - ${itemDisplay} ${niceNameDisplay}`;
     })
-    .join('\n')
-  console.log(display)
+    .join("\n");
+  console.log(display);
 }
 
 function configValues(addonName, configValues, currentValue) {
-  const table = new AsciiTable(`${addonName} add-on settings`)
+  const table = new AsciiTable(`${addonName} add-on settings`);
 
   const tableHeader = currentValue
-    ? ['Setting Name', 'Current Value', 'Description']
-    : ['Setting Name', 'Description', 'Type', 'Required']
+    ? ["Setting Name", "Current Value", "Description"]
+    : ["Setting Name", "Description", "Type", "Required"];
 
-  table.setHeading(...tableHeader)
+  table.setHeading(...tableHeader);
 
   Object.keys(configValues).map(key => {
-    const { type, displayName, required } = configValues[key]
-    let requiredText = required ? `true` : `false`
-    const typeInfo = type || ''
-    const description = displayName || ''
+    const { type, displayName, required } = configValues[key];
+    let requiredText = required ? `true` : `false`;
+    const typeInfo = type || "";
+    const description = displayName || "";
     if (currentValue) {
-      const value = currentValue[key] || 'Not supplied'
-      table.addRow(key, value, description)
+      const value = currentValue[key] || "Not supplied";
+      table.addRow(key, value, description);
     } else {
-      table.addRow(key, description, typeInfo, requiredText)
+      table.addRow(key, description, typeInfo, requiredText);
     }
-  })
-  console.log(table.toString())
+  });
+  console.log(table.toString());
 }
