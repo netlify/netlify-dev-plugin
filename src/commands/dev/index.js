@@ -100,8 +100,7 @@ function startDevServer(settings, log, error) {
     log(`Starting netlify dev with ${settings.type}`);
     const ps = execa(settings.command, settings.args, {
       env: settings.env,
-      stdio: "inherit",
-      shell: true
+      stdio: "inherit"
     });
     ps.on("close", code => process.exit(code));
     ps.on("SIGINT", process.exit);
