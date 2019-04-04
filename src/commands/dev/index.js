@@ -96,7 +96,6 @@ function startDevServer(settings, log, error) {
     server.start(function() {
       log("Server listening to", settings.proxyPort);
     });
-    return;
   } else {
     log(`Starting netlify dev with ${settings.type}`);
     const ps = execa(settings.command, settings.args, {
@@ -180,8 +179,13 @@ class DevCommand extends Command {
     startDevServer(settings, this.log, this.error);
 
     if (functionsDir) {
-      const fnSettings = await serveFunctions({ ...settings, functionsDir });
-      settings.functionsPort = fnSettings.port;
+      const functionsPort = await getPort({ port: 34567 });
+      const fnSettings = await serveFunctions({
+        ...settings,
+        port: functionsPort,
+        functionsDir
+      });
+      settings.functionsPort = functionsPort;
     }
 
     const proxyUrl = await startProxy(settings, addonUrls);
