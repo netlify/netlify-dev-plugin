@@ -23,6 +23,61 @@ function addonUrl(addonUrls, req) {
   return addonUrl ? `${addonUrl}${m[2]}` : null;
 }
 
+// Used as an optimization to avoid dual lookups for missing assets
+const assetExtensionRegExp = /\.(html?|png|jpg|js|css|svg|gif|ico|woff|woff2)$/
+
+function alternativePathsFor(url) {
+  const paths = []
+  if (url[url.length - 1] === '/') {
+    const end = url.length - 1
+    if (url !== '/') {
+      paths.push(url.slice(0, end) + '.html')
+      paths.push(url.slice(0, end) + '.htm')
+    }
+    paths.push(url + 'index.html')
+    paths.push(url + 'index.htm')
+  } else if (!url.match(assetExtensionRegExp)) {
+    paths.push(url + '.html')
+    paths.push(url + '.htm')
+    paths.push(url + '/index.html')
+    paths.push(url + '/index.htm')
+  }
+
+  return paths
+}
+
+function initializeProxy(port) {
+  const proxy = httpProxy.createProxyServer({
+    selfHandleResponse: true,
+    target: {
+      host: 'localhost',
+      port: port
+    }
+  })
+
+  proxy.on('proxyRes', (proxyRes, req, res) => {
+    if (proxyRes.statusCode === 404 && req.alternativePaths && req.alternativePaths.length) {
+      req.url = req.alternativePaths.shift()
+      return proxy.web(req, res, req.proxyOptions)
+    }
+    res.writeHead(proxyRes.statusCode, proxyRes.headers)
+    proxyRes.on('data', function(data) {
+      res.write(data)
+    })
+    proxyRes.on('end', function() {
+      res.end()
+    })
+  })
+
+  return {
+    web: (req, res, options) => {
+      req.proxyOptions = options
+      req.alternativePaths = alternativePathsFor(req.url)
+      return proxy.web(req, res, options)
+    }
+  }
+}
+
 async function startProxy(settings, addonUrls) {
   const rulesProxy = require("@netlify/rules-proxy");
 
