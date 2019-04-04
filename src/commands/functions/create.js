@@ -334,6 +334,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
       if (err) throw err;
       createdFiles.forEach(filePath => {
         this.log(`Created ${filePath}`);
+        require("fs").chmodSync(path.resolve(filePath), 0o777);
         if (filePath.includes("package.json")) hasPackageJSON = true;
       });
       // rename functions with different names from default
