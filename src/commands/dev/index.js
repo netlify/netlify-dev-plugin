@@ -249,7 +249,8 @@ class DevCommand extends Command {
     // Todo hoist this telemetry `command` to CLI hook
     track("command", {
       command: "dev",
-      projectType: settings.type || "custom"
+      projectType: settings.type || "custom",
+      live: flags.live || false
     });
 
     const banner = chalk.bold(`Netlify dev server is now ready on ${url}`);

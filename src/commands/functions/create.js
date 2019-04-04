@@ -11,6 +11,7 @@ const fetch = require("node-fetch");
 const cp = require("child_process");
 const { createAddon } = require("netlify/src/addons");
 const ora = require("ora");
+const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 
 const templatesDir = path.resolve(__dirname, "../../functions-templates");
 
@@ -29,6 +30,10 @@ class FunctionsCreateCommand extends Command {
     } else {
       await scaffoldFromTemplate.call(this, flags, args, functionsDir);
     }
+    track("command", {
+      command: "functions:create",
+      url: flags.url
+    });
   }
 }
 
