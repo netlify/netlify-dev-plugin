@@ -1,7 +1,16 @@
+const execa = require('execa')
 module.exports = {
   name: 'fauna-crud',
   description: 'CRUD function using Fauna DB',
-  addons: ['fauna'], // in future we'll want to pass/prompt args to addons
+  addons: [
+    {
+      addonName: 'fauna',
+      addonDidInstall(fnPath) {
+        require('fs').chmodSync(fnPath + '/create-schema.js', 0o777)
+        execa.sync(fnPath + '/create-schema.js', undefined, { env: process.env, stdio: 'inherit' })
+      }
+    }
+  ],
   onComplete() {
     console.log(`fauna-crud function created from template!`)
   }
