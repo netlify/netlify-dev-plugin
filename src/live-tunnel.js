@@ -89,12 +89,12 @@ async function fetchTunnelClient(execPath) {
     return false;
   }
 
-  const match = stdout.match(/^live-tunnel-client\/v([^\s]+)/);
+  const match = stdout.match(/^live-tunnel-client\/v?([^\s]+)/);
   if (!match) {
     return false;
   }
 
-  return updateAvailable(match[1]);
+  return updateAvailable("netlify/live-tunnel-client", match[1]);
 }
 
 function execExist(binPath) {
