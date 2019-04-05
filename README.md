@@ -43,7 +43,6 @@ USAGE
 
 OPTIONS
   -c, --cmd=cmd              command to run
-  -d, --devport=devport      port of the dev server started by command
   -f, --functions=functions  Specify a functions folder to serve
   -o, --offline              disables any features that require network access
   -p, --port=port            Specify port of netlify dev
