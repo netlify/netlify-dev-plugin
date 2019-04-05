@@ -21,14 +21,16 @@ async function addEnvVariables(api, site, accessToken) {
   /** from addons */
   const addonUrls = {};
   const addons = await getAddons(site.id, accessToken);
-  addons.forEach(addon => {
-    addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${addon.slug}`;
-    for (const key in addon.env) {
-      const msg = () =>
-        console.log(`${NETLIFYDEV} injected addon env var: `, key);
-      process.env[key] = assignLoudly(process.env[key], addon.env[key], msg);
-    }
-  });
+  if (Array.isArray(addons)) {
+    addons.forEach(addon => {
+      addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${addon.slug}`;
+      for (const key in addon.env) {
+        const msg = () =>
+          console.log(`${NETLIFYDEV} Injected addon env var: `, key);
+        process.env[key] = assignLoudly(process.env[key], addon.env[key], msg);
+      }
+    });
+  }
 
   /** from web UI */
   const apiSite = await api.getSite({ site_id: site.id });
@@ -38,7 +40,7 @@ async function addEnvVariables(api, site, accessToken) {
   if (apiSite.build_settings && apiSite.build_settings.env) {
     for (const key in apiSite.build_settings.env) {
       const msg = () =>
-        console.log(`${NETLIFYDEV} injected build setting env var: `, key);
+        console.log(`${NETLIFYDEV} Injected build setting env var: `, key);
       process.env[key] = assignLoudly(
         process.env[key],
         apiSite.build_settings.env[key],
