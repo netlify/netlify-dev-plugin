@@ -395,10 +395,8 @@ async function installAddons(addons = [], fnPath) {
             if (addonCreateMsg) {
               // spinner.success("installed addon: " + addonName);
               if (addonDidInstall) {
-                const {
-                  addEnvVarsFromAddons
-                } = require("../../utils/dev-exec");
-                await addEnvVarsFromAddons(site, accessToken);
+                const { addEnvVariables } = require("../../utils/dev");
+                await addEnvVariables(api, site, accessToken);
                 const { confirmPostInstall } = await inquirer.prompt([
                   {
                     type: "confirm",

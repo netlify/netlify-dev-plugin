@@ -4,11 +4,11 @@ const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 
 class ExecCommand extends Command {
   async run() {
-    const { site } = this.netlify;
+    const { site, api } = this.netlify;
     if (site.id) {
       const accessToken = await this.authenticate();
-      const { addEnvVarsFromAddons } = require("../../utils/dev-exec");
-      await addEnvVarsFromAddons(site, accessToken);
+      const { addEnvVariables } = require("../../utils/dev");
+      await addEnvVariables(api, site, accessToken);
     }
     execa(this.argv[0], this.argv.slice(1), {
       env: process.env,
