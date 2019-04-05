@@ -24,58 +24,62 @@ function addonUrl(addonUrls, req) {
 }
 
 // Used as an optimization to avoid dual lookups for missing assets
-const assetExtensionRegExp = /\.(html?|png|jpg|js|css|svg|gif|ico|woff|woff2)$/
+const assetExtensionRegExp = /\.(html?|png|jpg|js|css|svg|gif|ico|woff|woff2)$/;
 
 function alternativePathsFor(url) {
-  const paths = []
-  if (url[url.length - 1] === '/') {
-    const end = url.length - 1
-    if (url !== '/') {
-      paths.push(url.slice(0, end) + '.html')
-      paths.push(url.slice(0, end) + '.htm')
+  const paths = [];
+  if (url[url.length - 1] === "/") {
+    const end = url.length - 1;
+    if (url !== "/") {
+      paths.push(url.slice(0, end) + ".html");
+      paths.push(url.slice(0, end) + ".htm");
     }
-    paths.push(url + 'index.html')
-    paths.push(url + 'index.htm')
+    paths.push(url + "index.html");
+    paths.push(url + "index.htm");
   } else if (!url.match(assetExtensionRegExp)) {
-    paths.push(url + '.html')
-    paths.push(url + '.htm')
-    paths.push(url + '/index.html')
-    paths.push(url + '/index.htm')
+    paths.push(url + ".html");
+    paths.push(url + ".htm");
+    paths.push(url + "/index.html");
+    paths.push(url + "/index.htm");
   }
 
-  return paths
+  return paths;
 }
 
 function initializeProxy(port) {
   const proxy = httpProxy.createProxyServer({
     selfHandleResponse: true,
     target: {
-      host: 'localhost',
+      host: "localhost",
       port: port
     }
-  })
+  });
 
-  proxy.on('proxyRes', (proxyRes, req, res) => {
-    if (proxyRes.statusCode === 404 && req.alternativePaths && req.alternativePaths.length) {
-      req.url = req.alternativePaths.shift()
-      return proxy.web(req, res, req.proxyOptions)
+  proxy.on("proxyRes", (proxyRes, req, res) => {
+    if (
+      proxyRes.statusCode === 404 &&
+      req.alternativePaths &&
+      req.alternativePaths.length
+    ) {
+      req.url = req.alternativePaths.shift();
+      return proxy.web(req, res, req.proxyOptions);
     }
-    res.writeHead(proxyRes.statusCode, proxyRes.headers)
-    proxyRes.on('data', function(data) {
-      res.write(data)
-    })
-    proxyRes.on('end', function() {
-      res.end()
-    })
-  })
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.on("data", function(data) {
+      res.write(data);
+    });
+    proxyRes.on("end", function() {
+      res.end();
+    });
+  });
 
   return {
     web: (req, res, options) => {
-      req.proxyOptions = options
-      req.alternativePaths = alternativePathsFor(req.url)
-      return proxy.web(req, res, options)
+      req.proxyOptions = options;
+      req.alternativePaths = alternativePathsFor(req.url);
+      return proxy.web(req, res, options);
     }
-  }
+  };
 }
 
 async function startProxy(settings, addonUrls) {
@@ -171,33 +175,13 @@ class DevCommand extends Command {
       flags.functions ||
       (config.dev && config.dev.functions) ||
       (config.build && config.build.functions);
-    const addonUrls = {};
+    let addonUrls = {};
 
     let accessToken = api.accessToken;
     if (site.id && !flags.offline) {
       accessToken = await this.authenticate();
-      const addons = await getAddons(site.id, accessToken);
-      if (Array.isArray(addons)) {
-        addons.forEach(addon => {
-          addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${
-            addon.slug
-          }`;
-          for (const key in addon.env) {
-            process.env[key] = process.env[key] || addon.env[key];
-          }
-        });
-      }
-      const api = this.netlify.api;
-      const apiSite = await api.getSite({ site_id: site.id });
-      // TODO: We should move the environment outside of build settings and possibly have a
-      // `/api/v1/sites/:site_id/environment` endpoint for it that we can also gate access to
-      // In the future and that we could make context dependend
-      if (apiSite.build_settings && apiSite.build_settings.env) {
-        for (const key in apiSite.build_settings.env) {
-          process.env[key] =
-            process.env[key] || apiSite.build_settings.env[key];
-        }
-      }
+      const { addEnvVariables } = require("../../utils/dev");
+      addonUrls = await addEnvVariables(api, site, accessToken);
     }
     process.env.NETLIFY_DEV = "true";
 
