@@ -266,10 +266,6 @@ DevCommand.strict = false;
 
 DevCommand.flags = {
   cmd: flags.string({ char: "c", description: "command to run" }),
-  devport: flags.integer({
-    char: "d",
-    description: "port of the dev server started by command"
-  }),
   port: flags.integer({ char: "p", description: "port of netlify dev" }),
   dir: flags.integer({ char: "d", description: "dir with static files" }),
   functions: flags.string({
