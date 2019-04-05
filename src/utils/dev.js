@@ -1,7 +1,8 @@
 // reusable code for netlify dev
 // bit of a hasty abstraction but recommended by oclif
 const { getAddons } = require("netlify/src/addons");
-
+const chalk = require("chalk");
+const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
 /**
  * inject environment variables from netlify addons and buildbot
  * into your local dev process.env
@@ -23,7 +24,9 @@ async function addEnvVariables(api, site, accessToken) {
   addons.forEach(addon => {
     addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${addon.slug}`;
     for (const key in addon.env) {
-      process.env[key] = process.env[key] || addon.env[key];
+      const msg = () =>
+        console.log(`${NETLIFYDEV} injected addon env var: `, key);
+      process.env[key] = assignLoudly(process.env[key], addon.env[key], msg);
     }
   });
 
@@ -34,7 +37,13 @@ async function addEnvVariables(api, site, accessToken) {
   // In the future and that we could make context dependend
   if (apiSite.build_settings && apiSite.build_settings.env) {
     for (const key in apiSite.build_settings.env) {
-      process.env[key] = process.env[key] || apiSite.build_settings.env[key];
+      const msg = () =>
+        console.log(`${NETLIFYDEV} injected build setting env var: `, key);
+      process.env[key] = assignLoudly(
+        process.env[key],
+        apiSite.build_settings.env[key],
+        msg
+      );
     }
   }
 
@@ -44,3 +53,18 @@ async function addEnvVariables(api, site, accessToken) {
 module.exports = {
   addEnvVariables
 };
+
+// if first arg is undefined, use default, but tell user about it in case it is unintentional
+function assignLoudly(
+  optionalValue,
+  defaultValue,
+  tellUser = dV => console.log(`No value specified, using fallback of `, dV)
+) {
+  if (defaultValue === undefined) throw new Error("must have a defaultValue");
+  if (defaultValue !== optionalValue && optionalValue === undefined) {
+    tellUser(defaultValue);
+    return defaultValue;
+  } else {
+    return optionalValue;
+  }
+}

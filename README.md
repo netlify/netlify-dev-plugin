@@ -132,11 +132,11 @@ Function templates can specify `addons` that they rely on as well as execute arb
 ```js
 // .netlify-function-template.js
 module.exports = {
-  addons: ['fauna'],
+  addons: ["fauna"],
   onComplete() {
-    console.log(`custom-template function created from template!`)
+    console.log(`custom-template function created from template!`);
   }
-}
+};
 ```
 
 #### Executing Netlify Functions

@@ -1,4 +1,7 @@
 const path = require("path");
+const chalk = require("chalk");
+const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+
 const detectors = require("fs")
   .readdirSync(path.join(__dirname, "detectors"))
   .filter(x => x.endsWith(".js")) // only accept .js detector files
@@ -39,7 +42,7 @@ function assignLoudly(settings, settingsField, newValue) {
   if (settings[settingsField] !== newValue) {
     // silent if command is exactly same
     console.log(
-      `Overriding ${settingsField} with setting derived from netlify.toml [dev] block: `,
+      `${NETLIFYDEV} Overriding ${settingsField} with setting derived from netlify.toml [dev] block: `,
       newValue
     );
     settings[settingsField] === newValue;

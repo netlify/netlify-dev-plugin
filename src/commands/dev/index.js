@@ -10,6 +10,7 @@ const Command = require("@netlify/cli-utils");
 const { getAddons } = require("netlify/src/addons");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
+const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
 const boxen = require("boxen");
 const { createTunnel, connectTunnel } = require("../../live-tunnel");
 
@@ -138,7 +139,7 @@ function startDevServer(settings, log, error) {
     const StaticServer = require("static-server");
     if (!settings.dist) {
       log(
-        "Unable to determine public folder for the dev server.\nSetup a netlify.toml file with a [dev] section to specify your dev server settings."
+        `${NETLIFYDEV} Unable to determine public folder for the dev server. \n Setup a netlify.toml file with a [dev] section to specify your dev server settings.`
       );
       process.exit(1);
     }
@@ -153,10 +154,10 @@ function startDevServer(settings, log, error) {
     });
 
     server.start(function() {
-      log("Server listening to", settings.proxyPort);
+      log(`${NETLIFYDEV} Server listening to`, settings.proxyPort);
     });
   } else {
-    log(`Starting netlify dev with ${settings.type}`);
+    log(`${NETLIFYDEV} Starting Netlify Dev with ${settings.type}`);
     const ps = execa(settings.command, settings.args, {
       env: settings.env,
       stdio: "inherit"
@@ -187,7 +188,9 @@ class DevCommand extends Command {
 
     let settings = serverSettings(config.dev);
     if (!(settings && settings.command)) {
-      this.log("No dev server detected, using simple static server");
+      this.log(
+        "[Netlify Dev] No dev server detected, using simple static server"
+      );
       const dist =
         (config.dev && config.dev.publish) ||
         (config.build && config.build.publish);
@@ -237,7 +240,7 @@ class DevCommand extends Command {
       live: flags.live || false
     });
 
-    const banner = chalk.bold(`Netlify dev server is now ready on ${url}`);
+    const banner = chalk.bold(`Netlify Dev Server now ready on ${url}`);
     this.log(
       boxen(banner, {
         padding: 1,
