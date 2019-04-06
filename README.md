@@ -10,8 +10,7 @@ It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy,
 
 ## Prerequisites
 
-There are just two:
-
+- You should have the latest Netlify CLI version (`netlify -v` gives v2.10 and up) -`npm install -g netlify-cli` if not
 - You should be [logged in on Netlify CLI](https://www.netlify.com/docs/cli/#authentication)
 - Your project should be linked to a `siteID` on Netlify (using [netlify init](https://www.netlify.com/docs/cli/#continuous-deployment) or [netlify link](https://www.netlify.com/docs/cli/#linking-and-unlinking-sites)). You can confirm this has been done if you have a `.netlify` folder with a `state.json` file containing your `siteID`.
 
@@ -105,7 +104,7 @@ $ netlify dev
 
 Netlify Dev will attempt to detect the SSG or build command that you are using, and run these on your behalf, while adding other development utilities.
 
-The number of project types which Netlify Dev can detect is growing, but if yours is not yet supported automatically, you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
+**Overriding the detectors**: The number of project types which Netlify Dev can detect is growing, but if yours is not yet supported automatically, you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
 
 ```toml
 
@@ -114,6 +113,18 @@ The number of project types which Netlify Dev can detect is growing, but if your
   command = "yarn start" # Command to start your dev server
   port = 3000 # Port that the dev server will be listening on
   publish = "dist" # Folder with the static content for _redirect file
+```
+
+**Explanation of detectors and ports in Netlify Dev**: There will be a number of ports that you will encounter when using Netlify Dev, especially when runnign a static site generator like Gatsby which has its own dev server. All the port numbers can be a bit confusing, so here is a brief explainer. If your SSG has a devserver on port 8000 for example, Netlify Dev needs to be told to proxy that port so it can merge it in with the rest of the local Netlify environment (say, running on port 8888), which is what you want to get the full Netlify Dev experience with Functions, Redirects, and so on. If you're running a project we have a detector for, we hardcode those conventional ports so you don't have to supply it yourself. However, sometimes you're using some other project (we welcome contributions for detectors!) or just have a custom port you want Netlify Dev to point to for some reason. This is when you go to the `netlify.toml` `[dev]` block to specify exactly what port we should listen to.
+
+As for which port to use while doing local development in Netlify Dev, always look for this box in your console output and use that:
+
+```bash
+   ┌──────────────────────────────────────────────────────────────┐
+   │                                                              │
+   │   [Netlify Dev] Server now ready on http://localhost:64939   │
+   │                                                              │
+   └──────────────────────────────────────────────────────────────┘
 ```
 
 ### Netlify Functions
