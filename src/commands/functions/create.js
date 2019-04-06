@@ -355,15 +355,15 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
         require("fs").chmodSync(path.resolve(filePath), 0o777);
         if (filePath.includes("package.json")) hasPackageJSON = true;
       });
-      // rename functions with different names from default
+      // delete function template file that was copied over by copydir
+      fs.unlinkSync(path.join(functionPath, ".netlify-function-template.js"));
+      // rename the root function file if it has a different name from default
       if (name !== templateName) {
         fs.renameSync(
           path.join(functionPath, templateName + ".js"),
           path.join(functionPath, name + ".js")
         );
       }
-      // // delete function template file
-      // fs.unlinkSync(path.join(functionPath, ".netlify-function-template.js"));
       // npm install
       if (hasPackageJSON) {
         const spinner = ora({

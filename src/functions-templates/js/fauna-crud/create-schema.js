@@ -22,7 +22,8 @@ function createFaunaDB() {
       return client.query(
         q.Create(q.Ref("indexes"), {
           name: "all_items",
-          source: q.Ref("classes/items")
+          source: q.Ref("classes/items"),
+          active: true
         })
       );
     })

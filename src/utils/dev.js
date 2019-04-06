@@ -26,7 +26,10 @@ async function addEnvVariables(api, site, accessToken) {
       addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${addon.slug}`;
       for (const key in addon.env) {
         const msg = () =>
-          console.log(`${NETLIFYDEV} Injected addon env var: `, key);
+          console.log(
+            `${NETLIFYDEV} Injected ${chalk.yellow("addon")} env var: `,
+            key
+          );
         process.env[key] = assignLoudly(process.env[key], addon.env[key], msg);
       }
     });
@@ -40,7 +43,10 @@ async function addEnvVariables(api, site, accessToken) {
   if (apiSite.build_settings && apiSite.build_settings.env) {
     for (const key in apiSite.build_settings.env) {
       const msg = () =>
-        console.log(`${NETLIFYDEV} Injected build setting env var: `, key);
+        console.log(
+          `${NETLIFYDEV} Injected ${chalk.blue("build setting")} env var: `,
+          key
+        );
       process.env[key] = assignLoudly(
         process.env[key],
         apiSite.build_settings.env[key],
