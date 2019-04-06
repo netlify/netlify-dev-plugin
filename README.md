@@ -4,9 +4,18 @@ Netlify CLI plugin for local dev experience.
 
 ## What is Netlify Dev?
 
-Netlify Dev brings the power of Netlify's Edge Logic layer, serverless functions and [add-on ecosystem](#using-add-ons) to your local laptop. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
+Netlify Dev brings the power of Netlify's Edge Logic layer, [serverless functions](#netlify-functions) and [add-on ecosystem](#using-add-ons) to your local machine. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
 
 It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them.
+
+## Prerequisites
+
+There are just two:
+
+- You should be [logged in on Netlify CLI](https://www.netlify.com/docs/cli/#authentication)
+- Your project should be linked to a `siteID` on Netlify (using [netlify init](https://www.netlify.com/docs/cli/#continuous-deployment) or [netlify link](https://www.netlify.com/docs/cli/#linking-and-unlinking-sites)). You can confirm this has been done if you have a `.netlify` folder with a `state.json` file containing your `siteID`.
+
+This is how we pull down your build environment variables and manage your addons on your local machine.
 
 ## Usage
 
@@ -14,19 +23,30 @@ It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy,
 - `netlify dev:exec <command>` runs a shell command within the netlify dev environment
 - `netlify functions:create` bootstrap a new function
 
+As these commands are expected to be frequently used, it may be helpful to define aliases in your terminal (Mac: [bash](https://jonsuh.com/blog/bash-command-line-shortcuts/), [zsh](https://askubuntu.com/questions/758496/how-to-make-a-permanent-alias-in-oh-my-zsh), Windows: [doskey](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt), [registry](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt)) to your personal preference. For example:
+
+```bash
+## ~/.zshrc
+alias ndeploy="netlify deploy --prod"
+alias nd="netlify dev"
+alias ndl="netlify dev --live"
+alias nfc="netlify functions:create"
+alias ndx="netlify dev:exec "
+```
+
 ## Using the beta
 
 Currently the Netlify dev plugin is in private beta. You'll need to follow these steps to enable it:
 
 Make sure Netlify CLI is installed and up to date:
 
-```
+```bash
 npm install -g netlify-cli
 ```
 
 Then clone and activate the plugin:
 
-```
+```bash
 git clone git@github.com:netlify/netlify-dev-plugin.git
 cd netlify-dev-plugin
 npm install
@@ -161,7 +181,7 @@ Add-ons are a way for Netlify users to extend the functionality of their Jamstac
 
 To try out an add-on with Netlify dev, run the `netlify addons:create` command:
 
-```
+```bash
 netlify addons:create fauna
 ```
 
@@ -175,8 +195,10 @@ After you have installed an add-on, it will be visible with the `netlify addons:
 
 To share your ongoing dev session with a coworker, just run Netlify Dev with a `--live` flag:
 
-```
+```bash
 netlify dev --live
 ```
 
 You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
+
+> Note: there are currently known issues with ending the live session alongside your webdevserver. We are working on fixing it. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.

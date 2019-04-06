@@ -170,6 +170,7 @@ function startDevServer(settings, log, error) {
 
 class DevCommand extends Command {
   async run() {
+    this.log(`${NETLIFYDEV} Starting Netlify Dev...`);
     const { flags, args } = this.parse(DevCommand);
     const { api, site, config } = this.netlify;
     const functionsDir =
@@ -180,7 +181,6 @@ class DevCommand extends Command {
 
     let accessToken = api.accessToken;
     if (site.id && !flags.offline) {
-      accessToken = await this.authenticate();
       const { addEnvVariables } = require("../../utils/dev");
       addonUrls = await addEnvVariables(api, site, accessToken);
     }
@@ -189,7 +189,7 @@ class DevCommand extends Command {
     let settings = serverSettings(config.dev);
     if (!(settings && settings.command)) {
       this.log(
-        "[Netlify Dev] No dev server detected, using simple static server"
+        `${NETLIFYDEV} No dev server detected, using simple static server`
       );
       const dist =
         (config.dev && config.dev.publish) ||
@@ -240,7 +240,7 @@ class DevCommand extends Command {
       live: flags.live || false
     });
 
-    const banner = chalk.bold(`Netlify Dev Server now ready on ${url}`);
+    const banner = chalk.bold(`${NETLIFYDEV} Server now ready on ${url}`);
     this.log(
       boxen(banner, {
         padding: 1,

@@ -9,9 +9,9 @@ const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
  *
  * ```
  * // usage example
- * const { site } = this.netlify
+ * const { site, api } = this.netlify
  * if (site.id) {
- *   const accessToken = await this.authenticate()
+ *   const accessToken = api.accessToken
  *   const addonUrls = await addEnvVariables(site, accessToken)
  *   // addonUrls is only for startProxy in netlify dev:index
  * }

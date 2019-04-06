@@ -8,7 +8,10 @@ class ExecCommand extends Command {
   async run() {
     const { site, api } = this.netlify;
     if (site.id) {
-      const accessToken = await this.authenticate();
+      console.log(
+        `${NETLIFYDEV} Checking your site's environment variables...`
+      );
+      const accessToken = api.accessToken;
       const { addEnvVariables } = require("../../utils/dev");
       await addEnvVariables(api, site, accessToken);
     } else {
