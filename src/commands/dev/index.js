@@ -95,12 +95,7 @@ async function startProxy(settings, addonUrls) {
     ? `http://localhost:${settings.functionsPort}`
     : null;
 
-  const proxy = httpProxy.createProxyServer({
-    target: {
-      host: "localhost",
-      port: settings.proxyPort
-    }
-  });
+  const proxy = initializeProxy(settings.proxyPort);
 
   const rewriter = rulesProxy({ publicFolder: settings.dist });
 
