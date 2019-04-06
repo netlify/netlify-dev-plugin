@@ -1,6 +1,8 @@
 const execa = require("execa");
 const Command = require("@netlify/cli-utils");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
+const chalk = require("chalk");
+const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
 
 class ExecCommand extends Command {
   async run() {
@@ -9,6 +11,10 @@ class ExecCommand extends Command {
       const accessToken = await this.authenticate();
       const { addEnvVariables } = require("../../utils/dev");
       await addEnvVariables(api, site, accessToken);
+    } else {
+      console.log(
+        `${NETLIFYDEV} No Site ID detected. You probably forgot to run \`netlify link\` or \`netlify init\`. `
+      );
     }
     execa(this.argv[0], this.argv.slice(1), {
       env: process.env,
