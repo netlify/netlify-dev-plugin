@@ -27,8 +27,8 @@ async function addEnvVariables(api, site, accessToken) {
       for (const key in addon.env) {
         const msg = () =>
           console.log(
-            `${NETLIFYDEV} Injected ${chalk.yellow("addon")} env var: `,
-            key
+            `${NETLIFYDEV} Injected ${chalk.yellow.bold("addon")} env var: `,
+            chalk.yellow(key)
           );
         process.env[key] = assignLoudly(process.env[key], addon.env[key], msg);
       }
@@ -44,8 +44,10 @@ async function addEnvVariables(api, site, accessToken) {
     for (const key in apiSite.build_settings.env) {
       const msg = () =>
         console.log(
-          `${NETLIFYDEV} Injected ${chalk.blue("build setting")} env var: `,
-          key
+          `${NETLIFYDEV} Injected ${chalk.blue.bold(
+            "build setting"
+          )} env var: `,
+          chalk.yellow(key)
         );
       process.env[key] = assignLoudly(
         process.env[key],

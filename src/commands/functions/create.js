@@ -335,7 +335,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     }
 
     const name = await getNameFromArgs(args, flags, templateName);
-    this.log(`${NETLIFYDEV} Creating function ${chalk.magenta.inverse(name)}`);
+    this.log(`${NETLIFYDEV} Creating function ${chalk.cyan.inverse(name)}`);
     const functionPath = ensureFunctionPathIsOk.call(
       this,
       functionsDir,
