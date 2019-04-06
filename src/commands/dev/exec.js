@@ -11,7 +11,7 @@ class ExecCommand extends Command {
       console.log(
         `${NETLIFYDEV} Checking your site's environment variables...`
       );
-      const accessToken = await this.authenticate();
+      const accessToken = api.accessToken;
       const { addEnvVariables } = require("../../utils/dev");
       await addEnvVariables(api, site, accessToken);
     } else {
