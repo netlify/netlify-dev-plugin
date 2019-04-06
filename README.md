@@ -4,7 +4,7 @@ Netlify CLI plugin for local dev experience.
 
 ## What is Netlify Dev?
 
-Netlify Dev brings the power of Netlify's Edge Logic layer, serverless functions and [add-on ecosystem](#using-add-ons) to your local laptop. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
+Netlify Dev brings the power of Netlify's Edge Logic layer, [serverless functions](#netlify-functions) and [add-on ecosystem](#using-add-ons) to your local laptop. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
 
 It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them.
 
@@ -13,6 +13,17 @@ It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy,
 - `netlify dev` start a local dev server for the build tool you're using
 - `netlify dev:exec <command>` runs a shell command within the netlify dev environment
 - `netlify functions:create` bootstrap a new function
+
+As these commands are expected to be frequently used, it may be helpful to define aliases in your terminal (Mac: [bash](https://jonsuh.com/blog/bash-command-line-shortcuts/), [zsh](https://askubuntu.com/questions/758496/how-to-make-a-permanent-alias-in-oh-my-zsh), Windows: [doskey](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt), [registry](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt)) to your personal preference. For example:
+
+```
+## ~/.zshrc
+alias ndeploy="netlify deploy --prod"
+alias nd="netlify dev"
+alias ndl="netlify dev --live"
+alias nfc="netlify functions:create"
+alias ndx="netlify dev:exec "
+```
 
 ## Using the beta
 
