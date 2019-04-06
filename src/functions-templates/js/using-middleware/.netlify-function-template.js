@@ -1,7 +1,7 @@
 module.exports = {
-  name: 'using-middleware',
-  description: 'Using Middleware with middy',
+  name: "using-middleware",
+  description: "Using Middleware with middy",
   onComplete() {
-    console.log(`using-middleware function created from template!`)
+    // console.log(`using-middleware function created from template!`)
   }
-}
+};

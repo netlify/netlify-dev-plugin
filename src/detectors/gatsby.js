@@ -14,8 +14,17 @@ module.exports = function() {
   }
 
   const npmCommand =
-    scripts && ((scripts.develop && "develop") || (scripts.dev && "dev"));
+    scripts &&
+    ((scripts.start && "start") ||
+      (scripts.develop && "develop") ||
+      (scripts.dev && "dev"));
   if (!npmCommand) {
+    if (!scripts) {
+      console.error(
+        "Couldn't determine the package.json script to run for this Gatsby project. Use the --command flag."
+      );
+      process.exit(1);
+    }
     // search all the scripts for something that starts with 'gatsby develop'
     Object.entries(scripts).forEach(([k, v]) => {
       if (v.startsWith("gatsby develop")) {
@@ -24,7 +33,7 @@ module.exports = function() {
     });
     if (!npmCommand) {
       console.error(
-        "Couldn't determine the package.json script to run for this Gatsby project. Use the -c flag."
+        "Couldn't determine the package.json script to run for this Gatsby project. Use the --command flag."
       );
       process.exit(1);
     } else {

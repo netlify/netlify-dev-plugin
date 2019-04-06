@@ -14,6 +14,8 @@ const ora = require("ora");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
 const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const NETLIFYWARN = chalk.yellow.inverse("Warning");
+const NETLIFYERR = chalk.red.inverse("Error");
 
 const templatesDir = path.resolve(__dirname, "../../functions-templates");
 
@@ -211,10 +213,16 @@ function ensureFunctionDirExists(flags, config) {
   }
   if (!fs.existsSync(functionsDir)) {
     this.log(
-      `${NETLIFYDEV} functions folder ${functionsDir} specified in netlify.toml but folder not found, creating it...`
+      `${NETLIFYDEV} functions folder ${chalk.magenta.inverse(
+        functionsDir
+      )} specified in netlify.toml but folder not found, creating it...`
     );
     fs.mkdirSync(functionsDir);
-    this.log(`${NETLIFYDEV} functions folder ${functionsDir} created`);
+    this.log(
+      `${NETLIFYDEV} functions folder ${chalk.magenta.inverse(
+        functionsDir
+      )} created`
+    );
   }
   return functionsDir;
 }
@@ -230,7 +238,7 @@ async function downloadFromURL(flags, args, functionsDir) {
     fs.lstatSync(fnFolder + ".js").isFile()
   ) {
     this.log(
-      `${NETLIFYDEV} Warning: A single file version of the function ${name} already exists at ${fnFolder}.js. Terminating without further action.`
+      `${NETLIFYDEV} ${NETLIFYWARN}: A single file version of the function ${name} already exists at ${fnFolder}.js. Terminating without further action.`
     );
     process.exit(1);
   }
@@ -301,7 +309,9 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     try {
       await downloadFromURL.call(this, flags, args, functionsDir);
     } catch (err) {
-      console.error(`${NETLIFYDEV} Error downloading from URL: ` + flags.url);
+      console.error(
+        `${NETLIFYDEV} ${NETLIFYERR} Error downloading from URL: ` + flags.url
+      );
       console.error(err);
       process.exit(1);
     }
@@ -325,7 +335,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     }
 
     const name = await getNameFromArgs(args, flags, templateName);
-    this.log(`${NETLIFYDEV} Creating function ${name}`);
+    this.log(`${NETLIFYDEV} Creating function ${chalk.magenta.inverse(name)}`);
     const functionPath = ensureFunctionPathIsOk.call(
       this,
       functionsDir,
@@ -340,7 +350,8 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     copy(pathToTemplate, functionPath, vars, async (err, createdFiles) => {
       if (err) throw err;
       createdFiles.forEach(filePath => {
-        this.log(`${NETLIFYDEV} Created ${filePath}`);
+        if (filePath.endsWith(".netlify-function-template.js")) return;
+        this.log(`${NETLIFYDEV} ${chalk.greenBright("Created")} ${filePath}`);
         require("fs").chmodSync(path.resolve(filePath), 0o777);
         if (filePath.includes("package.json")) hasPackageJSON = true;
       });
@@ -351,8 +362,8 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
           path.join(functionPath, name + ".js")
         );
       }
-      // delete function template file
-      fs.unlinkSync(path.join(functionPath, ".netlify-function-template.js"));
+      // // delete function template file
+      // fs.unlinkSync(path.join(functionPath, ".netlify-function-template.js"));
       // npm install
       if (hasPackageJSON) {
         const spinner = ora({
@@ -384,7 +395,9 @@ async function installAddons(addons = [], fnPath) {
     return api.getSite({ siteId }).then(async siteData => {
       const accessToken = api.accessToken;
       const arr = addons.map(({ addonName, addonDidInstall }) => {
-        console.log(`${NETLIFYDEV} installing addon: ` + addonName);
+        console.log(
+          `${NETLIFYDEV} installing addon: ` + chalk.yellow.inverse(addonName)
+        );
         // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
         return createSiteAddon(
           accessToken,
@@ -412,7 +425,10 @@ async function installAddons(addons = [], fnPath) {
             }
           })
           .catch(err => {
-            console.error("Error installing addon: ", err);
+            console.error(
+              `${NETLIFYDEV} ${NETLIFYERR} Error installing addon: `,
+              err
+            );
           });
       });
       return Promise.all(arr);

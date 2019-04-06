@@ -14,6 +14,6 @@ module.exports = {
     }
   ],
   onComplete() {
-    console.log(`fauna-graphql function created from template!`);
+    // console.log(`fauna-graphql function created from template!`);
   }
 };
