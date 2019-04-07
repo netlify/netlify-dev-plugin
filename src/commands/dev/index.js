@@ -4,8 +4,10 @@ const http = require("http");
 const httpProxy = require("http-proxy");
 const waitPort = require("wait-port");
 const getPort = require("get-port");
+const chokidar = require("chokidar");
 const { serveFunctions } = require("@netlify/zip-it-and-ship-it");
 const { serverSettings } = require("../../detect-server");
+const { detectFunctionsBuilder } = require("../../detect-functions-builder");
 const Command = require("@netlify/cli-utils");
 const { getAddons } = require("netlify/src/addons");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
@@ -216,6 +218,14 @@ class DevCommand extends Command {
     startDevServer(settings, this.log, this.error);
 
     if (functionsDir) {
+      const functionBuilder = await detectFunctionsBuilder(settings);
+      if (functionBuilder) {
+        await functionBuilder.build();
+        const functionWatcher = chokidar.watch(functionBuilder.src);
+        functionWatcher.on("add", functionBuilder.build);
+        functionWatcher.on("change", functionBuilder.build);
+        functionWatcher.on("unlink", functionBuilder.build);
+      }
       const functionsPort = await getPort({ port: 34567 });
       const fnSettings = await serveFunctions({
         ...settings,
