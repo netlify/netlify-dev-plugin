@@ -79,7 +79,8 @@ function initializeProxy(port) {
       req.proxyOptions = options;
       req.alternativePaths = alternativePathsFor(req.url);
       return proxy.web(req, res, options);
-    }
+    },
+    ws: (req, socket, head) => proxy.ws(req, socket, head)
   };
 }
 
