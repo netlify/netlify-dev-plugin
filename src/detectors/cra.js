@@ -8,8 +8,9 @@ module.exports = function() {
   const packageSettings = JSON.parse(
     readFileSync("package.json", { encoding: "utf8" })
   );
-  const { dependencies, scripts } = packageSettings;
-  if (!(dependencies && dependencies["react-scripts"])) {
+  const { dependencies, devDependencies, scripts } = packageSettings;
+  const hasReactScripts = (dependencies && dependencies["react-scripts"]) || (devDependencies && devDependencies["react-scripts"])
+  if (!hasReactScripts) {
     return false;
   }
 
