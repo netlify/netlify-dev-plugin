@@ -54,7 +54,7 @@ netlify plugins:link .
 
 Now you're both ready to start testing netlify dev and to contribute to the project.
 
-### Netlify Dev usage
+## Netlify Dev usage
 
 ```bash
 USAGE
@@ -68,7 +68,7 @@ OPTIONS
   -l, --live                 Start a public live session
 
 DESCRIPTION
-  The dev command will run a local dev server with Netlify's proxy and redirect rules
+  The dev command will run a local dev server with Netlify's Edge Logic proxies and redirects, serverless functions, and addons
 
 EXAMPLES
   $ netlify dev
@@ -79,7 +79,45 @@ COMMANDS
   dev:exec  Exec command
 ```
 
-### Redirects
+## Project detection
+
+Netlify Dev will attempt to detect the SSG or build command that you are using, and run these on your behalf, while adding other development utilities.
+
+**Overriding the detectors**: The number of project types which Netlify Dev can detect is growing, but if yours is not yet supported automatically, you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
+
+```toml
+
+#sample dev block in the toml
+[dev]
+  command = "yarn start" # Command to start your dev server
+  port = 3000 # Port that the dev server will be listening on
+  publish = "dist" # If you use a _redirect file, provide the path to your static content folder
+```
+
+<details>
+<summary>
+<b>Explanation of detectors and ports in Netlify Dev</b>
+</summary>
+
+There will be a number of ports that you will encounter when using Netlify Dev, especially when running a static site generator like Gatsby which has its own dev server. All the port numbers can be a bit confusing, so here is a brief explainer.
+
+- If your SSG has a devserver on port 8000 for example, Netlify Dev needs to be told to proxy that port so it can merge it in with the rest of the local Netlify environment (say, running on port 8888), which is what you want to get the full Netlify Dev experience with Functions, Redirects, and so on.
+- If you're running a project we have a detector for, we hardcode those conventional ports so you don't have to supply it yourself.
+- However, sometimes you're using some other project (we welcome contributions for detectors!) or just have a custom port you want Netlify Dev to point to for some reason. This is when you go to the `netlify.toml` `[dev]` block to specify exactly what port we should listen to.
+
+As for which port to use while doing local development in Netlify Dev, always look for this box in your console output and use that:
+
+```bash
+   ┌──────────────────────────────────────────────────────────────┐
+   │                                                              │
+   │   [Netlify Dev] Server now ready on http://localhost:64939   │
+   │                                                              │
+   └──────────────────────────────────────────────────────────────┘
+```
+
+</details>
+
+## Redirects
 
 Netlify Dev has the ability emulate the [redirect capability](https://www.netlify.com/docs/redirects/) Netlify provide on the [ADN](https://netlify.com/features/adn) in your local environment. The same redirect rules which you configure to run on the edge, will also work in your local builds.
 
@@ -93,41 +131,7 @@ The order of precedence for applying redirect rules is:
 
 See the [Redirects Documentation](https://www.netlify.com/docs/redirects/) for more information on Netlify's redirect and proxying capabilities.
 
-#### Running the project and accessing redirects
-
-```bash
-# Build, serve and hot-reload changes
-$ netlify dev
-```
-
-### Project detection
-
-Netlify Dev will attempt to detect the SSG or build command that you are using, and run these on your behalf, while adding other development utilities.
-
-**Overriding the detectors**: The number of project types which Netlify Dev can detect is growing, but if yours is not yet supported automatically, you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
-
-```toml
-
-#sample dev block in the toml
-[dev]
-  command = "yarn start" # Command to start your dev server
-  port = 3000 # Port that the dev server will be listening on
-  publish = "dist" # Folder with the static content for _redirect file
-```
-
-**Explanation of detectors and ports in Netlify Dev**: There will be a number of ports that you will encounter when using Netlify Dev, especially when runnign a static site generator like Gatsby which has its own dev server. All the port numbers can be a bit confusing, so here is a brief explainer. If your SSG has a devserver on port 8000 for example, Netlify Dev needs to be told to proxy that port so it can merge it in with the rest of the local Netlify environment (say, running on port 8888), which is what you want to get the full Netlify Dev experience with Functions, Redirects, and so on. If you're running a project we have a detector for, we hardcode those conventional ports so you don't have to supply it yourself. However, sometimes you're using some other project (we welcome contributions for detectors!) or just have a custom port you want Netlify Dev to point to for some reason. This is when you go to the `netlify.toml` `[dev]` block to specify exactly what port we should listen to.
-
-As for which port to use while doing local development in Netlify Dev, always look for this box in your console output and use that:
-
-```bash
-   ┌──────────────────────────────────────────────────────────────┐
-   │                                                              │
-   │   [Netlify Dev] Server now ready on http://localhost:64939   │
-   │                                                              │
-   └──────────────────────────────────────────────────────────────┘
-```
-
-### Netlify Functions
+## Netlify Functions
 
 Netlify can also create serverless functions for you locally as part of Netlify Functions. The serverless functions can then be run by Netlify Dev in the same way that wold be when deployed to the cloud.
 
@@ -155,52 +159,48 @@ $ netlify functions:create --name hello-world # same
 $ netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware
 ```
 
-**Function Templates**
+**Writing your own Function Templates**
 
 Function templates can specify `addons` that they rely on as well as execute arbitrary code after installation in an `onComplete` hook, if a special `.netlify-function-template.js` file exists in the directory:
 
 ```js
 // .netlify-function-template.js
 module.exports = {
-  addons: ["fauna"],
+  addons: [
+    {
+      addonName: "fauna",
+      addonDidInstall: () => {} // post install function to run after installing addon, eg. for setting up schema
+    }
+  ],
   onComplete() {
     console.log(`custom-template function created from template!`);
   }
 };
 ```
 
-#### Executing Netlify Functions
+Instead of using our basic templates, you can use your own by passing it with a --url flag: `netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware`, specifying any addons and postinstall/complete steps as shown above.
 
-After creating serverless functions, Netlify Dev can serve them to you as part of your local build. This emulates the behaviour of Netlify Functions when deployed to Netlify.
+#### Function Builders, Function Builder Detection, and Relationship with `netlify-lambda`
 
-```bash
-# Build, serve and hot-reload changes
-$ netlify dev
-```
+**Why Function Builders**
 
-Each serverless function will be exposed on a URL corresponding to its path and file name.
+Notice that all the functions created and mentioned so far require no build step. This is intentional: we want to remain agnostic of build tooling and thereby create clear expectations: You give us a folder of functions, and we simply serve it (This is called [`zip-it-and-ship-it`](https://github.com/netlify/zip-it-and-ship-it)). If you want to build that folder from a separate source folder, that is entirely under your control. Use whatever tool you like.
 
-`./functions/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/hello-world`
+This can be helpful, for example, to use ES modules syntax (e.g. `import`/`export`) via webpack, babel transforms via `babel-cli` or `babel-loader`, or strict type-checking and transpilation with TypeScript's `tsc` or other webpack loaders.
 
-`./functions/my-api/hello-world.js` -> `http://localhost:{PORT}/.netlify/functions/my-api/hello-world`
+We'll call this category of tools **function builders**. In fact, we do maintain an open source function builder dedicated to the task of transforming serverless functions from source to destination via webpack, called [`netlify-lambda`](https://github.com/netlify/netlify-lambda).
 
-### Using Add-ons
+**Function Builder Detection**
 
-Add-ons are a way for Netlify users to extend the functionality of their Jamstack site/app.
+We don't expect everyone to use function builders, but we expect many will, and want to provide helpful defaults that "just work" for this. To do that, we use a similar detection concept to [project detectors](#Project-detection), and look for common function builder setups.
 
-[Add-on docs](https://www.netlify.com/docs/partner-add-ons/).
+With this feature, pre-Netlify Dev projects like https://github.com/netlify/create-react-app-lambda can immediately use the `netlify dev` command with no change to code. Currently, we only offer detection for scripts with `netlify-lambda build $SRCFOLDER`. More ideas are welcome.
 
-To try out an add-on with Netlify dev, run the `netlify addons:create` command:
+Netlify Dev will watch `netlify-lambda`'s source folder and rebuild whenever the source file changes, eliminating the need for `netlify-lambda serve` since we dont want a duplicate functions server.
 
-```bash
-netlify addons:create fauna
-```
+**Bring Your Own Function Builder**
 
-The above command will install the FaunaDB add-on and provision a noSQL database for your site to leverage. The FaunaDB add-on injects environment variables into your site's build process and the serverless functions.
-
-Or install this [one click example](https://github.com/netlify/fauna-one-click).
-
-After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory.
+We may offer detection for more function builders in future, and also let you specify function build commands in the `netlify.toml` `[dev]` block. Please share your usecase with us if you are likely to need this.
 
 ## Live Share
 
@@ -212,4 +212,22 @@ netlify dev --live
 
 You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
 
-> Note: there are currently known issues with ending the live session alongside your webdevserver. We are working on fixing it. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
+> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
+
+### Using Add-ons
+
+Add-ons are a way for Netlify users to extend the functionality of their Jamstack site/app.
+
+Check out [Add-on docs](https://www.netlify.com/docs/partner-add-ons/) here.
+
+To try out an add-on with Netlify dev, run the `netlify addons:create` command:
+
+```bash
+netlify addons:create fauna
+```
+
+The above command will install the FaunaDB add-on and provision a noSQL database for your site to leverage. The FaunaDB add-on injects environment variables into your site's build process and the serverless functions.
+
+Or install this [one click example](https://github.com/netlify/fauna-one-click).
+
+After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory. You can use `netlify addons:delete $ADDONNAME` to delete your addon instance.
