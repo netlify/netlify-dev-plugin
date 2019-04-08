@@ -184,9 +184,6 @@ class DevCommand extends Command {
     }
     process.env.NETLIFY_DEV = "true";
 
-    if (flags.cmd) {
-      flags = { command: flags.cmd, ...flags };
-    }
     let settings = await serverSettings(Object.assign(config.dev, flags));
 
     if (!(settings && settings.command)) {
@@ -279,7 +276,7 @@ DevCommand.examples = [
 DevCommand.strict = false;
 
 DevCommand.flags = {
-  cmd: flags.string({ char: "c", description: "command to run" }),
+  command: flags.string({ char: "c", description: "command to run" }),
   port: flags.integer({ char: "p", description: "port of netlify dev" }),
   dir: flags.integer({ char: "d", description: "dir with static files" }),
   functions: flags.string({
