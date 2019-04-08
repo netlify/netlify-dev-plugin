@@ -1,18 +1,15 @@
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
 
 module.exports = {
   name: "token-hider",
   description: "Token Hider: access APIs without exposing your API keys",
   async onComplete() {
     console.log(
-      `${NETLIFYDEV} ${chalk.yellow(
-        "token-hider"
-      )} function created from template!`
+      `${chalk.yellow("token-hider")} function created from template!`
     );
     if (!process.env.API_URL || !process.env.API_TOKEN) {
       console.log(
-        `${NETLIFYDEV} note this function requires ${chalk.yellow(
+        `note this function requires ${chalk.yellow(
           "API_URL"
         )} and ${chalk.yellow(
           "API_TOKEN"
@@ -28,7 +25,7 @@ module.exports = {
         // silent error, not important
       }
       console.log(
-        `${NETLIFYDEV} Set them at: https://app.netlify.com/sites/${
+        `Set them at: https://app.netlify.com/sites/${
           siteData.name
         }/settings/deploys#build-environment-variables (must have CD setup)`
       );

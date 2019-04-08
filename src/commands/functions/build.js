@@ -2,8 +2,7 @@ const fs = require("fs");
 const { flags } = require("@oclif/command");
 const Command = require("@netlify/cli-utils");
 const { zipFunctions } = require("@netlify/zip-it-and-ship-it");
-const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 class FunctionsBuildCommand extends Command {
   async run() {
@@ -15,7 +14,7 @@ class FunctionsBuildCommand extends Command {
 
     if (src === dst) {
       this.log(
-        `${NETLIFYDEV} Source and destination for function build can't be the same`
+        `${NETLIFYDEVERR} Source and destination for function build can't be the same`
       );
       process.exit(1);
     }
@@ -23,11 +22,11 @@ class FunctionsBuildCommand extends Command {
     if (!src || !dst) {
       if (!src)
         this.log(
-          `${NETLIFYDEV} Error: You must specify a source folder with a --src flag or a functionsSource field in your config`
+          `${NETLIFYDEVERR} Error: You must specify a source folder with a --src flag or a functionsSource field in your config`
         );
       if (!dst)
         this.log(
-          `${NETLIFYDEV} Error: You must specify a destination functions folder with a --functions flag or a functions field in your config`
+          `${NETLIFYDEVERR} Error: You must specify a destination functions folder with a --functions flag or a functions field in your config`
         );
       process.exit(1);
     }

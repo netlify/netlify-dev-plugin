@@ -2,7 +2,7 @@
 // bit of a hasty abstraction but recommended by oclif
 const { getAddons } = require("netlify/src/addons");
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../cli-logo");
 /**
  * inject environment variables from netlify addons and buildbot
  * into your local dev process.env

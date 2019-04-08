@@ -4,8 +4,7 @@ const os = require("os");
 const path = require("path");
 const execa = require("execa");
 const { fetchLatest, updateAvailable } = require("gh-release-fetch");
-const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
 
 async function createTunnel(siteId, netlifyApiToken, log) {
   await installTunnelClient(log);

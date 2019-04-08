@@ -1,6 +1,6 @@
 const { Command, flags } = require("@oclif/command");
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 class FunctionsUpdateCommand extends Command {
   async run() {
