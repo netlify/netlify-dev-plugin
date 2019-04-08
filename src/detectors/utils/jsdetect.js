@@ -9,8 +9,16 @@ let pkgJSON = null,
 
 /** hold package.json in a singleton so we dont do expensive parsing repeatedly */
 function getPkgJSON() {
-  if (pkgJSON) return pkgJSON;
-  else return JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
+  if (pkgJSON) {
+    return pkgJSON;
+  } else {
+    if (!existsSync("package.json"))
+      throw new Error(
+        "dont call this method unless you already checked for pkg json"
+      );
+    pkgJSON = JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
+    return pkgJSON;
+  }
 }
 function getYarnOrNPMCommand() {
   if (!yarnExists) {
