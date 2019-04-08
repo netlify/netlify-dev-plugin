@@ -68,7 +68,7 @@ USAGE
   $ netlify dev
 
 OPTIONS
-  -c, --cmd=cmd              command to run
+  -c, --command=command      command to run
   -f, --functions=functions  Specify a functions folder to serve
   -o, --offline              disables any features that require network access
   -p, --port=port            Specify port of netlify dev
