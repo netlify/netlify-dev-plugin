@@ -10,7 +10,7 @@ const Command = require("@netlify/cli-utils");
 const { getAddons } = require("netlify/src/addons");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 const boxen = require("boxen");
 const { createTunnel, connectTunnel } = require("../../live-tunnel");
 
@@ -135,7 +135,7 @@ function startDevServer(settings, log, error) {
     const StaticServer = require("static-server");
     if (!settings.dist) {
       log(
-        `${NETLIFYDEV} Unable to determine public folder for the dev server. \n Setup a netlify.toml file with a [dev] section to specify your dev server settings.`
+        `${NETLIFYDEVWARN} Unable to determine public folder for the dev server. \n Setup a netlify.toml file with a [dev] section to specify your dev server settings.`
       );
       process.exit(1);
     }
@@ -186,7 +186,7 @@ class DevCommand extends Command {
 
     if (!(settings && settings.command)) {
       this.log(
-        `${NETLIFYDEV} No dev server detected, using simple static server`
+        `${NETLIFYDEVWARN} No dev server detected, using simple static server`
       );
       const dist =
         (config.dev && config.dev.publish) ||

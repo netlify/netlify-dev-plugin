@@ -14,9 +14,7 @@ const { createAddon } = require("netlify/src/addons");
 const ora = require("ora");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
-const NETLIFYWARN = chalk.yellow.inverse("Warning");
-const NETLIFYERR = chalk.red.inverse("Error");
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 const templatesDir = path.resolve(__dirname, "../../functions-templates");
 
@@ -239,7 +237,7 @@ async function downloadFromURL(flags, args, functionsDir) {
     fs.lstatSync(fnFolder + ".js").isFile()
   ) {
     this.log(
-      `${NETLIFYDEV} ${NETLIFYWARN}: A single file version of the function ${name} already exists at ${fnFolder}.js. Terminating without further action.`
+      `${NETLIFYWARN}: A single file version of the function ${name} already exists at ${fnFolder}.js. Terminating without further action.`
     );
     process.exit(1);
   }
@@ -317,9 +315,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     try {
       await downloadFromURL.call(this, flags, args, functionsDir);
     } catch (err) {
-      console.error(
-        `${NETLIFYDEV} ${NETLIFYERR} Error downloading from URL: ` + flags.url
-      );
+      console.error(`$${NETLIFYERR} Error downloading from URL: ` + flags.url);
       console.error(err);
       process.exit(1);
     }
@@ -440,10 +436,7 @@ async function installAddons(addons = [], fnPath) {
             }
           })
           .catch(err => {
-            console.error(
-              `${NETLIFYDEV} ${NETLIFYERR} Error installing addon: `,
-              err
-            );
+            console.error(`${NETLIFYERR} Error installing addon: `, err);
           });
       });
       return Promise.all(arr);

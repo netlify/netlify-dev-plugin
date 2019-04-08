@@ -1,6 +1,6 @@
 const path = require("path");
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
 const inquirer = require("inquirer");
 const fs = require("fs");
 const detectors = fs
@@ -104,7 +104,7 @@ module.exports.serverSettings = async devConfig => {
       const regexp =
         devConfig.urlRegexp ||
         new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, "g");
-      settings.urlRegexp = assignLoudly(settings.urlRegexp);
+      settings.urlRegexp = assignLoudly(settings.urlRegexp, regexp);
     }
     settings.dist = assignLoudly(devConfig.publish, settings.dist);
   }

@@ -2,21 +2,19 @@ const execa = require("execa");
 const Command = require("@netlify/cli-utils");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
-const NETLIFYDEV = `[${chalk.cyan("Netlify Dev")}]`;
+const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 class ExecCommand extends Command {
   async run() {
     const { site, api } = this.netlify;
     if (site.id) {
-      console.log(
-        `${NETLIFYDEV} Checking your site's environment variables...`
-      );
+      this.log(`${NETLIFYDEV} Checking your site's environment variables...`); // just to show some visual response first
       const accessToken = api.accessToken;
       const { addEnvVariables } = require("../../utils/dev");
       await addEnvVariables(api, site, accessToken);
     } else {
-      console.log(
-        `${NETLIFYDEV} No Site ID detected. You probably forgot to run \`netlify link\` or \`netlify init\`. `
+      this.log(
+        `${NETLIFYDEVERR} No Site ID detected. You probably forgot to run \`netlify link\` or \`netlify init\`. `
       );
     }
     execa(this.argv[0], this.argv.slice(1), {
