@@ -33,9 +33,8 @@ module.exports = function() {
   }
 
   if (settings.npmScript) {
-    settings.build = () => {
+    settings.build = () =>
       execa(yarnExists ? "yarn" : "npm", ["run", settings.npmScript]);
-    };
     return settings;
   }
 };
