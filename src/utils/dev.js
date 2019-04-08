@@ -20,7 +20,18 @@ const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../cli-logo");
 async function addEnvVariables(api, site, accessToken) {
   /** from addons */
   const addonUrls = {};
-  const addons = await getAddons(site.id, accessToken);
+  const addons = await getAddons(site.id, accessToken).catch(err => {
+    console.error(err);
+    switch (err.status) {
+      default:
+        console.error(
+          `${NETLIFYDEVERR} Error retrieving addons data for site ${chalk.yellow(
+            site.id
+          )}. Double-check your login status with 'netlify status' or contact support with details of your error.`
+        );
+        process.exit();
+    }
+  });
   if (Array.isArray(addons)) {
     addons.forEach(addon => {
       addonUrls[addon.slug] = `${addon.config.site_url}/.netlify/${addon.slug}`;
@@ -36,7 +47,29 @@ async function addEnvVariables(api, site, accessToken) {
   }
 
   /** from web UI */
-  const apiSite = await api.getSite({ site_id: site.id });
+  const apiSite = await api.getSite({ site_id: site.id }).catch(err => {
+    console.error(err);
+    switch (err.status) {
+      case 401:
+        console.error(
+          `${NETLIFYDEVERR} Unauthorized error: This Site ID ${chalk.yellow(
+            site.id
+          )} does not belong to your account.`
+        );
+        console.error(
+          `${NETLIFYDEVERR} If you cloned someone else's code, try running 'npm unlink' and then 'npm init' or 'npm link'.`
+        );
+
+        process.exit();
+      default:
+        console.error(
+          `${NETLIFYDEVERR} Error retrieving site data for site ${chalk.yellow(
+            site.id
+          )}. Double-check your login status with 'netlify status' or contact support with details of your error.`
+        );
+        process.exit();
+    }
+  });
   // TODO: We should move the environment outside of build settings and possibly have a
   // `/api/v1/sites/:site_id/environment` endpoint for it that we can also gate access to
   // In the future and that we could make context dependend
