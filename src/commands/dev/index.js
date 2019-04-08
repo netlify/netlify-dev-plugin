@@ -182,7 +182,8 @@ class DevCommand extends Command {
     }
     process.env.NETLIFY_DEV = "true";
 
-    let settings = serverSettings(config.dev);
+    let settings = await serverSettings(config.dev);
+
     if (!(settings && settings.command)) {
       this.log(
         `${NETLIFYDEV} No dev server detected, using simple static server`

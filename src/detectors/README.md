@@ -11,9 +11,9 @@
     port: Number, // e.g. 8888
     proxyPort: Number, // e.g. 3000
     env: Object, // env variables, see examples
-    args: String, // e.g 'run develop', so that the combined command is 'npm run develop'
+    possibleArgsArrs: [[String]], // e.g [['run develop]], so that the combined command is 'npm run develop', but we allow for multiple
     urlRegexp: RegExp, // see examples
-    dist: String // e.g. 'dist' or 'build'
+    dist: String, // e.g. 'dist' or 'build'
 }
 ```
 

@@ -1,9 +1,16 @@
-const { existsSync } = require("fs");
+const {
+  hasRequiredDeps,
+  hasRequiredFiles,
+  getYarnOrNPM,
+  scanScripts
+} = require("./utils/jsdetect");
 
 module.exports = function() {
-  if (!existsSync(".eleventy.js")) {
-    return false;
-  }
+  // REQUIRED FILES
+  if (!hasRequiredFiles(["package.json", ".eleventy.js"])) return false;
+  // commented this out because we're not sure if we want to require it
+  // // REQUIRED DEPS
+  // if (!hasRequiredDeps(["react-scripts"])) return false;
 
   return {
     type: "eleventy",
@@ -11,7 +18,7 @@ module.exports = function() {
     proxyPort: 8080,
     env: { ...process.env },
     command: "npx",
-    args: ["eleventy", "--serve", "--watch"],
+    possibleArgsArrs: [["eleventy", "--serve", "--watch"]],
     urlRegexp: new RegExp(`(http://)([^:]+:)${8080}(/)?`, "g"),
     dist: "_site"
   };

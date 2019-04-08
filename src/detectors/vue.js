@@ -1,38 +1,30 @@
-const { existsSync, readFileSync } = require("fs");
+const {
+  hasRequiredDeps,
+  hasRequiredFiles,
+  getYarnOrNPM,
+  scanScripts
+} = require("./utils/jsdetect");
 
 module.exports = function() {
-  if (!existsSync("package.json")) {
-    return false;
-  }
+  // REQUIRED FILES
+  if (!hasRequiredFiles(["package.json"])) return false;
+  // REQUIRED DEPS
+  if (!hasRequiredDeps(["@vue/cli-service"])) return false;
 
-  const packageSettings = JSON.parse(
-    readFileSync("package.json", { encoding: "utf8" })
-  );
-  const { dependencies, scripts } = packageSettings;
-  if (!(dependencies && dependencies.vue)) {
-    return false;
-  }
+  /** everything below now assumes that we are within vue */
 
-  const npmCommand =
-    scripts &&
-    ((scripts.serve && "serve") ||
-      (scripts.start && "start") ||
-      (scripts.run && "run"));
+  const possibleArgsArrs = scanScripts({
+    preferredScriptsArr: ["serve", "start", "run"],
+    preferredCommand: "vue-cli-service serve"
+  });
 
-  if (!npmCommand) {
-    console.error("Couldn't determine the script to run. Use the -c flag.");
-    process.exit(1);
-  }
-
-  const yarnExists = existsSync("yarn.lock");
   return {
     type: "vue-cli",
-    command: yarnExists ? "yarn" : "npm",
+    command: getYarnOrNPM(),
     port: 8888,
     proxyPort: 8080,
     env: { ...process.env },
-    args:
-      yarnExists || npmCommand != "start" ? ["run", npmCommand] : [npmCommand],
+    possibleArgsArrs,
     urlRegexp: new RegExp(`(http://)([^:]+:)${8080}(/)?`, "g"),
     dist: "dist"
   };
