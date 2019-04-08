@@ -86,27 +86,48 @@ module.exports.serverSettings = async devConfig => {
   }
 
   /** everything below assumes we have settled on one detector */
+  const tellUser = settingsField => dV =>
+    console.log(
+      `${NETLIFYDEV} Overriding ${chalk.yellow(
+        settingsField
+      )} with setting derived from netlify.toml [dev] block: `,
+      dV
+    );
 
   if (devConfig) {
     settings = settings || {};
     if (devConfig.command) {
       settings.command = assignLoudly(
         devConfig.command.split(/\s/)[0],
-        settings.command
-      );
+        settings.command || null,
+        tellUser("command")
+      ); // if settings.command is empty, its bc no settings matched
       settings.args = assignLoudly(
         devConfig.command.split(/\s/).slice(1),
-        settings.command
-      );
+        settings.command || null,
+        tellUser("command")
+      ); // if settings.command is empty, its bc no settings matched
     }
     if (devConfig.port) {
-      settings.proxyPort = assignLoudly(devConfig.port, settings.proxyPort);
+      settings.proxyPort = assignLoudly(
+        devConfig.port,
+        settings.proxyPort || null,
+        tellUser("proxyPort")
+      ); // if settings.proxyPort is empty, its bc no settings matched
       const regexp =
         devConfig.urlRegexp ||
         new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, "g");
-      settings.urlRegexp = assignLoudly(settings.urlRegexp, regexp);
+      settings.urlRegexp = assignLoudly(
+        settings.urlRegexp,
+        regexp,
+        tellUser("urlRegexp")
+      );
     }
-    settings.dist = assignLoudly(devConfig.publish, settings.dist);
+    settings.dist = assignLoudly(
+      devConfig.publish,
+      settings.dist || null,
+      tellUser("dist")
+    ); // if settings.dist is empty, its bc no settings matched
   }
   return settings;
 };
@@ -115,11 +136,7 @@ module.exports.serverSettings = async devConfig => {
 function assignLoudly(
   optionalValue,
   defaultValue,
-  tellUser = dV =>
-    console.log(
-      `${NETLIFYDEV} Overriding ${settingsField} with setting derived from netlify.toml [dev] block: `,
-      dV
-    )
+  tellUser = dV => console.log(`No value specified, using fallback of `, dV)
 ) {
   if (defaultValue === undefined) throw new Error("must have a defaultValue");
   if (defaultValue !== optionalValue && optionalValue === undefined) {
