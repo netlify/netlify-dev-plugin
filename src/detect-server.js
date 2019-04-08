@@ -39,7 +39,7 @@ module.exports.serverSettings = async devConfig => {
     const scriptInquirerOptions = formatSettingsArrForInquirer(settingsArr);
     const { chosenSetting } = await inquirer.prompt({
       name: "chosenSetting",
-      message: `${NETLIFYDEV} Multiple matching scripts found`,
+      message: `Multiple possible start commands found`,
       type: "autocomplete",
       source: async function(_, input) {
         if (!input || input === "") {
@@ -72,7 +72,9 @@ module.exports.serverSettings = async devConfig => {
       settingsArr.forEach(setting => {
         setting.possibleArgsArrs.forEach(args => {
           ans.push({
-            name: `[${setting.type}] ` + args.join(" "),
+            name: `[${chalk.yellow(setting.type)}] ${
+              setting.command
+            } ${args.join(" ")}`,
             value: { ...setting, args },
             short: setting.type + "-" + args.join(" ")
           });

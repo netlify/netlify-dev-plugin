@@ -1,7 +1,7 @@
 const {
   hasRequiredDeps,
   hasRequiredFiles,
-  getYarnOrNPM,
+  getYarnOrNPMCommand,
   scanScripts
 } = require("./utils/jsdetect");
 module.exports = function() {
@@ -17,9 +17,13 @@ module.exports = function() {
     preferredCommand: "gatsby develop"
   });
 
+  if (!possibleArgsArrs.length) {
+    // ofer to run it when the user doesnt have any scripts setup! 🤯
+    possibleArgsArrs.push(["gatsby", "develop"]);
+  }
   return {
     type: "gatsby",
-    command: getYarnOrNPM(),
+    command: getYarnOrNPMCommand(),
     port: 8888,
     proxyPort: 8000,
     env: { ...process.env },

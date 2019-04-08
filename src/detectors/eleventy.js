@@ -1,7 +1,6 @@
 const {
   hasRequiredDeps,
   hasRequiredFiles,
-  getYarnOrNPM,
   scanScripts
 } = require("./utils/jsdetect");
 
@@ -10,7 +9,7 @@ module.exports = function() {
   if (!hasRequiredFiles(["package.json", ".eleventy.js"])) return false;
   // commented this out because we're not sure if we want to require it
   // // REQUIRED DEPS
-  // if (!hasRequiredDeps(["react-scripts"])) return false;
+  // if (!hasRequiredDeps(["@11y/eleventy"])) return false;
 
   return {
     type: "eleventy",

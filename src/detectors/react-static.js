@@ -1,7 +1,7 @@
 const {
   hasRequiredDeps,
   hasRequiredFiles,
-  getYarnOrNPM,
+  getYarnOrNPMCommand,
   scanScripts
 } = require("./utils/jsdetect");
 module.exports = function() {
@@ -17,10 +17,14 @@ module.exports = function() {
     preferredCommand: "react-static start"
   });
 
+  if (!possibleArgsArrs.length) {
+    // ofer to run it when the user doesnt have any scripts setup! 🤯
+    possibleArgsArrs.push(["react-static", "start"]);
+  }
   const yarnExists = existsSync("yarn.lock");
   return {
     type: "react-static",
-    command: getYarnOrNPM(),
+    command: getYarnOrNPMCommand(),
     port: 8888,
     proxyPort: 3000,
     env: { ...process.env },

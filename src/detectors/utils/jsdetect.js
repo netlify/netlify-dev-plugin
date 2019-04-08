@@ -32,9 +32,9 @@ function hasRequiredFiles(filenameArr) {
  * other utilites, not requirements related
  */
 
-function getYarnOrNPM() {
+function getYarnOrNPMCommand() {
   const yarnExists = existsSync("yarn.lock");
-  return yarnExists ? "yarn" : "npm";
+  return yarnExists ? "yarn" : "npm run";
 }
 
 // preferredScriptsArr is in decreasing order of preference
@@ -76,6 +76,6 @@ function scanScripts({ preferredScriptsArr, preferredCommand }) {
 module.exports = {
   hasRequiredDeps,
   hasRequiredFiles,
-  getYarnOrNPM,
+  getYarnOrNPMCommand,
   scanScripts
 };

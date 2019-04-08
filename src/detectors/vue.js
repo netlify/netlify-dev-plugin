@@ -1,7 +1,7 @@
 const {
   hasRequiredDeps,
   hasRequiredFiles,
-  getYarnOrNPM,
+  getYarnOrNPMCommand,
   scanScripts
 } = require("./utils/jsdetect");
 
@@ -18,9 +18,14 @@ module.exports = function() {
     preferredCommand: "vue-cli-service serve"
   });
 
+  if (!possibleArgsArrs.length) {
+    // ofer to run it when the user doesnt have any scripts setup! 🤯
+    possibleArgsArrs.push(["vue-cli-service", "serve"]);
+  }
+
   return {
     type: "vue-cli",
-    command: getYarnOrNPM(),
+    command: getYarnOrNPMCommand(),
     port: 8888,
     proxyPort: 8080,
     env: { ...process.env },
