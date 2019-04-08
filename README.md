@@ -22,6 +22,10 @@ This is how we pull down your build environment variables and manage your addons
 - `netlify dev:exec <command>` runs a shell command within the netlify dev environment
 - `netlify functions:create` bootstrap a new function
 
+<details>
+<summary>
+<b>Pro tip: Aliasing commands</b>
+</summary>
 As these commands are expected to be frequently used, it may be helpful to define aliases in your terminal (Mac: [bash](https://jonsuh.com/blog/bash-command-line-shortcuts/), [zsh](https://askubuntu.com/questions/758496/how-to-make-a-permanent-alias-in-oh-my-zsh), Windows: [doskey](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt), [registry](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt)) to your personal preference. For example:
 
 ```bash
@@ -32,6 +36,20 @@ alias ndl="netlify dev --live"
 alias nfc="netlify functions:create"
 alias ndx="netlify dev:exec "
 ```
+
+</details>
+
+## Live Share
+
+To share your ongoing dev session with a coworker, just run Netlify Dev with a `--live` flag:
+
+```bash
+netlify dev --live
+```
+
+You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
+
+> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
 
 ## Using the beta
 
@@ -137,13 +155,16 @@ Netlify can also create serverless functions for you locally as part of Netlify 
 
 A number of function templates are available to get you started, and you can add your own utility functions to suit your own project development needs.
 
-Create a new function
+**Create a new function**
 
 ```bash
 $ netlify functions:create
 ```
 
-More detailed usage examples:
+<details>
+<summary>
+<b>More detailed usage examples</b>
+</summary>
 
 ```bash
 # Create a new function from one of the
@@ -180,11 +201,15 @@ module.exports = {
 
 Instead of using our basic templates, you can use your own by passing it with a --url flag: `netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware`, specifying any addons and postinstall/complete steps as shown above.
 
-#### Function Builders, Function Builder Detection, and Relationship with `netlify-lambda`
+</details>
+
+### Function Builders, Function Builder Detection, and Relationship with `netlify-lambda`
+
+**Existing users of `netlify-lambda` should have no change to their workflow by switching to `netlify dev`.** One immediate benefit is no need for [proxying](https://github.com/netlify/netlify-lambda#proxying-for-local-development) since Netlify Dev does that for you.
 
 **Why Function Builders**
 
-Notice that all the functions created and mentioned so far require no build step. This is intentional: we want to remain agnostic of build tooling and thereby create clear expectations: You give us a folder of functions, and we simply serve it (This is called [`zip-it-and-ship-it`](https://github.com/netlify/zip-it-and-ship-it)). If you want to build that folder from a separate source folder, that is entirely under your control. Use whatever tool you like.
+Notice that all the functions created by `netlify functions:create` require no build step. This is intentional: we want to remain agnostic of build tooling and thereby create clear expectations: You give us a folder of functions, and we simply serve it (This is called [`zip-it-and-ship-it`](https://github.com/netlify/zip-it-and-ship-it)). If you want to build that folder from a separate source folder, that is entirely under your control. Use whatever tool you like.
 
 This can be helpful, for example, to use ES modules syntax (e.g. `import`/`export`) via webpack, babel transforms via `babel-cli` or `babel-loader`, or strict type-checking and transpilation with TypeScript's `tsc` or other webpack loaders.
 
@@ -201,18 +226,6 @@ Netlify Dev will watch `netlify-lambda`'s source folder and rebuild whenever the
 **Bring Your Own Function Builder**
 
 We may offer detection for more function builders in future, and also let you specify function build commands in the `netlify.toml` `[dev]` block. Please share your usecase with us if you are likely to need this.
-
-## Live Share
-
-To share your ongoing dev session with a coworker, just run Netlify Dev with a `--live` flag:
-
-```bash
-netlify dev --live
-```
-
-You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
-
-> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
 
 ### Using Add-ons
 
@@ -231,3 +244,5 @@ The above command will install the FaunaDB add-on and provision a noSQL database
 Or install this [one click example](https://github.com/netlify/fauna-one-click).
 
 After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory. You can use `netlify addons:delete $ADDONNAME` to delete your addon instance.
+
+For now, it is important to include instructions to create addons for each member of your team, as there is no way to specify addons inside of `netlify.toml`. We are working on this.
