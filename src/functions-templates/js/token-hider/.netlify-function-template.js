@@ -10,26 +10,28 @@ module.exports = {
         "token-hider"
       )} function created from template!`
     );
-    console.log(
-      `${NETLIFYDEV} note this function requires ${chalk.yellow(
-        "API_URL"
-      )} and ${chalk.yellow(
-        "API_TOKEN"
-      )} build environment variables set in your Netlify Site.`
-    );
+    if (!process.env.API_URL || !process.env.API_TOKEN) {
+      console.log(
+        `${NETLIFYDEV} note this function requires ${chalk.yellow(
+          "API_URL"
+        )} and ${chalk.yellow(
+          "API_TOKEN"
+        )} build environment variables set in your Netlify Site.`
+      );
 
-    let siteData = { name: "YOURSITENAMEHERE" };
-    try {
-      siteData = await this.netlify.api.getSite({
-        siteId: this.netlify.site.id
-      });
-    } catch (e) {
-      // silent error, not important
+      let siteData = { name: "YOURSITENAMEHERE" };
+      try {
+        siteData = await this.netlify.api.getSite({
+          siteId: this.netlify.site.id
+        });
+      } catch (e) {
+        // silent error, not important
+      }
+      console.log(
+        `${NETLIFYDEV} Set them at: https://app.netlify.com/sites/${
+          siteData.name
+        }/settings/deploys#build-environment-variables (must have CD setup)`
+      );
     }
-    console.log(
-      `${NETLIFYDEV} Set them at: https://app.netlify.com/sites/${
-        siteData.name
-      }/settings/deploys#build-environment-variables (must have CD setup)`
-    );
   }
 };

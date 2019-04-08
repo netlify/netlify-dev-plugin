@@ -10,26 +10,28 @@ module.exports = {
         "url-shortener"
       )} function created from template!`
     );
-    console.log(
-      `${NETLIFYDEV} note this function requires ${chalk.yellow(
-        "ROUTES_FORM_ID"
-      )} and ${chalk.yellow(
-        "API_AUTH"
-      )} build environment variables set in your Netlify Site.`
-    );
+    if (!process.env.ROUTES_FORM_ID || !process.env.API_AUTH) {
+      console.log(
+        `${NETLIFYDEV} note this function requires ${chalk.yellow(
+          "ROUTES_FORM_ID"
+        )} and ${chalk.yellow(
+          "API_AUTH"
+        )} build environment variables set in your Netlify Site.`
+      );
 
-    let siteData = { name: "YOURSITENAMEHERE" };
-    try {
-      siteData = await this.netlify.api.getSite({
-        siteId: this.netlify.site.id
-      });
-    } catch (e) {
-      // silent error, not important
+      let siteData = { name: "YOURSITENAMEHERE" };
+      try {
+        siteData = await this.netlify.api.getSite({
+          siteId: this.netlify.site.id
+        });
+      } catch (e) {
+        // silent error, not important
+      }
+      console.log(
+        `${NETLIFYDEV} Set them at: https://app.netlify.com/sites/${
+          siteData.name
+        }/settings/deploys#build-environment-variables (must have CD setup)`
+      );
     }
-    console.log(
-      `${NETLIFYDEV} Set them at: https://app.netlify.com/sites/${
-        siteData.name
-      }/settings/deploys#build-environment-variables (must have CD setup)`
-    );
   }
 };

@@ -5,6 +5,7 @@ const { flags } = require("@oclif/command");
 const Command = require("@netlify/cli-utils");
 const inquirer = require("inquirer");
 const { readRepoURL, validateRepoURL } = require("../../utils/readRepoURL");
+const { addEnvVariables } = require("../../utils/dev");
 const { createSiteAddon } = require("../../utils/addons");
 const http = require("http");
 const fetch = require("node-fetch");
@@ -278,7 +279,14 @@ async function downloadFromURL(flags, args, functionsDir) {
     const { onComplete, addons = [] } = require(fnTemplateFile);
 
     await installAddons.call(this, addons, path.resolve(fnFolder));
-    if (onComplete) await onComplete.call(this);
+    if (onComplete) {
+      await addEnvVariables(
+        this.netlify.api,
+        this.netlify.site,
+        this.netlify.api.accessToken
+      );
+      await onComplete.call(this);
+    }
     fs.unlinkSync(fnTemplateFile); // delete
   }
 }
@@ -375,7 +383,14 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
       }
 
       installAddons.call(this, addons, path.resolve(functionPath));
-      if (onComplete) await onComplete.call(this); // do whatever the template wants to do after it is scaffolded
+      if (onComplete) {
+        await addEnvVariables(
+          this.netlify.api,
+          this.netlify.site,
+          this.netlify.api.accessToken
+        );
+        await onComplete.call(this);
+      }
     });
   }
 }
