@@ -4,11 +4,28 @@
  *
  */
 const { existsSync, readFileSync } = require("fs");
+let pkgJSON = null,
+  yarnExists = false;
+
+/** hold package.json in a singleton so we dont do expensive parsing repeatedly */
+function getPkgJSON() {
+  if (pkgJSON) return pkgJSON;
+  else return JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
+}
+function getYarnOrNPMCommand() {
+  if (!yarnExists) {
+    yarnExists = existsSync("yarn.lock") ? "yes" : "no";
+  }
+  return yarnExists === "yes" ? "yarn" : "npm run";
+}
+
+/**
+ * real utiltiies are down here
+ *
+ */
 
 function hasRequiredDeps(requiredDepArray) {
-  const { dependencies, devDependencies } = JSON.parse(
-    readFileSync("package.json", { encoding: "utf8" })
-  );
+  const { dependencies, devDependencies } = getPkgJSON();
   for (let depName of requiredDepArray) {
     const hasItInDeps = dependencies && dependencies[depName];
     const hasItInDevDeps = devDependencies && devDependencies[depName];
@@ -27,21 +44,9 @@ function hasRequiredFiles(filenameArr) {
   return true;
 }
 
-/**
- *
- * other utilites, not requirements related
- */
-
-function getYarnOrNPMCommand() {
-  const yarnExists = existsSync("yarn.lock");
-  return yarnExists ? "yarn" : "npm run";
-}
-
 // preferredScriptsArr is in decreasing order of preference
 function scanScripts({ preferredScriptsArr, preferredCommand }) {
-  const { scripts } = JSON.parse(
-    readFileSync("package.json", { encoding: "utf8" })
-  );
+  const { scripts } = getPkgJSON();
 
   /**
    *
@@ -54,6 +59,7 @@ function scanScripts({ preferredScriptsArr, preferredCommand }) {
    *
    *  */
   // this is very simplistic logic, we can offer far more intelligent logic later
+  // eg make a dependency tree of npm scripts and offer the parentest node first
   let possibleArgsArrs = preferredScriptsArr
     .filter(s => Object.keys(scripts).includes(s))
     .filter(s => !scripts[s].includes("netlify dev")) // prevent netlify dev calling netlify dev
@@ -64,11 +70,6 @@ function scanScripts({ preferredScriptsArr, preferredCommand }) {
     .forEach(([k, v]) => {
       if (v.includes(preferredCommand)) possibleArgsArrs.push([k]);
     });
-
-  // // for example.. in your detector you
-  // // could allow for running dev server
-  // // even if there's no script setup for it
-  // possibleArgsArrs.push(["react-scripts", "start"]);
 
   return possibleArgsArrs;
 }
