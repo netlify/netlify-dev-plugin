@@ -26,6 +26,7 @@ This is how we pull down your build environment variables and manage your addons
 <summary>
 <b>Pro tip: Aliasing commands</b>
 </summary>
+
 As these commands are expected to be frequently used, it may be helpful to define aliases in your terminal (Mac: [bash](https://jonsuh.com/blog/bash-command-line-shortcuts/), [zsh](https://askubuntu.com/questions/758496/how-to-make-a-permanent-alias-in-oh-my-zsh), Windows: [doskey](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt), [registry](https://stackoverflow.com/questions/20530996/aliases-in-windows-command-prompt)) to your personal preference. For example:
 
 ```bash
@@ -38,18 +39,6 @@ alias ndx="netlify dev:exec "
 ```
 
 </details>
-
-## Live Share
-
-To share your ongoing dev session with a coworker, just run Netlify Dev with a `--live` flag:
-
-```bash
-netlify dev --live
-```
-
-You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
-
-> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
 
 ## Using the beta
 
@@ -97,14 +86,25 @@ COMMANDS
   dev:exec  Exec command
 ```
 
+## Live Share
+
+To share your ongoing dev session with a coworker, just run Netlify Dev with a `--live` flag:
+
+```bash
+netlify dev --live
+```
+
+You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
+
+> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
+
 ## Project detection
 
-Netlify Dev will attempt to detect the SSG or build command that you are using, and run these on your behalf, while adding other development utilities.
+Netlify Dev will attempt to detect the SSG or build command that you are using, and run these on your behalf, while adding other development utilities. If you have a JavaScript project, it looks for the best `package.json` script to run for you, using simple heuristics, so you can use the full flexibility of npm scripts. We may add more intelligence to this in future.
 
-**Overriding the detectors**: The number of project types which Netlify Dev can detect is growing, but if yours is not yet supported automatically, you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
+**Overriding the detectors**: The number of [project types which Netlify Dev can detect](https://github.com/netlify/netlify-dev-plugin/tree/master/src/detectors) is growing, but if yours is not yet supported (contributions welcome!), you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
 
 ```toml
-
 #sample dev block in the toml
 [dev]
   command = "yarn start" # Command to start your dev server
@@ -114,13 +114,13 @@ Netlify Dev will attempt to detect the SSG or build command that you are using, 
 
 <details>
 <summary>
-<b>Explanation of detectors and ports in Netlify Dev</b>
+<b>Explanation of ports in Netlify Dev</b>
 </summary>
 
 There will be a number of ports that you will encounter when using Netlify Dev, especially when running a static site generator like Gatsby which has its own dev server. All the port numbers can be a bit confusing, so here is a brief explainer.
 
 - If your SSG has a devserver on port 8000 for example, Netlify Dev needs to be told to proxy that port so it can merge it in with the rest of the local Netlify environment (say, running on port 8888), which is what you want to get the full Netlify Dev experience with Functions, Redirects, and so on.
-- If you're running a project we have a detector for, we hardcode those conventional ports so you don't have to supply it yourself.
+- If you're running a project we have a detector for, we hardcode those conventional ports so you don't have to supply it yourself. If we have multiple detectors that match, we'll ask you to choose.
 - However, sometimes you're using some other project (we welcome contributions for detectors!) or just have a custom port you want Netlify Dev to point to for some reason. This is when you go to the `netlify.toml` `[dev]` block to specify exactly what port we should listen to.
 
 As for which port to use while doing local development in Netlify Dev, always look for this box in your console output and use that:
