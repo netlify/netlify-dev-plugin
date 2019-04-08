@@ -1,55 +1,34 @@
-const { existsSync, readFileSync } = require("fs");
-
+const {
+  hasRequiredDeps,
+  hasRequiredFiles,
+  getYarnOrNPMCommand,
+  scanScripts
+} = require("./utils/jsdetect");
 module.exports = function() {
-  if (!existsSync("static.config.js") || !existsSync("package.json")) {
-    return false;
-  }
+  // REQUIRED FILES
+  if (!hasRequiredFiles(["package.json", "static.config.js"])) return false;
+  // REQUIRED DEPS
+  if (!hasRequiredDeps(["react-static"])) return false;
 
-  const packageSettings = JSON.parse(
-    readFileSync("package.json", { encoding: "utf8" })
-  );
-  const { dependencies, scripts } = packageSettings;
-  if (!(dependencies && dependencies["react-static"])) {
-    return false;
-  }
+  /** everything below now assumes that we are within react-static */
 
-  const npmCommand =
-    scripts &&
-    ((scripts.start && "start") ||
-      (scripts.develop && "develop") ||
-      (scripts.dev && "dev"));
-  if (!npmCommand) {
-    if (!scripts) {
-      console.error(
-        "Couldn't determine the package.json script to run for this Gatsby project. Use the --command flag."
-      );
-      process.exit(1);
-    }
-    // search all the scripts for something that starts with 'react-static start'
-    Object.entries(scripts).forEach(([k, v]) => {
-      if (v.startsWith("react-static start")) {
-        npmCommand = k;
-      }
-    });
-    if (!npmCommand) {
-      console.error(
-        "Couldn't determine the package.json script to run for this React-Static project. Use the --command flag."
-      );
-      process.exit(1);
-    } else {
-      console.log("using npm script starting with react-static start: ", k);
-    }
-  }
+  const possibleArgsArrs = scanScripts({
+    preferredScriptsArr: ["start", "develop", "dev"],
+    preferredCommand: "react-static start"
+  });
 
+  if (!possibleArgsArrs.length) {
+    // ofer to run it when the user doesnt have any scripts setup! 🤯
+    possibleArgsArrs.push(["react-static", "start"]);
+  }
   const yarnExists = existsSync("yarn.lock");
   return {
     type: "react-static",
-    command: yarnExists ? "yarn" : "npm",
+    command: getYarnOrNPMCommand(),
     port: 8888,
     proxyPort: 3000,
     env: { ...process.env },
-    args:
-      yarnExists || npmCommand != "start" ? ["run", npmCommand] : [npmCommand],
+    possibleArgsArrs,
     urlRegexp: new RegExp(`(http://)([^:]+:)${3000}(/)?`, "g"),
     dist: "dist"
   };

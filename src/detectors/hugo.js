@@ -11,7 +11,7 @@ module.exports = function() {
     proxyPort: 1313,
     env: { ...process.env },
     command: "hugo",
-    args: ["server", "-w"],
+    possibleArgsArrs: [["server", "-w"]],
     urlRegexp: new RegExp(`(http://)([^:]+:)${1313}(/)?`, "g"),
     dist: "public"
   };

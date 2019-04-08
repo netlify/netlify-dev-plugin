@@ -1,38 +1,38 @@
-const { existsSync, readFileSync } = require("fs");
+const {
+  hasRequiredDeps,
+  hasRequiredFiles,
+  getYarnOrNPMCommand,
+  scanScripts
+} = require("./utils/jsdetect");
 
+/**
+ * detection logic - artificial intelligence!
+ * */
 module.exports = function() {
-  if (!existsSync("package.json")) {
-    return false;
+  // REQUIRED FILES
+  if (!hasRequiredFiles(["package.json"])) return false;
+  // REQUIRED DEPS
+  if (!hasRequiredDeps(["react-scripts"])) return false;
+
+  /** everything below now assumes that we are within create-react-app */
+
+  const possibleArgsArrs = scanScripts({
+    preferredScriptsArr: ["start", "serve", "run"],
+    preferredCommand: "react-scripts start"
+  });
+
+  if (!possibleArgsArrs.length) {
+    // ofer to run it when the user doesnt have any scripts setup! 🤯
+    possibleArgsArrs.push(["react-scripts", "start"]);
   }
 
-  const packageSettings = JSON.parse(
-    readFileSync("package.json", { encoding: "utf8" })
-  );
-  const { dependencies, scripts } = packageSettings;
-  if (!(dependencies && dependencies["react-scripts"])) {
-    return false;
-  }
-
-  const npmCommand =
-    scripts &&
-    ((scripts.start && "start") ||
-      (scripts.serve && "serve") ||
-      (scripts.run && "run"));
-
-  if (!npmCommand) {
-    console.error("Couldn't determine the script to run. Use the -c flag.");
-    process.exit(1);
-  }
-
-  const yarnExists = existsSync("yarn.lock");
   return {
     type: "create-react-app",
-    command: yarnExists ? "yarn" : "npm",
-    port: 8888,
-    proxyPort: 3000,
+    command: getYarnOrNPMCommand(),
+    port: 8888, // the port that the Netlify Dev User will use
+    proxyPort: 3000, // the port that create-react-app normally outputs
     env: { ...process.env, BROWSER: "none", PORT: 3000 },
-    args:
-      yarnExists || npmCommand != "start" ? ["run", npmCommand] : [npmCommand],
+    possibleArgsArrs,
     urlRegexp: new RegExp(`(http://)([^:]+:)${3000}(/)?`, "g"),
     dist: "dist"
   };
