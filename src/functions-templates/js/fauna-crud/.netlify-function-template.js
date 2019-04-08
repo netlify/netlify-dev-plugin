@@ -12,8 +12,5 @@ module.exports = {
         });
       }
     }
-  ],
-  onComplete() {
-    // console.log(`fauna-crud function created from template!`);
-  }
+  ]
 };

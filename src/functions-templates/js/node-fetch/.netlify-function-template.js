@@ -1,8 +1,5 @@
 module.exports = {
   name: "node-fetch",
   description:
-    "Fetch function: uses node-fetch to hit an external API without CORS issues",
-  onComplete() {
-    // console.log(`node-fetch function created from template!`)
-  }
+    "Fetch function: uses node-fetch to hit an external API without CORS issues"
 };

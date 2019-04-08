@@ -1,7 +1,4 @@
 module.exports = {
   name: "send-email",
-  description: "Send Email: Send email with no STMP server via 'sendmail' pkg",
-  async onComplete() {
-    // your message here
-  }
+  description: "Send Email: Send email with no STMP server via 'sendmail' pkg"
 };
