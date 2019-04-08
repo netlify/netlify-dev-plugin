@@ -20,11 +20,12 @@ module.exports.serverSettings = async devConfig => {
     settings = settingsArr[0];
     settings.args = settings.possibleArgsArrs[0]; // just pick the first one
     if (!settings.args) {
-      console.error(
-        "empty args assigned, this is an internal Netlify Dev bug, please report your settings and scripts so we can improve"
-      );
       const { scripts } = JSON.parse(
         fs.readFileSync("package.json", { encoding: "utf8" })
+      );
+      console.error(
+        "empty args assigned, this is an internal Netlify Dev bug, please report your settings and scripts so we can improve",
+        { scripts, settings }
       );
       process.exit(1);
     }

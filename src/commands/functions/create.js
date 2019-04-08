@@ -278,7 +278,7 @@ async function downloadFromURL(flags, args, functionsDir) {
     const { onComplete, addons = [] } = require(fnTemplateFile);
 
     await installAddons.call(this, addons, path.resolve(fnFolder));
-    if (onComplete) onComplete();
+    if (onComplete) await onComplete.call(this);
     fs.unlinkSync(fnTemplateFile); // delete
   }
 }
@@ -293,7 +293,7 @@ async function installDeps(functionPath) {
 
 // no --url flag specified, pick from a provided template
 async function scaffoldFromTemplate(flags, args, functionsDir) {
-  const chosentemplate = await pickTemplate(); // pull the rest of the metadata from the template
+  const chosentemplate = await pickTemplate.call(this); // pull the rest of the metadata from the template
   if (chosentemplate === "url") {
     const { chosenurl } = await inquirer.prompt([
       {
@@ -375,7 +375,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
       }
 
       installAddons.call(this, addons, path.resolve(functionPath));
-      if (onComplete) onComplete(); // do whatever the template wants to do after it is scaffolded
+      if (onComplete) await onComplete.call(this); // do whatever the template wants to do after it is scaffolded
     });
   }
 }
