@@ -91,12 +91,12 @@ module.exports.serverSettings = async devConfig => {
     settings = settings || {};
     if (devConfig.command) {
       settings.command = assignLoudly(
-        devConfig.command,
-        settings.command.split(/\s/)[0]
+        devConfig.command.split(/\s/)[0],
+        settings.command
       );
       settings.args = assignLoudly(
-        devConfig.command,
-        settings.command.split(/\s/).slice(1)
+        devConfig.command.split(/\s/).slice(1),
+        settings.command
       );
     }
     if (devConfig.port) {
