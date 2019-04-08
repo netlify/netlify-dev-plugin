@@ -247,7 +247,11 @@ class DevCommand extends Command {
       live: flags.live || false
     });
 
-    const banner = chalk.bold(`${NETLIFYDEV} Server now ready on ${url}`);
+    // boxen doesnt support text wrapping yet https://github.com/sindresorhus/boxen/issues/16
+    const banner = require("wrap-ansi")(
+      chalk.bold(`${NETLIFYDEV} Server now ready on ${url}`),
+      70
+    );
     this.log(
       boxen(banner, {
         padding: 1,

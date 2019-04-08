@@ -1,5 +1,4 @@
 const { Command, flags } = require("@oclif/command");
-const chalk = require("chalk");
 const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 class FunctionsServeCommand extends Command {

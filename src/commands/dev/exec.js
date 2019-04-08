@@ -1,7 +1,6 @@
 const execa = require("execa");
 const Command = require("@netlify/cli-utils");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
-const chalk = require("chalk");
 const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 class ExecCommand extends Command {

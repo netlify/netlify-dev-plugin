@@ -2,7 +2,6 @@ const fs = require("fs");
 const { flags } = require("@oclif/command");
 const Command = require("@netlify/cli-utils");
 const { zipFunctions } = require("@netlify/zip-it-and-ship-it");
-const chalk = require("chalk");
 const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
 
 class FunctionsBuildCommand extends Command {
