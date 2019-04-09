@@ -1,7 +1,7 @@
 const execa = require("execa");
 module.exports = {
   name: "fauna-graphql",
-  description: "GraphQL function using Fauna DB [Public Beta]",
+  description: "GraphQL Backend using Fauna DB",
   addons: [
     {
       addonName: "fauna",

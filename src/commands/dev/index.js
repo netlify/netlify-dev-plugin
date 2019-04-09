@@ -146,7 +146,7 @@ function startDevServer(settings, log, error) {
     });
 
     server.start(function() {
-      log(`${NETLIFYDEV} Server listening to`, settings.proxyPort);
+      log(`\n${NETLIFYDEV} Server listening to`, settings.proxyPort);
     });
     return;
   }

@@ -26,7 +26,7 @@ exports.handler = function(event, context, cb) {
 
   /** standard creation of apollo-server executable schema */
   const link = createHttpLink({
-    uri: "https://graphql.faunadb.com/graphql", // modify as you see fit
+    uri: "https://graphql.fauna.com/graphql", // modify as you see fit
     fetch,
     headers
   });

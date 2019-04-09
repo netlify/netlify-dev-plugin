@@ -15,7 +15,7 @@ function createFaunaGraphQL() {
     .toString(); // name of your schema file
 
   var options = {
-    url: "https://graphql.faunadb.com/import",
+    url: "https://graphql.fauna.com/import",
     method: "POST",
     body: dataString,
     auth: {
