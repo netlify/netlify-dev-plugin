@@ -154,16 +154,16 @@ function startDevServer(settings, log, error) {
     server.start(function() {
       log(`${NETLIFYDEV} Server listening to`, settings.proxyPort);
     });
-  } else {
-    log(`${NETLIFYDEV} Starting Netlify Dev with ${settings.type}`);
-    const ps = execa(settings.command, settings.args, {
-      env: settings.env,
-      stdio: "inherit"
-    });
-    ps.on("close", code => process.exit(code));
-    ps.on("SIGINT", process.exit);
-    ps.on("SIGTERM", process.exit);
+    return;
   }
+  log(`${NETLIFYDEV} Starting Netlify Dev with ${settings.type}`);
+  const ps = execa(settings.command, settings.args, {
+    env: settings.env,
+    stdio: "inherit"
+  });
+  ps.on("close", code => process.exit(code));
+  ps.on("SIGINT", process.exit);
+  ps.on("SIGTERM", process.exit);
 }
 
 class DevCommand extends Command {
@@ -202,19 +202,6 @@ class DevCommand extends Command {
     }
 
     let url;
-    if (flags.live) {
-      const liveSession = await createTunnel(site.id, accessToken, this.log);
-      url = liveSession.session_url;
-      process.env.BASE_URL = url;
-
-      await connectTunnel(
-        liveSession,
-        accessToken,
-        settings.port,
-        this.log,
-        this.error
-      );
-    }
 
     startDevServer(settings, this.log, this.error);
 
@@ -240,6 +227,22 @@ class DevCommand extends Command {
     if (!url) {
       url = proxyUrl;
     }
+
+    if (flags.live) {
+      await waitPort({ port: settings.proxyPort });
+      const liveSession = await createTunnel(site.id, accessToken, this.log);
+      url = liveSession.session_url;
+      process.env.BASE_URL = url;
+
+      await connectTunnel(
+        liveSession,
+        accessToken,
+        settings.port,
+        this.log,
+        this.error
+      );
+    }
+
     // Todo hoist this telemetry `command` to CLI hook
     track("command", {
       command: "dev",
