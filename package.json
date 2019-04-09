@@ -1,7 +1,7 @@
 {
   "name": "netlify-dev-plugin",
   "description": "Netlify development tools plugin",
-  "version": "0.2.0",
+  "version": "1.0.0-beta",
   "author": "David Calavera @calavera",
   "bugs": "https://github.com/netlify/netlify-dev-plugin/issues",
   "dependencies": {
@@ -12,6 +12,8 @@
     "@oclif/config": "^1",
     "ascii-table": "0.0.9",
     "boxen": "^3.0.0",
+    "chalk": "^2.4.2",
+    "chokidar": "^2.1.5",
     "copy-template-dir": "^1.4.0",
     "execa": "^1.0.0",
     "fs-extra": "^7.0.1",
@@ -23,7 +25,6 @@
     "inquirer-autocomplete-prompt": "^1.0.1",
     "netlify": "2.4.1",
     "node-fetch": "^2.3.0",
-    "opn": "^5.5.0",
     "ora": "^3.4.0",
     "safe-join": "^0.1.2",
     "static-server": "^2.2.1",
@@ -71,15 +72,15 @@
   },
   "repository": "netlify/netlify-dev-plugin",
   "scripts": {
+    "format": "npm run format:prettier -- --write",
+    "format:prettier": "prettier \"{{src,test}/**/,}*.js\"",
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint .",
     "prepack": "oclif-dev manifest && oclif-dev readme",
+    "prepublishOnly": "git push && git push --tags && gh-release",
     "test": "run-s test:*",
-    "test:mocha": "nyc mocha --forbid-only \"test/**/*.test.js\"",
     "test:deps": "dependency-check ./package.json --entry \"src/commands/**/!(*.test).js\" --unused --missing --no-dev --no-peer -i @oclif/plugin-not-found -i @oclif/config -i @oclif/plugin-help -i @oclif/plugin-plugins",
-    "format": "npm run format:prettier -- --write",
-    "format:prettier": "prettier \"{{src,test}/**/,}*.js\"",
-    "version": "oclif-dev readme && auto-changelog -p --template keepachangelog && git add README.md CHANGELOG.md",
-    "prepublishOnly": "git push && git push --tags && gh-release"
+    "test-skip:mocha": "nyc mocha --forbid-only \"test/**/*.test.js\"",
+    "version": "oclif-dev readme && auto-changelog -p --template keepachangelog && git add README.md CHANGELOG.md"
   }
 }
