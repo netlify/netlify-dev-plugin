@@ -213,7 +213,7 @@ Notice that all the functions created by `netlify functions:create` require no b
 
 This can be helpful, for example, to use ES modules syntax (e.g. `import`/`export`) via webpack, babel transforms via `babel-cli` or `babel-loader`, or strict type-checking and transpilation with TypeScript's `tsc` or other webpack loaders.
 
-We'll call this category of tools **function builders**. In fact, we do maintain an open source function builder dedicated to the task of transforming serverless functions from source to destination via webpack, called [`netlify-lambda`](https://github.com/netlify/netlify-lambda).
+We'll call this category of tools **function builders**. In fact, we do maintain an open source function builder dedicated to the task of transforming serverless functions from source to destination via webpack, called [`netlify-lambda`](https://github.com/netlify/netlify-lambda). We maintain [a comparison between Netlify Dev and `netlify-lambda` on its README as well as advice on when to use which or both](https://github.com/netlify/netlify-lambda#netlify-lambda).
 
 **Function Builder Detection**
 
