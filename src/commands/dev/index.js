@@ -135,12 +135,6 @@ async function startProxy(settings, addonUrls) {
 function startDevServer(settings, log, error) {
   if (settings.noCmd) {
     const StaticServer = require("static-server");
-    if (!settings.dist) {
-      log(
-        `${NETLIFYDEVWARN} Unable to determine public folder for the dev server. \n Setup a netlify.toml file with a [dev] section to specify your dev server settings.`
-      );
-      process.exit(1);
-    }
 
     const server = new StaticServer({
       rootPath: settings.dist,
@@ -190,9 +184,25 @@ class DevCommand extends Command {
       this.log(
         `${NETLIFYDEVWARN} No dev server detected, using simple static server`
       );
-      const dist =
+      let dist =
         (config.dev && config.dev.publish) ||
         (config.build && config.build.publish);
+      if (!dist) {
+        console.log(`${NETLIFYDEV} Using current working directory`);
+        this.log(
+          `${NETLIFYDEVWARN} Unable to determine public folder to serve files from.`
+        );
+        this.log(
+          `${NETLIFYDEVWARN} Setup a netlify.toml file with a [dev] section to specify your dev server settings.`
+        );
+        this.log(
+          `${NETLIFYDEVWARN} See docs at: https://github.com/netlify/netlify-dev-plugin#project-detection`
+        );
+        this.log(
+          `${NETLIFYDEVWARN} Using current working directory for now...`
+        );
+        dist = process.cwd();
+      }
       settings = {
         noCmd: true,
         port: 8888,

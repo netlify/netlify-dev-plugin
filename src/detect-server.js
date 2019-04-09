@@ -123,11 +123,7 @@ module.exports.serverSettings = async devConfig => {
         tellUser("urlRegexp")
       );
     }
-    settings.dist = assignLoudly(
-      devConfig.publish,
-      settings.dist || null,
-      tellUser("dist")
-    ); // if settings.dist is empty, its bc no settings matched
+    settings.dist = devConfig.publish || settings.dist; // dont loudassign if they dont need it
   }
   return settings;
 };
