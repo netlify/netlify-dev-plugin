@@ -184,7 +184,7 @@ class DevCommand extends Command {
     }
     process.env.NETLIFY_DEV = "true";
 
-    let settings = await serverSettings(Object.assign(config.dev, flags));
+    let settings = await serverSettings(Object.assign({}, config.dev, flags));
 
     if (!(settings && settings.command)) {
       this.log(

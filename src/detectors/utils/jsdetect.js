@@ -4,21 +4,22 @@
  *
  */
 const { existsSync, readFileSync } = require("fs");
-let pkgJSON = null,
-  yarnExists = false;
+let pkgJSON = null;
+let yarnExists = false;
+let warnedAboutEmptyScript = false;
+const { NETLIFYDEVWARN } = require("../../cli-logo.js");
 
 /** hold package.json in a singleton so we dont do expensive parsing repeatedly */
 function getPkgJSON() {
   if (pkgJSON) {
     return pkgJSON;
-  } else {
-    if (!existsSync("package.json"))
-      throw new Error(
-        "dont call this method unless you already checked for pkg json"
-      );
-    pkgJSON = JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
-    return pkgJSON;
   }
+  if (!existsSync("package.json"))
+    throw new Error(
+      "dont call this method unless you already checked for pkg json"
+    );
+  pkgJSON = JSON.parse(readFileSync("package.json", { encoding: "utf8" }));
+  return pkgJSON;
 }
 function getYarnOrNPMCommand() {
   if (!yarnExists) {
@@ -56,6 +57,16 @@ function hasRequiredFiles(filenameArr) {
 function scanScripts({ preferredScriptsArr, preferredCommand }) {
   const { scripts } = getPkgJSON();
 
+  if (!scripts && !warnedAboutEmptyScript) {
+    console.log(
+      `${NETLIFYDEVWARN} You have a package.json without any npm scripts.`
+    );
+    console.log(
+      `${NETLIFYDEVWARN} Netlify Dev's detector system works best with a script, or you can specify a command to run in the netlify.toml [[dev]]  block `
+    );
+    warnedAboutEmptyScript = true; // dont spam message with every detector
+    return []; // not going to match any scripts anyway
+  }
   /**
    *
    * NOTE: we return an array of arrays (args)
