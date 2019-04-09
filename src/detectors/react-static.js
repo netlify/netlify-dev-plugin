@@ -21,7 +21,6 @@ module.exports = function() {
     // ofer to run it when the user doesnt have any scripts setup! 🤯
     possibleArgsArrs.push(["react-static", "start"]);
   }
-  const yarnExists = existsSync("yarn.lock");
   return {
     type: "react-static",
     command: getYarnOrNPMCommand(),
