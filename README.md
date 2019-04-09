@@ -10,7 +10,7 @@ It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy,
 
 ## Prerequisites
 
-- You should have the latest Netlify CLI version (`netlify -v` gives v2.10 and up) -`npm install -g netlify-cli` if not
+- You should have the latest Netlify CLI version. Run `npm install -g netlify-cli` to be sure.
 - You should be [logged in on Netlify CLI](https://www.netlify.com/docs/cli/#authentication)
 - Your project should be linked to a `siteID` on Netlify (using [netlify init](https://www.netlify.com/docs/cli/#continuous-deployment) or [netlify link](https://www.netlify.com/docs/cli/#linking-and-unlinking-sites)). You can confirm this has been done if you have a `.netlify` folder with a `state.json` file containing your `siteID`.
 
