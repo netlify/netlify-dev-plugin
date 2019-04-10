@@ -222,6 +222,8 @@ class DevCommand extends Command {
 
     startDevServer(settings, this.log, this.error);
 
+    // serve functions from zip-it-and-ship-it
+    // env variables relies on `url`, careful moving this code
     if (functionsDir) {
       const functionBuilder = await detectFunctionsBuilder(settings);
       if (functionBuilder) {
@@ -272,6 +274,9 @@ class DevCommand extends Command {
       chalk.bold(`${NETLIFYDEVLOG} Server now ready on ${url}`),
       70
     );
+    process.env.URL = url;
+    process.env.DEPLOY_URL = process.env.URL;
+
     this.log(
       boxen(banner, {
         padding: 1,
