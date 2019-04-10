@@ -1,13 +1,20 @@
 const execa = require("execa");
 const Command = require("@netlify/cli-utils");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
+const {
+  NETLIFYDEV,
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("../../cli-logo");
 
 class ExecCommand extends Command {
   async run() {
     const { site, api } = this.netlify;
     if (site.id) {
-      this.log(`${NETLIFYDEV} Checking your site's environment variables...`); // just to show some visual response first
+      this.log(
+        `${NETLIFYDEVLOG} Checking your site's environment variables...`
+      ); // just to show some visual response first
       const accessToken = api.accessToken;
       const { addEnvVariables } = require("../../utils/dev");
       await addEnvVariables(api, site, accessToken);

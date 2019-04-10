@@ -2,7 +2,12 @@ const fs = require("fs");
 const { flags } = require("@oclif/command");
 const Command = require("@netlify/cli-utils");
 const { zipFunctions } = require("@netlify/zip-it-and-ship-it");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
+const {
+  NETLIFYDEV,
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("../../cli-logo");
 
 class FunctionsBuildCommand extends Command {
   async run() {
@@ -33,9 +38,9 @@ class FunctionsBuildCommand extends Command {
 
     fs.mkdirSync(dst, { recursive: true });
 
-    this.log(`${NETLIFYDEV} Building functions`);
+    this.log(`${NETLIFYDEVLOG} Building functions`);
     zipFunctions(src, dst, { skipGo: true });
-    this.log(`${NETLIFYDEV} Functions built to `, dst);
+    this.log(`${NETLIFYDEVLOG} Functions built to `, dst);
   }
 }
 
