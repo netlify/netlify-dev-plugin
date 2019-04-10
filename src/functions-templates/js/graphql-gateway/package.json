@@ -1,8 +1,8 @@
 {
-  "name": "apollo-graphql",
+  "name": "graphql-gateway",
   "version": "1.0.0",
-  "description": "netlify functions:create - set up for apollo graphql",
-  "main": "apollo-graphql.js",
+  "description": "netlify functions:create - GraphQL Gateway stitching schemas from other GraphQL Functions!",
+  "main": "graphql-gateway.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
