@@ -6,7 +6,7 @@ const {
   makeRemoteExecutableSchema
 } = require("graphql-tools");
 
-exports.handler = function(event, context, cb) {
+exports.handler = async function(event, context) {
   /** required for Fauna GraphQL auth */
   if (!process.env.FAUNADB_SERVER_SECRET) {
     const msg = `
@@ -30,14 +30,16 @@ exports.handler = function(event, context, cb) {
     fetch,
     headers
   });
-  introspectSchema(link).then(schema => {
-    const executableSchema = makeRemoteExecutableSchema({
-      schema,
-      link
-    });
-    const server = new ApolloServer({
-      schema: executableSchema
-    });
+  const schema = await introspectSchema(link);
+  const executableSchema = makeRemoteExecutableSchema({
+    schema,
+    link
+  });
+  const server = new ApolloServer({
+    schema: executableSchema
+  });
+  return new Promise((yay, nay) => {
+    const cb = (err, args) => (err ? nay(err) : yay(args));
     server.createHandler()(event, context, cb);
   });
 };
