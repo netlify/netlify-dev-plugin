@@ -1,6 +1,11 @@
 const path = require("path");
 const chalk = require("chalk");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
+const {
+  NETLIFYDEV,
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("./cli-logo");
 const inquirer = require("inquirer");
 const fs = require("fs");
 const detectors = fs
@@ -88,7 +93,7 @@ module.exports.serverSettings = async devConfig => {
   /** everything below assumes we have settled on one detector */
   const tellUser = settingsField => dV =>
     console.log(
-      `${NETLIFYDEV} Overriding ${chalk.yellow(
+      `${NETLIFYDEVLOG} Overriding ${chalk.yellow(
         settingsField
       )} with setting derived from netlify.toml [dev] block: `,
       dV

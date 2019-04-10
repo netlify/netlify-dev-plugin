@@ -1,10 +1,15 @@
 const { Command, flags } = require("@oclif/command");
 const chalk = require("chalk");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
+const {
+  NETLIFYDEV,
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("../../cli-logo");
 
 class FunctionsUpdateCommand extends Command {
   async run() {
-    this.log(`${NETLIFYDEV} NOT IMPLEMENTED YET: update a function`);
+    this.log(`${NETLIFYDEVERR} NOT IMPLEMENTED YET: update a function`);
   }
 }
 

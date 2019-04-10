@@ -4,7 +4,7 @@ const os = require("os");
 const path = require("path");
 const execa = require("execa");
 const { fetchLatest, updateAvailable } = require("gh-release-fetch");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
+const { NETLIFYDEVLOG, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
 
 async function createTunnel(siteId, netlifyApiToken, log) {
   await installTunnelClient(log);
@@ -15,7 +15,7 @@ async function createTunnel(siteId, netlifyApiToken, log) {
     );
     process.exit(1);
   }
-  log(`${NETLIFYDEV} Creating Live Tunnel for ` + siteId);
+  log(`${NETLIFYDEVLOG} Creating Live Tunnel for ` + siteId);
   const url = `https://api.netlify.com/api/v1/live_sessions?site_id=${siteId}`;
 
   const response = await fetch(url, {
@@ -72,7 +72,7 @@ async function installTunnelClient(log) {
     return;
   }
 
-  log(`${NETLIFYDEV} Installing Live Tunnel Client`);
+  log(`${NETLIFYDEVLOG} Installing Live Tunnel Client`);
 
   const win = isWindows();
   const platform = win ? "windows" : process.platform;

@@ -14,7 +14,12 @@ const { createAddon } = require("netlify/src/addons");
 const ora = require("ora");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
+const {
+  NETLIFYDEV,
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("../../cli-logo");
 
 const templatesDir = path.resolve(__dirname, "../../functions-templates");
 
@@ -206,19 +211,19 @@ function ensureFunctionDirExists(flags, config) {
     flags.functions || (config.build && config.build.functions);
   if (!functionsDir) {
     this.log(
-      `${NETLIFYDEV} No functions folder specified in netlify.toml or as an argument`
+      `${NETLIFYDEVLOG} No functions folder specified in netlify.toml or as an argument`
     );
     process.exit(1);
   }
   if (!fs.existsSync(functionsDir)) {
     this.log(
-      `${NETLIFYDEV} functions folder ${chalk.magenta.inverse(
+      `${NETLIFYDEVLOG} functions folder ${chalk.magenta.inverse(
         functionsDir
       )} specified in netlify.toml but folder not found, creating it...`
     );
     fs.mkdirSync(functionsDir);
     this.log(
-      `${NETLIFYDEV} functions folder ${chalk.magenta.inverse(
+      `${NETLIFYDEVLOG} functions folder ${chalk.magenta.inverse(
         functionsDir
       )} created`
     );
@@ -264,10 +269,10 @@ async function downloadFromURL(flags, args, functionsDir) {
     })
   );
 
-  this.log(`${NETLIFYDEV} Installing dependencies for ${nameToUse}...`);
+  this.log(`${NETLIFYDEVLOG} Installing dependencies for ${nameToUse}...`);
   cp.exec("npm i", { cwd: path.join(functionsDir, nameToUse) }, () => {
     this.log(
-      `${NETLIFYDEV} Installing dependencies for ${nameToUse} complete `
+      `${NETLIFYDEVLOG} Installing dependencies for ${nameToUse} complete `
     );
   });
 
@@ -315,13 +320,15 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     try {
       await downloadFromURL.call(this, flags, args, functionsDir);
     } catch (err) {
-      console.error(`$${NETLIFYERR} Error downloading from URL: ` + flags.url);
+      console.error(
+        `$${NETLIFYDEVERR} Error downloading from URL: ` + flags.url
+      );
       console.error(err);
       process.exit(1);
     }
   } else if (chosentemplate === "report") {
     console.log(
-      `${NETLIFYDEV} Open in browser: https://github.com/netlify/netlify-dev-plugin/issues/new`
+      `${NETLIFYDEVLOG} Open in browser: https://github.com/netlify/netlify-dev-plugin/issues/new`
     );
   } else {
     const {
@@ -339,7 +346,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     }
 
     const name = await getNameFromArgs(args, flags, templateName);
-    this.log(`${NETLIFYDEV} Creating function ${chalk.cyan.inverse(name)}`);
+    this.log(`${NETLIFYDEVLOG} Creating function ${chalk.cyan.inverse(name)}`);
     const functionPath = ensureFunctionPathIsOk.call(
       this,
       functionsDir,
@@ -355,7 +362,9 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
       if (err) throw err;
       createdFiles.forEach(filePath => {
         if (filePath.endsWith(".netlify-function-template.js")) return;
-        this.log(`${NETLIFYDEV} ${chalk.greenBright("Created")} ${filePath}`);
+        this.log(
+          `${NETLIFYDEVLOG} ${chalk.greenBright("Created")} ${filePath}`
+        );
         require("fs").chmodSync(path.resolve(filePath), 0o777);
         if (filePath.includes("package.json")) hasPackageJSON = true;
       });
@@ -401,13 +410,14 @@ async function installAddons(addons = [], fnPath) {
       );
       return false;
     }
-    console.log(`${NETLIFYDEV} checking Netlify APIs...`);
+    console.log(`${NETLIFYDEVLOG} checking Netlify APIs...`);
 
     return api.getSite({ siteId }).then(async siteData => {
       const accessToken = api.accessToken;
       const arr = addons.map(({ addonName, addonDidInstall }) => {
         console.log(
-          `${NETLIFYDEV} installing addon: ` + chalk.yellow.inverse(addonName)
+          `${NETLIFYDEVLOG} installing addon: ` +
+            chalk.yellow.inverse(addonName)
         );
         // will prompt for configs if not supplied - we do not yet allow for addon configs supplied by `netlify functions:create` command and may never do so
         return createSiteAddon(
@@ -436,7 +446,7 @@ async function installAddons(addons = [], fnPath) {
             }
           })
           .catch(err => {
-            console.error(`${NETLIFYERR} Error installing addon: `, err);
+            console.error(`${NETLIFYDEVERR} Error installing addon: `, err);
           });
       });
       return Promise.all(arr);
@@ -450,7 +460,7 @@ function ensureFunctionPathIsOk(functionsDir, flags, name) {
   const functionPath = path.join(functionsDir, name);
   if (fs.existsSync(functionPath)) {
     this.log(
-      `${NETLIFYDEV} Function ${functionPath} already exists, cancelling...`
+      `${NETLIFYDEVLOG} Function ${functionPath} already exists, cancelling...`
     );
     process.exit(1);
   }

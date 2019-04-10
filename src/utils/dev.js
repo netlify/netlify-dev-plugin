@@ -2,7 +2,7 @@
 // bit of a hasty abstraction but recommended by oclif
 const { getAddons } = require("netlify/src/addons");
 const chalk = require("chalk");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../cli-logo");
+const { NETLIFYDEVLOG, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../cli-logo");
 /**
  * inject environment variables from netlify addons and buildbot
  * into your local dev process.env
@@ -38,7 +38,7 @@ async function addEnvVariables(api, site, accessToken) {
       for (const key in addon.env) {
         const msg = () =>
           console.log(
-            `${NETLIFYDEV} Injected ${chalk.yellow.bold("addon")} env var: `,
+            `${NETLIFYDEVLOG} Injected ${chalk.yellow.bold("addon")} env var: `,
             chalk.yellow(key)
           );
         process.env[key] = assignLoudly(process.env[key], addon.env[key], msg);
@@ -77,7 +77,7 @@ async function addEnvVariables(api, site, accessToken) {
     for (const key in apiSite.build_settings.env) {
       const msg = () =>
         console.log(
-          `${NETLIFYDEV} Injected ${chalk.blue.bold(
+          `${NETLIFYDEVLOG} Injected ${chalk.blue.bold(
             "build setting"
           )} env var: `,
           chalk.yellow(key)

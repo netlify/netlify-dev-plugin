@@ -12,7 +12,12 @@ const Command = require("@netlify/cli-utils");
 const { getAddons } = require("netlify/src/addons");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
-const { NETLIFYDEV, NETLIFYDEVWARN, NETLIFYDEVERR } = require("../../cli-logo");
+const {
+  NETLIFYDEV,
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("../../cli-logo");
 const boxen = require("boxen");
 const { createTunnel, connectTunnel } = require("../../live-tunnel");
 
@@ -146,11 +151,11 @@ function startDevServer(settings, log, error) {
     });
 
     server.start(function() {
-      log(`\n${NETLIFYDEV} Server listening to`, settings.proxyPort);
+      log(`\n${NETLIFYDEVLOG} Server listening to`, settings.proxyPort);
     });
     return;
   }
-  log(`${NETLIFYDEV} Starting Netlify Dev with ${settings.type}`);
+  log(`${NETLIFYDEVLOG} Starting Netlify Dev with ${settings.type}`);
   const ps = execa(settings.command, settings.args, {
     env: settings.env,
     stdio: "inherit"
@@ -162,7 +167,7 @@ function startDevServer(settings, log, error) {
 
 class DevCommand extends Command {
   async run() {
-    this.log(`${NETLIFYDEV} Starting Netlify Dev...`);
+    this.log(`${NETLIFYDEV} Starting...`);
     let { flags } = this.parse(DevCommand);
     const { api, site, config } = this.netlify;
     const functionsDir =
@@ -188,7 +193,7 @@ class DevCommand extends Command {
         (config.dev && config.dev.publish) ||
         (config.build && config.build.publish);
       if (!dist) {
-        console.log(`${NETLIFYDEV} Using current working directory`);
+        console.log(`${NETLIFYDEVLOG} Using current working directory`);
         this.log(
           `${NETLIFYDEVWARN} Unable to determine public folder to serve files from.`
         );
@@ -262,7 +267,7 @@ class DevCommand extends Command {
 
     // boxen doesnt support text wrapping yet https://github.com/sindresorhus/boxen/issues/16
     const banner = require("wrap-ansi")(
-      chalk.bold(`${NETLIFYDEV} Server now ready on ${url}`),
+      chalk.bold(`${NETLIFYDEVLOG} Server now ready on ${url}`),
       70
     );
     this.log(
