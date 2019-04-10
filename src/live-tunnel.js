@@ -3,6 +3,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const execa = require("execa");
+const chalk = require("chalk");
 const { fetchLatest, updateAvailable } = require("gh-release-fetch");
 const { NETLIFYDEVLOG, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
 
