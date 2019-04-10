@@ -156,7 +156,9 @@ function startDevServer(settings, log, error) {
     return;
   }
   log(`${NETLIFYDEVLOG} Starting Netlify Dev with ${settings.type}`);
-  const ps = execa(settings.command, settings.args, {
+  const args =
+    settings.command === "npm" ? ["run", ...settings.args] : settings.args;
+  const ps = execa(settings.command, args, {
     env: settings.env,
     stdio: "inherit"
   });
@@ -167,7 +169,7 @@ function startDevServer(settings, log, error) {
 
 class DevCommand extends Command {
   async run() {
-    this.log(`${NETLIFYDEV} Starting...`);
+    this.log(`${NETLIFYDEV}`);
     let { flags } = this.parse(DevCommand);
     const { api, site, config } = this.netlify;
     const functionsDir =

@@ -25,7 +25,7 @@ function getYarnOrNPMCommand() {
   if (!yarnExists) {
     yarnExists = existsSync("yarn.lock") ? "yes" : "no";
   }
-  return yarnExists === "yes" ? "yarn" : "npm run";
+  return yarnExists === "yes" ? "yarn" : "npm";
 }
 
 /**
