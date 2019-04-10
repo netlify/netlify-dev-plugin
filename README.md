@@ -40,27 +40,6 @@ alias ndx="netlify dev:exec "
 
 </details>
 
-## Using the beta
-
-Currently the Netlify dev plugin is in private beta. You'll need to follow these steps to enable it:
-
-Make sure Netlify CLI is installed and up to date:
-
-```bash
-npm install -g netlify-cli
-```
-
-Then clone and activate the plugin:
-
-```bash
-git clone git@github.com:netlify/netlify-dev-plugin.git
-cd netlify-dev-plugin
-npm install
-netlify plugins:link .
-```
-
-Now you're both ready to start testing netlify dev and to contribute to the project.
-
 ## Netlify Dev usage
 
 ```bash
@@ -246,3 +225,17 @@ Or install this [one click example](https://github.com/netlify/fauna-one-click).
 After you have installed an add-on, it will be visible with the `netlify addons:list` command inside your site's current working directory. You can use `netlify addons:delete $ADDONNAME` to delete your addon instance.
 
 For now, it is important to include instructions to create addons for each member of your team, as there is no way to specify addons inside of `netlify.toml`. We are working on this.
+
+
+## Contributing/Local Development
+
+Thanks for contributing! You'll need to follow these steps to run Netlify CLI and `netlify-dev-plugin` locally:
+
+0. uninstall any globally installed versions of `netlify-cli`
+1. clone and install deps for https://github.com/netlify/cli 
+2. `npm link` from inside the `cli` folder
+3. clone and install deps for this repo
+4. inside the `netlify-dev-plugin` folder, run `yarn link`
+5. inside the `cli` folder, run `yarn link "netlify-dev-plugin"`
+
+Now you're both ready to start testing `netlify dev` and to contribute to the project! Note these are untested instructions, please get in touch if you're unable to follow them clearly and we'll work with you. Or ping [@swyx](https://twitter.com/swyx).
