@@ -1,7 +1,7 @@
 {
   "name": "graphql-gateway",
   "version": "1.0.0",
-  "description": "netlify functions:create - GraphQL Gateway stitching schemas from other GraphQL Functions!",
+  "description": "netlify functions:create - Apollo Server Lambda Gateway stitching schemas from other GraphQL Functions!",
   "main": "graphql-gateway.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
