@@ -26,39 +26,39 @@ const books = [
   },
   {
     id: 2,
-    title: "The Chamber of Secrets",
-    year: 1998,
+    title: "Pet Sematary",
+    year: 1983,
     authorName: "Stephen King"
   },
   {
     id: 3,
-    title: "The Prisoner of Azkaban",
-    year: 1999,
+    title: "Going Postal",
+    year: 2004,
     authorName: "Terry Pratchett"
   },
   {
     id: 4,
-    title: "The Goblet of Fire",
-    year: 2000,
+    title: "Small Gods",
+    year: 1992,
     authorName: "Terry Pratchett"
   },
   {
     id: 5,
-    title: "The Order of the Phoenix",
-    year: 2003,
+    title: "Night Watch",
+    year: 2002,
     authorName: "Terry Pratchett"
   },
   {
     id: 6,
-    title: "The Half-Blood Prince",
-    year: 2005,
+    title: "The Shining",
+    year: 1977,
     authorName: "Stephen King"
   },
   {
     id: 7,
     title: "The Deathly Hallows",
     year: 2007,
-    authorName: "Stephen King"
+    authorName: "JK Rowling"
   }
 ];
 
