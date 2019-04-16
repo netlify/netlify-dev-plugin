@@ -6,10 +6,10 @@ const queryString = require("querystring");
 const path = require("path");
 const getPort = require("get-port");
 const chokidar = require("chokidar");
-const chalk = require("chalk");
+// const chalk = require("chalk");
 const {
   NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
+  // NETLIFYDEVWARN,
   NETLIFYDEVERR
 } = require("netlify-cli-logo");
 
@@ -23,17 +23,17 @@ function handleErr(err, response) {
     `${NETLIFYDEVERR} Function invocation failed: ` + err.toString()
   );
   response.end();
-  console.log(`${NETLIFYDEVERR} Error during invocation: `, err);
-  return;
+  console.log(`${NETLIFYDEVERR} Error during invocation: `, err); // eslint-disable-line no-console
 }
 
 function createCallback(response) {
-  return function callback(err, lambdaResponse) {
+  return function(err, lambdaResponse) {
     if (err) {
       return handleErr(err, response);
     }
 
     response.statusCode = lambdaResponse.statusCode;
+    // eslint-disable-line guard-for-in
     for (const key in lambdaResponse.headers) {
       response.setHeader(key, lambdaResponse.headers[key]);
     }
@@ -61,15 +61,15 @@ function promiseCallback(promise, callback) {
   );
 }
 
-function getHandlerPath(functionPath) {
-  if (functionPath.match(/\.js$/)) {
-    return functionPath;
-  }
+// function getHandlerPath(functionPath) {
+//   if (functionPath.match(/\.js$/)) {
+//     return functionPath;
+//   }
 
-  return path.join(functionPath, `${path.basename(functionPath)}.js`);
-}
+//   return path.join(functionPath, `${path.basename(functionPath)}.js`);
+// }
 
-function createHandler(dir, options) {
+function createHandler(dir) {
   const functions = {};
   fs.readdirSync(dir).forEach(file => {
     if (dir === "node_modules") {
@@ -132,9 +132,9 @@ function createHandler(dir, options) {
       module.paths = [moduleDir];
       handler = require(functionPath);
       module.paths = before;
-    } catch (err) {
+    } catch (error) {
       module.paths = before;
-      handleErr(err, response);
+      handleErr(error, response);
       return;
     }
 
@@ -160,8 +160,7 @@ function createHandler(dir, options) {
   };
 }
 
-async function serveFunctions(settings, options) {
-  options = options || {};
+async function serveFunctions(settings) {
   const app = express();
   const dir = settings.functionsDir;
   const port = await getPort({
@@ -179,16 +178,16 @@ async function serveFunctions(settings, options) {
   app.get("/favicon.ico", function(req, res) {
     res.status(204).end();
   });
-  app.all("*", createHandler(dir, options));
+  app.all("*", createHandler(dir));
 
   app.listen(port, function(err) {
     if (err) {
-      console.error(`${NETLIFYDEVERR} Unable to start lambda server: `, err);
+      console.error(`${NETLIFYDEVERR} Unable to start lambda server: `, err); // eslint-disable-line no-console
       process.exit(1);
     }
 
     // add newline because this often appears alongside the client devserver's output
-    console.log(`\n${NETLIFYDEVLOG} Lambda server is listening on ${port}`);
+    console.log(`\n${NETLIFYDEVLOG} Lambda server is listening on ${port}`); // eslint-disable-line no-console
   });
 
   return Promise.resolve({
@@ -203,13 +202,12 @@ function assignLoudly(
   optionalValue,
   fallbackValue,
   tellUser = dV =>
-    console.log(`${NETLIFYDEVLOG} No port specified, using defaultPort of `, dV)
+    console.log(`${NETLIFYDEVLOG} No port specified, using defaultPort of `, dV) // eslint-disable-line no-console
 ) {
   if (fallbackValue === undefined) throw new Error("must have a fallbackValue");
   if (fallbackValue !== optionalValue && optionalValue === undefined) {
     tellUser(fallbackValue);
     return fallbackValue;
-  } else {
-    return optionalValue;
   }
+  return optionalValue;
 }

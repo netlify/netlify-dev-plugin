@@ -3,15 +3,15 @@ const { flags } = require("@oclif/command");
 const Command = require("@netlify/cli-utils");
 const { zipFunctions } = require("@netlify/zip-it-and-ship-it");
 const {
-  NETLIFYDEV,
+  // NETLIFYDEV,
   NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
+  // NETLIFYDEVWARN,
   NETLIFYDEVERR
 } = require("netlify-cli-logo");
 
 class FunctionsBuildCommand extends Command {
   async run() {
-    const { flags, args } = this.parse(FunctionsBuildCommand);
+    const { flags } = this.parse(FunctionsBuildCommand);
     const { config } = this.netlify;
 
     const src = flags.src || config.build.functionsSource;

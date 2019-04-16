@@ -1,10 +1,12 @@
+/* eslint no-console: 0 */
+
 // reusable code for netlify dev
 // bit of a hasty abstraction but recommended by oclif
 const { getAddons } = require("netlify/src/addons");
 const chalk = require("chalk");
 const {
   NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
+  // NETLIFYDEVWARN,
   NETLIFYDEVERR
 } = require("netlify-cli-logo");
 /**
@@ -24,9 +26,9 @@ const {
 async function addEnvVariables(api, site, accessToken) {
   /** from addons */
   const addonUrls = {};
-  const addons = await getAddons(site.id, accessToken).catch(err => {
-    console.error(err);
-    switch (err.status) {
+  const addons = await getAddons(site.id, accessToken).catch(error => {
+    console.error(error);
+    switch (error.status) {
       default:
         console.error(
           `${NETLIFYDEVERR} Error retrieving addons data for site ${chalk.yellow(
@@ -51,9 +53,9 @@ async function addEnvVariables(api, site, accessToken) {
   }
 
   /** from web UI */
-  const apiSite = await api.getSite({ site_id: site.id }).catch(err => {
-    console.error(err);
-    switch (err.status) {
+  const apiSite = await api.getSite({ site_id: site.id }).catch(error => {
+    console.error(error);
+    switch (error.status) {
       case 401:
         console.error(
           `${NETLIFYDEVERR} Unauthorized error: This Site ID ${chalk.yellow(
@@ -111,7 +113,6 @@ function assignLoudly(
   if (defaultValue !== optionalValue && optionalValue === undefined) {
     tellUser(defaultValue);
     return defaultValue;
-  } else {
-    return optionalValue;
   }
+  return optionalValue;
 }
