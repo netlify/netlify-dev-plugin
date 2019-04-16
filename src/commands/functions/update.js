@@ -5,7 +5,7 @@ const {
   NETLIFYDEVLOG,
   NETLIFYDEVWARN,
   NETLIFYDEVERR
-} = require("../../cli-logo");
+} = require("netlify-cli-logo");
 
 class FunctionsUpdateCommand extends Command {
   async run() {

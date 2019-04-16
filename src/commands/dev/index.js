@@ -17,7 +17,7 @@ const {
   NETLIFYDEVLOG,
   NETLIFYDEVWARN,
   NETLIFYDEVERR
-} = require("../../cli-logo");
+} = require("netlify-cli-logo");
 const boxen = require("boxen");
 const { createTunnel, connectTunnel } = require("../../live-tunnel");
 

@@ -5,7 +5,11 @@ const path = require("path");
 const execa = require("execa");
 const chalk = require("chalk");
 const { fetchLatest, updateAvailable } = require("gh-release-fetch");
-const { NETLIFYDEVLOG, NETLIFYDEVWARN, NETLIFYDEVERR } = require("./cli-logo");
+const {
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("netlify-cli-logo");
 
 async function createTunnel(siteId, netlifyApiToken, log) {
   await installTunnelClient(log);
