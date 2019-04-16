@@ -5,7 +5,7 @@ const {
   NETLIFYDEVLOG,
   NETLIFYDEVWARN,
   NETLIFYDEVERR
-} = require("./cli-logo");
+} = require("netlify-cli-logo");
 const inquirer = require("inquirer");
 const fs = require("fs");
 const detectors = fs
