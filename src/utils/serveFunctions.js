@@ -7,10 +7,11 @@ const path = require("path");
 const getPort = require("get-port");
 const chokidar = require("chokidar");
 const chalk = require("chalk");
-
-const NETLIFYDEVLOG = `${chalk.greenBright("◈")}`;
-const NETLIFYDEVWARN = `${chalk.yellowBright("◈")}`;
-const NETLIFYDEVERR = `${chalk.redBright("◈")}`;
+const {
+  NETLIFYDEVLOG,
+  NETLIFYDEVWARN,
+  NETLIFYDEVERR
+} = require("netlify-cli-logo");
 
 const { findModuleDir, findHandler } = require("./finders");
 
