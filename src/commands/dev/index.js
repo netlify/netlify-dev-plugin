@@ -5,18 +5,17 @@ const httpProxy = require("http-proxy");
 const waitPort = require("wait-port");
 const getPort = require("get-port");
 const chokidar = require("chokidar");
-const { serveFunctions } = require("../../utils/serveFunctions");
+const { serveFunctions } = require("../../utils/serve-functions");
 const { serverSettings } = require("../../detect-server");
 const { detectFunctionsBuilder } = require("../../detect-functions-builder");
 const Command = require("@netlify/cli-utils");
-const { getAddons } = require("netlify/src/addons");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
 const {
   NETLIFYDEV,
   NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
-  NETLIFYDEVERR
+  NETLIFYDEVWARN
+  // NETLIFYDEVERR
 } = require("netlify-cli-logo");
 const boxen = require("boxen");
 const { createTunnel, connectTunnel } = require("../../live-tunnel");
@@ -26,7 +25,7 @@ function isFunction(settings, req) {
 }
 
 function addonUrl(addonUrls, req) {
-  const m = req.url.match(/^\/.netlify\/([^\/]+)(\/.*)/);
+  const m = req.url.match(/^\/.netlify\/([^\/]+)(\/.*)/); // eslint-disable-line no-useless-escape
   const addonUrl = m && addonUrls[m[1]];
   return addonUrl ? `${addonUrl}${m[2]}` : null;
 }
@@ -67,7 +66,7 @@ function initializeProxy(port) {
     if (
       proxyRes.statusCode === 404 &&
       req.alternativePaths &&
-      req.alternativePaths.length
+      req.alternativePaths.length > 0
     ) {
       req.url = req.alternativePaths.shift();
       return proxy.web(req, res, req.proxyOptions);
@@ -137,7 +136,7 @@ async function startProxy(settings, addonUrls) {
   return `http://localhost:${port}`;
 }
 
-function startDevServer(settings, log, error) {
+function startDevServer(settings, log) {
   if (settings.noCmd) {
     const StaticServer = require("static-server");
 
@@ -195,7 +194,7 @@ class DevCommand extends Command {
         (config.dev && config.dev.publish) ||
         (config.build && config.build.publish);
       if (!dist) {
-        console.log(`${NETLIFYDEVLOG} Using current working directory`);
+        this.log(`${NETLIFYDEVLOG} Using current working directory`);
         this.log(
           `${NETLIFYDEVWARN} Unable to determine public folder to serve files from.`
         );
@@ -220,7 +219,7 @@ class DevCommand extends Command {
 
     let url;
 
-    startDevServer(settings, this.log, this.error);
+    startDevServer(settings, this.log);
 
     // serve functions from zip-it-and-ship-it
     // env variables relies on `url`, careful moving this code
@@ -234,7 +233,9 @@ class DevCommand extends Command {
         functionWatcher.on("unlink", functionBuilder.build);
       }
       const functionsPort = await getPort({ port: 34567 });
-      const fnSettings = await serveFunctions({
+
+      // returns a value but we dont use it
+      await serveFunctions({
         ...settings,
         port: functionsPort,
         functionsDir
@@ -253,13 +254,7 @@ class DevCommand extends Command {
       url = liveSession.session_url;
       process.env.BASE_URL = url;
 
-      await connectTunnel(
-        liveSession,
-        accessToken,
-        settings.port,
-        this.log,
-        this.error
-      );
+      await connectTunnel(liveSession, accessToken, settings.port, this.log);
     }
 
     // Todo hoist this telemetry `command` to CLI hook

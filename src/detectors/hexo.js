@@ -17,7 +17,7 @@ module.exports = function() {
     preferredCommand: "hexo server"
   });
 
-  if (!possibleArgsArrs.length) {
+  if (possibleArgsArrs.length === 0) {
     // ofer to run it when the user doesnt have any scripts setup! 🤯
     possibleArgsArrs.push(["hexo", "server"]);
   }

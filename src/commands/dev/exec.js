@@ -2,9 +2,9 @@ const execa = require("execa");
 const Command = require("@netlify/cli-utils");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const {
-  NETLIFYDEV,
+  // NETLIFYDEV,
   NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
+  // NETLIFYDEVWARN,
   NETLIFYDEVERR
 } = require("netlify-cli-logo");
 

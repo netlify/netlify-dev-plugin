@@ -24,8 +24,8 @@ class FunctionsListCommand extends Command {
         "scheduled",
         "weyhfd-hjjk-67533"
       );
-
-    console.log(table.toString());
+    this.log(`netlify functions:list NOT IMPLEMENTED YET`);
+    this.log(table.toString());
   }
 }
 

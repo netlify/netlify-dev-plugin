@@ -37,12 +37,11 @@ async function getRepoURLContents(repoHost, owner_and_repo, contents_path) {
     );
     return fetch(APIURL)
       .then(x => x.json())
-      .catch(err =>
-        console.error("Error occurred while fetching ", APIURL, err)
+      .catch(
+        error => console.error("Error occurred while fetching ", APIURL, error) // eslint-disable-line no-console
       );
-  } else {
-    throw new Error("unsupported host ", repoHost);
   }
+  throw new Error("unsupported host ", repoHost);
 }
 
 function validateRepoURL(_url) {
@@ -57,9 +56,8 @@ function parseRepoURL(repoHost, URL) {
     // https://developer.github.com/v3/repos/contents/#get-contents
     const [owner_and_repo, contents_path] = URL.path.split("/tree/master"); // what if it's not master? note that our contents retrieval may assume it is master
     return [owner_and_repo, contents_path];
-  } else {
-    throw new Error("unsupported host ", repoHost);
   }
+  throw new Error("unsupported host ", repoHost);
 }
 
 module.exports = {
