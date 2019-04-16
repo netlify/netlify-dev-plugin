@@ -101,12 +101,13 @@ function createHandler(dir) {
       delete require.cache[require.resolve(fn.functionPath)];
       module.paths = before;
     };
-    fn.watcher = chokidar.watch(
-      [fn.functionPath, path.join(fn.moduleDir, "package.json")],
-      {
-        ignored: /node_modules/
-      }
-    );
+    const pathsToWatch = [fn.functionPath];
+    if (fn.moduleDir) {
+      pathsToWatch.push(path.join(fn.moduleDir, "package.json"));
+    }
+    fn.watcher = chokidar.watch(pathsToWatch, {
+      ignored: /node_modules/
+    });
     fn.watcher
       .on("add", clearCache)
       .on("change", clearCache)
