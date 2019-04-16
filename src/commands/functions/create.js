@@ -62,13 +62,7 @@ FunctionsCreateCommand.examples = [
 FunctionsCreateCommand.aliases = ["function:create"];
 FunctionsCreateCommand.flags = {
   name: flags.string({ char: "n", description: "function name" }),
-  functions: flags.string({ char: "f", description: "functions folder" }),
   url: flags.string({ char: "u", description: "pull template from URL" })
-  // // SWYX: deprecated; every scaffolded function is a directory now
-  // dir: flags.boolean({
-  //   char: 'd',
-  //   description: 'create function as a directory'
-  // })
 };
 module.exports = FunctionsCreateCommand;
 
@@ -207,8 +201,7 @@ async function pickTemplate() {
 
 /* get functions dir (and make it if necessary) */
 function ensureFunctionDirExists(flags, config) {
-  const functionsDir =
-    flags.functions || (config.build && config.build.functions);
+  const functionsDir = config.build && config.build.functions;
   if (!functionsDir) {
     this.log(
       `${NETLIFYDEVLOG} No functions folder specified in netlify.toml or as an argument`
