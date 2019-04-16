@@ -7,7 +7,7 @@ const chalk = require("chalk");
 const { fetchLatest, updateAvailable } = require("gh-release-fetch");
 const {
   NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
+  // NETLIFYDEVWARN,
   NETLIFYDEVERR
 } = require("netlify-cli-logo");
 
@@ -15,6 +15,7 @@ async function createTunnel(siteId, netlifyApiToken, log) {
   await installTunnelClient(log);
 
   if (!siteId) {
+    // eslint-disable-next-line no-console
     console.error(
       `${NETLIFYDEVERR} Error: no siteId defined, did you forget to run ${chalk.yellow(
         "netlify init"
@@ -43,7 +44,7 @@ async function createTunnel(siteId, netlifyApiToken, log) {
   return data;
 }
 
-async function connectTunnel(session, netlifyApiToken, localPort, log, error) {
+async function connectTunnel(session, netlifyApiToken, localPort, log) {
   const execPath = path.join(
     os.homedir(),
     ".netlify",
@@ -84,7 +85,7 @@ async function installTunnelClient(log) {
   const win = isWindows();
   const platform = win ? "windows" : process.platform;
   const extension = win ? "zip" : "tar.gz";
-  release = {
+  const release = {
     repository: "netlify/live-tunnel-client",
     package: `live-tunnel-client-${platform}-amd64.${extension}`,
     destination: binPath,

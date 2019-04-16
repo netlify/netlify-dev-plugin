@@ -4,18 +4,16 @@ const copy = require("copy-template-dir");
 const { flags } = require("@oclif/command");
 const Command = require("@netlify/cli-utils");
 const inquirer = require("inquirer");
-const { readRepoURL, validateRepoURL } = require("../../utils/readRepoURL");
+const { readRepoURL, validateRepoURL } = require("../../utils/read-repo-url");
 const { addEnvVariables } = require("../../utils/dev");
 const { createSiteAddon } = require("../../utils/addons");
-const http = require("http");
 const fetch = require("node-fetch");
 const cp = require("child_process");
-const { createAddon } = require("netlify/src/addons");
 const ora = require("ora");
 const { track } = require("@netlify/cli-utils/src/utils/telemetry");
 const chalk = require("chalk");
 const {
-  NETLIFYDEV,
+  // NETLIFYDEV,
   NETLIFYDEVLOG,
   NETLIFYDEVWARN,
   NETLIFYDEVERR
@@ -235,14 +233,14 @@ async function downloadFromURL(flags, args, functionsDir) {
     fs.lstatSync(fnFolder + ".js").isFile()
   ) {
     this.log(
-      `${NETLIFYWARN}: A single file version of the function ${name} already exists at ${fnFolder}.js. Terminating without further action.`
+      `${NETLIFYDEVWARN}: A single file version of the function ${nameToUse} already exists at ${fnFolder}.js. Terminating without further action.`
     );
     process.exit(1);
   }
 
   try {
     fs.mkdirSync(fnFolder, { recursive: true });
-  } catch (e) {
+  } catch (error) {
     // Ignore
   }
   await Promise.all(
@@ -256,8 +254,10 @@ async function downloadFromURL(flags, args, functionsDir) {
           const dest = fs.createWriteStream(path.join(fnFolder, finalName));
           res.body.pipe(dest);
         })
-        .catch(err => {
-          throw new Error("Error while retrieving " + download_url);
+        .catch(error => {
+          throw new Error(
+            "Error while retrieving " + download_url + ` ${error}`
+          );
         });
     })
   );
@@ -288,7 +288,7 @@ async function downloadFromURL(flags, args, functionsDir) {
 }
 
 async function installDeps(functionPath) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     cp.exec("npm i", { cwd: path.join(functionPath) }, () => {
       resolve();
     });
@@ -312,15 +312,13 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
     flags.url = chosenurl.trim();
     try {
       await downloadFromURL.call(this, flags, args, functionsDir);
-    } catch (err) {
-      console.error(
-        `$${NETLIFYDEVERR} Error downloading from URL: ` + flags.url
-      );
-      console.error(err);
+    } catch (error) {
+      this.error(`$${NETLIFYDEVERR} Error downloading from URL: ` + flags.url);
+      this.error(error);
       process.exit(1);
     }
   } else if (chosentemplate === "report") {
-    console.log(
+    this.log(
       `${NETLIFYDEVLOG} Open in browser: https://github.com/netlify/netlify-dev-plugin/issues/new`
     );
   } else {
@@ -394,7 +392,7 @@ async function scaffoldFromTemplate(flags, args, functionsDir) {
 }
 
 async function installAddons(addons = [], fnPath) {
-  if (addons.length) {
+  if (addons.length > 0) {
     const { api, site } = this.netlify;
     const siteId = site.id;
     if (!siteId) {
@@ -403,12 +401,12 @@ async function installAddons(addons = [], fnPath) {
       );
       return false;
     }
-    console.log(`${NETLIFYDEVLOG} checking Netlify APIs...`);
+    this.log(`${NETLIFYDEVLOG} checking Netlify APIs...`);
 
     return api.getSite({ siteId }).then(async siteData => {
       const accessToken = api.accessToken;
       const arr = addons.map(({ addonName, addonDidInstall }) => {
-        console.log(
+        this.log(
           `${NETLIFYDEVLOG} installing addon: ` +
             chalk.yellow.inverse(addonName)
         );
@@ -438,8 +436,8 @@ async function installAddons(addons = [], fnPath) {
               }
             }
           })
-          .catch(err => {
-            console.error(`${NETLIFYDEVERR} Error installing addon: `, err);
+          .catch(error => {
+            this.error(`${NETLIFYDEVERR} Error installing addon: `, error);
           });
       });
       return Promise.all(arr);

@@ -1,6 +1,14 @@
 {
   "extends": ["oclif", "plugin:prettier/recommended"],
   "rules": {
-    "prettier/prettier": "error"
+    "no-warning-comments": "off",
+    "prettier/prettier": "error",
+    "no-process-exit": "off",
+    "unicorn/no-process-exit": "off",
+    "camelcase": "off",
+    "guard-for-in": "off",
+    "valid-jsdoc": "off",
+    "no-inner-declarations": "off",
+    "no-missing-require": "off"
   }
 }

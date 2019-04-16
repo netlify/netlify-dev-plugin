@@ -58,9 +58,11 @@ function scanScripts({ preferredScriptsArr, preferredCommand }) {
   const { scripts } = getPkgJSON();
 
   if (!scripts && !warnedAboutEmptyScript) {
+    // eslint-disable-next-line no-console
     console.log(
       `${NETLIFYDEVWARN} You have a package.json without any npm scripts.`
     );
+    // eslint-disable-next-line no-console
     console.log(
       `${NETLIFYDEVWARN} Netlify Dev's detector system works best with a script, or you can specify a command to run in the netlify.toml [dev]  block `
     );
