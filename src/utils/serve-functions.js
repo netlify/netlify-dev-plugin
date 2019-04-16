@@ -31,6 +31,20 @@ function createCallback(response) {
     if (err) {
       return handleErr(err, response);
     }
+    if (!Number(lambdaResponse.statusCode)) {
+      console.log(
+        `${NETLIFYDEVERR} Your function response must have a numerical statusCode. You gave: $`,
+        lambdaResponse.statusCode
+      );
+      return handleErr("Incorrect function response statusCode", response);
+    }
+    if (typeof lambdaResponse.body !== "string") {
+      console.log(
+        `${NETLIFYDEVERR} Your function response must have a string body. You gave:`,
+        lambdaResponse.body
+      );
+      return handleErr("Incorrect function response body", response);
+    }
 
     response.statusCode = lambdaResponse.statusCode;
     // eslint-disable-line guard-for-in
