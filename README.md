@@ -84,7 +84,8 @@ Netlify Dev will attempt to detect the SSG or build command that you are using, 
 **Overriding the detectors**: The number of [project types which Netlify Dev can detect](https://github.com/netlify/netlify-dev-plugin/tree/master/src/detectors) is growing, but if yours is not yet supported (contributions welcome!), you can instruct Netlify Dev to run the project on your behalf by declaring it in a `[dev]` block of your `netlify.toml` file.
 
 ```toml
-#sample dev block in the toml
+# sample dev block in the toml
+# note: each of these fields are OPTIONAL and should only be used if you need an override
 [dev]
   command = "yarn start" # Command to start your dev server
   port = 3000 # Port that the dev server will be listening on
@@ -226,16 +227,15 @@ After you have installed an add-on, it will be visible with the `netlify addons:
 
 For now, it is important to include instructions to create addons for each member of your team, as there is no way to specify addons inside of `netlify.toml`. We are working on this.
 
-
 ## Contributing/Local Development
 
 Thanks for contributing! You'll need to follow these steps to run Netlify CLI and `netlify-dev-plugin` locally:
 
 0. uninstall any globally installed versions of `netlify-cli`
-1. clone and install deps for https://github.com/netlify/cli 
-2. `npm link` from inside the `cli` folder
-3. clone and install deps for this repo
-4. inside the `netlify-dev-plugin` folder, run `yarn link`
-5. inside the `cli` folder, run `yarn link "netlify-dev-plugin"`
+1. clone and install deps for https://github.com/netlify/cli
+1. `npm link` from inside the `cli` folder
+1. clone and install deps for this repo
+1. inside the `netlify-dev-plugin` folder, run `yarn link`
+1. inside the `cli` folder, run `yarn link "netlify-dev-plugin"`
 
 Now you're both ready to start testing `netlify dev` and to contribute to the project! Note these are untested instructions, please get in touch if you're unable to follow them clearly and we'll work with you. Or ping [@swyx](https://twitter.com/swyx).

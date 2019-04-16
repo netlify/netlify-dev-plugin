@@ -1,7 +1,7 @@
 const axios = require("axios");
 const qs = require("qs");
 
-export function handler(event, context, callback) {
+exports.handler = function(event, context, callback) {
   // apply our function to the queryStringParameters and assign it to a variable
   const API_PARAMS = qs.stringify(event.queryStringParameters);
   // Get env var values defined in our Netlify site UI
@@ -36,4 +36,4 @@ export function handler(event, context, callback) {
   if (event.httpMethod == "GET") {
     get();
   }
-}
+};

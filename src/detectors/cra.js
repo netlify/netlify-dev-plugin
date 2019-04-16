@@ -34,6 +34,6 @@ module.exports = function() {
     env: { ...process.env, BROWSER: "none", PORT: 3000 },
     possibleArgsArrs,
     urlRegexp: new RegExp(`(http://)([^:]+:)${3000}(/)?`, "g"),
-    dist: "dist"
+    dist: "public"
   };
 };
