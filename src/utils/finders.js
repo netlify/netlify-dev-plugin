@@ -6,7 +6,7 @@ const resolve = require("resolve");
 const readPkgUp = require("read-pkg-up");
 const requirePackageName = require("require-package-name");
 const alwaysIgnored = new Set(["aws-sdk"]);
-const debug = require("debug")("@netlify/zip-it-and-ship-it:finders");
+const debug = require("debug")("netlify-dev-plugin:src/utils/finders");
 
 const ignoredExtensions = new Set([
   ".log",
