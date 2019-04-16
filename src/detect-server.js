@@ -1,10 +1,10 @@
 const path = require("path");
 const chalk = require("chalk");
 const {
-  NETLIFYDEV,
-  NETLIFYDEVLOG,
-  NETLIFYDEVWARN,
-  NETLIFYDEVERR
+  // NETLIFYDEV,
+  NETLIFYDEVLOG
+  // NETLIFYDEVWARN,
+  // NETLIFYDEVERR
 } = require("netlify-cli-logo");
 const inquirer = require("inquirer");
 const fs = require("fs");
@@ -14,8 +14,8 @@ const detectors = fs
   .map(det => require(path.join(__dirname, `detectors/${det}`)));
 
 module.exports.serverSettings = async devConfig => {
-  let settingsArr = [],
-    settings = null;
+  let settingsArr = [];
+  let settings = null;
   for (const i in detectors) {
     const detectorResult = detectors[i]();
     if (detectorResult) settingsArr.push(detectorResult);
@@ -28,10 +28,12 @@ module.exports.serverSettings = async devConfig => {
       const { scripts } = JSON.parse(
         fs.readFileSync("package.json", { encoding: "utf8" })
       );
+      // eslint-disable-next-line no-console
       console.error(
         "empty args assigned, this is an internal Netlify Dev bug, please report your settings and scripts so we can improve",
         { scripts, settings }
       );
+      // eslint-disable-next-line no-process-exit
       process.exit(1);
     }
   } else if (settingsArr.length > 1) {
@@ -92,6 +94,7 @@ module.exports.serverSettings = async devConfig => {
 
   /** everything below assumes we have settled on one detector */
   const tellUser = settingsField => dV =>
+    // eslint-disable-next-line no-console
     console.log(
       `${NETLIFYDEVLOG} Overriding ${chalk.yellow(
         settingsField
@@ -137,13 +140,13 @@ module.exports.serverSettings = async devConfig => {
 function assignLoudly(
   optionalValue,
   defaultValue,
+  // eslint-disable-next-line no-console
   tellUser = dV => console.log(`No value specified, using fallback of `, dV)
 ) {
   if (defaultValue === undefined) throw new Error("must have a defaultValue");
   if (defaultValue !== optionalValue && optionalValue === undefined) {
     tellUser(defaultValue);
     return defaultValue;
-  } else {
-    return optionalValue;
   }
+  return optionalValue;
 }

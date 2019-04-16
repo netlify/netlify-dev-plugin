@@ -156,7 +156,7 @@ Please ensure "${moduleName}" is installed in the project.`);
   });
   debug("Sizes per extension: ", sizes);
 
-  return Array.from(filePaths);
+  return [...filePaths];
 }
 
 function findModuleDir(dir) {
