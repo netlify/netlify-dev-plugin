@@ -1,6 +1,6 @@
 # netlify-dev-plugin
 
-Netlify CLI plugin for local dev experience.
+Netlify CLI plugin for local dev experience. [If you're interested to work on Netlify Dev and other product initatives fulltime, we are hiring.](https://boards.greenhouse.io/netlify/jobs/4215780002)
 
 ## What is Netlify Dev?
 
