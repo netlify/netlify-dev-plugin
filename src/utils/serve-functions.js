@@ -6,6 +6,7 @@ const queryString = require("querystring");
 const path = require("path");
 const getPort = require("get-port");
 const chokidar = require("chokidar");
+const jwtDecode = require("jwt-decode");
 // const chalk = require("chalk");
 const {
   NETLIFYDEVLOG,
@@ -82,6 +83,26 @@ function promiseCallback(promise, callback) {
 
 //   return path.join(functionPath, `${path.basename(functionPath)}.js`);
 // }
+
+function buildClientContext(headers) {
+  // inject a client context based on auth header, ported over from netlify-lambda (https://github.com/netlify/netlify-lambda/pull/57)
+  if (!headers.authorization) return;
+
+  const parts = headers.authorization.split(" ");
+  if (parts.length !== 2 || parts[0] !== "Bearer") return;
+
+  try {
+    return {
+      identity: {
+        url: "NETLIFY_LAMBDA_LOCALLY_EMULATED_IDENTITY_URL",
+        token: "NETLIFY_LAMBDA_LOCALLY_EMULATED_IDENTITY_TOKEN"
+      },
+      user: jwtDecode(parts[1])
+    };
+  } catch (_) {
+    // Ignore errors - bearer token is not a JWT, probably not intended for us
+  }
+}
 
 function createHandler(dir) {
   const functions = {};
@@ -170,7 +191,11 @@ function createHandler(dir) {
     };
 
     const callback = createCallback(response);
-    const promise = handler.handler(lambdaRequest, {}, callback);
+    const promise = handler.handler(
+      lambdaRequest,
+      { clientContext: buildClientContext(request.headers) || {} },
+      callback
+    );
     promiseCallback(promise, callback);
   };
 }
