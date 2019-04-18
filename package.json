@@ -31,6 +31,7 @@
     "http-proxy": "^1.17.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.0.1",
+    "jwt-decode": "^2.2.0",
     "netlify": "2.4.1",
     "netlify-cli-logo": "^1.0.0",
     "node-fetch": "^2.3.0",
