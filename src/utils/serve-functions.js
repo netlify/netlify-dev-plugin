@@ -174,20 +174,24 @@ function createHandler(dir) {
       return;
     }
 
-    const isBase64 =
-      request.body &&
-      !(request.headers["content-type"] || "").match(
-        /text|application|multipart\/form-data/
-      );
+    var isBase64Encoded = false;
+    var body = request.body;
+
+    if (body instanceof Buffer) {
+      isBase64Encoded = true;
+      body = body.toString("base64");
+    } else if(body.toString) {
+      isBase64Encoded = false;
+      body = body.toString();
+    }
+
     const lambdaRequest = {
       path: request.path,
       httpMethod: request.method,
       queryStringParameters: queryString.parse(request.url.split(/\?(.+)/)[1]),
       headers: request.headers,
-      body: isBase64
-        ? Buffer.from(request.body.toString(), "utf8").toString("base64")
-        : request.body,
-      isBase64Encoded: isBase64
+      body: body,
+      isBase64Encoded: isBase64Encoded
     };
 
     const callback = createCallback(response);
@@ -207,8 +211,8 @@ async function serveFunctions(settings) {
     port: assignLoudly(settings.port, defaultPort)
   });
 
-  app.use(bodyParser.raw({ limit: "6mb" }));
-  app.use(bodyParser.text({ limit: "6mb", type: "*/*" }));
+  app.use(bodyParser.text({ limit: "6mb", type: ["text/*", "application/json", "multipart/form-data"] }));
+  app.use(bodyParser.raw({ limit: "6mb", type: "*/*" }));
   app.use(
     expressLogging(console, {
       blacklist: ["/favicon.ico"]
