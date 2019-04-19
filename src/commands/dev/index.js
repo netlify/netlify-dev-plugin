@@ -133,7 +133,7 @@ async function startProxy(settings, addonUrls) {
   });
 
   server.listen(port);
-  return `http://localhost:${port}`;
+  return { url: `http://localhost:${port}`, port };
 }
 
 function startDevServer(settings, log) {
@@ -217,8 +217,6 @@ class DevCommand extends Command {
       };
     }
 
-    let url;
-
     startDevServer(settings, this.log);
 
     // serve functions from zip-it-and-ship-it
@@ -243,18 +241,18 @@ class DevCommand extends Command {
       settings.functionsPort = functionsPort;
     }
 
-    const proxyUrl = await startProxy(settings, addonUrls);
+    let { url, port } = await startProxy(settings, addonUrls);
     if (!url) {
       url = proxyUrl;
     }
 
     if (flags.live) {
-      await waitPort({ port: settings.proxyPort });
+      await waitPort({ port });
       const liveSession = await createTunnel(site.id, accessToken, this.log);
       url = liveSession.session_url;
       process.env.BASE_URL = url;
 
-      await connectTunnel(liveSession, accessToken, settings.port, this.log);
+      await connectTunnel(liveSession, accessToken, port, this.log);
     }
 
     // Todo hoist this telemetry `command` to CLI hook
