@@ -177,14 +177,13 @@ function createHandler(dir) {
     var isBase64Encoded = false;
     var body = request.body;
 
-    if (body === undefined || Object.keys(body).length === 0) {
-      // handle empty body (https://github.com/expressjs/body-parser/issues/288)
-      body = "";
-    } else if (body instanceof Buffer) {
+    if (body instanceof Buffer) {
       isBase64Encoded = true;
       body = body.toString("base64");
     } else if(typeof(body) === "string") {
       // body is already processed as string
+    } else {
+      body = "";
     }
 
     const lambdaRequest = {
