@@ -14,12 +14,13 @@ module.exports = function() {
   /** everything below now assumes that we are within Quasar */
   
   const possibleArgsArrs = scanScripts({
-    preferredScriptsArr: ["serve", "start", "run", "dev"],
-    preferredCommand: "quasar dev"
+    preferredScriptsArr: ["serve", "start", "run", "dev"]
+    // NOTE: this is comented out as it was picking this up in cordova related scripts.
+    // preferredCommand: "quasar dev"
   });
 
   if (possibleArgsArrs.length === 0) {
-    // ofer to run it when the user doesnt have any scripts setup!
+    // ofer to run this default when the user doesnt have any matching scripts setup!
     possibleArgsArrs.push(["quasar", "dev"]);
   }
 
