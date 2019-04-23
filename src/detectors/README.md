@@ -13,7 +13,7 @@
     env: Object, // env variables, see examples
     possibleArgsArrs: [[String]], // e.g [['run develop]], so that the combined command is 'npm run develop', but we allow for multiple
     urlRegexp: RegExp, // see examples
-    dist: String, // e.g. 'dist' or 'build'
+    dist: String, // static folder where a _redirect file would be placed, e.g. 'public' or 'static'. NOT the build output folder
 }
 ```
 
