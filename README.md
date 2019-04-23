@@ -167,6 +167,16 @@ $ netlify functions:create --name hello-world # same
 $ netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware
 ```
 
+**Deploying unbundled function folders**
+
+Functions that have `node_modules` inside their own folders require these `node_modules` to be installed when deployed. For the time being, the Netlify build process does not recursively install dependencies for your function folders yet. So the recommended way to deploy these functions is to use the CLI command:
+
+```
+netlify deploy --prod
+```
+
+Opt out of the continuous deployment flow and use [zip-it-and-ship-it](https://github.com/netlify/zip-it-and-ship-it) instead. [Follow this issue for more updates](https://github.com/netlify/netlify-dev-plugin/issues/140).
+
 **Writing your own Function Templates**
 
 Function templates can specify `addons` that they rely on as well as execute arbitrary code after installation in an `onComplete` hook, if a special `.netlify-function-template.js` file exists in the directory:
