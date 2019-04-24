@@ -32,6 +32,12 @@ function createCallback(response) {
     if (err) {
       return handleErr(err, response);
     }
+    if (lambdaResponse === undefined) {
+      return handleErr(
+        "lambda response was undefined. check your function code again.",
+        response
+      );
+    }
     if (!Number(lambdaResponse.statusCode)) {
       console.log(
         `${NETLIFYDEVERR} Your function response must have a numerical statusCode. You gave: $`,
@@ -52,6 +58,7 @@ function createCallback(response) {
     for (const key in lambdaResponse.headers) {
       response.setHeader(key, lambdaResponse.headers[key]);
     }
+    console.log({ lambdaResponse });
     response.write(
       lambdaResponse.isBase64Encoded
         ? Buffer.from(lambdaResponse.body, "base64")
@@ -59,21 +66,6 @@ function createCallback(response) {
     );
     response.end();
   };
-}
-
-function promiseCallback(promise, callback) {
-  if (!promise) return;
-  if (typeof promise.then !== "function") return;
-  if (typeof callback !== "function") return;
-
-  promise.then(
-    function(data) {
-      callback(null, data);
-    },
-    function(err) {
-      callback(err, null);
-    }
-  );
 }
 
 // function getHandlerPath(functionPath) {
@@ -167,6 +159,11 @@ function createHandler(dir) {
     try {
       module.paths = [moduleDir];
       handler = require(functionPath);
+      if (typeof handler.handler !== "function") {
+        throw new Error(
+          `function ${functionPath} must export a function named handler`
+        );
+      }
       module.paths = before;
     } catch (error) {
       module.paths = before;
@@ -198,6 +195,22 @@ function createHandler(dir) {
     );
     promiseCallback(promise, callback);
   };
+}
+
+function promiseCallback(promise, callback) {
+  if (!promise) return; // means no handler was written
+  if (typeof promise.then !== "function") return;
+  if (typeof callback !== "function") return;
+
+  promise.then(
+    function(data) {
+      console.log("hellooo");
+      callback(null, data);
+    },
+    function(err) {
+      callback(err, null);
+    }
+  );
 }
 
 async function serveFunctions(settings) {
