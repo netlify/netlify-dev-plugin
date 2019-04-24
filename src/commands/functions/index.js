@@ -42,7 +42,4 @@ FunctionsCommand.examples = [
   "netlify functions:build --name function-abc --timeout 30s"
 ];
 
-// TODO make visible once implementation complete
-FunctionsCommand.hidden = true;
-
 module.exports = FunctionsCommand;
