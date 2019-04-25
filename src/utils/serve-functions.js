@@ -223,7 +223,6 @@ function promiseCallback(promise, callback) {
 
   promise.then(
     function(data) {
-      console.log("hellooo");
       callback(null, data);
     },
     function(err) {
