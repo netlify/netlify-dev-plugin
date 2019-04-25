@@ -81,11 +81,13 @@ function createHandler(dir) {
   Object.keys(functions).forEach(name => {
     const fn = functions[name];
     const clearCache = action => () => {
-      console.log(
-        `${NETLIFYDEVLOG} function ${chalk.yellow(
-          name
-        )} ${action}, reloading...`
-      ); // eslint-disable-line no-console
+      if (action !== "added") {
+        console.log(
+          `${NETLIFYDEVLOG} function ${chalk.yellow(
+            name
+          )} ${action}, reloading...`
+        ); // eslint-disable-line no-console
+      }
       const before = module.paths;
       module.paths = [fn.moduleDir];
       delete require.cache[require.resolve(fn.functionPath)];
