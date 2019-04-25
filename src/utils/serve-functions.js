@@ -7,7 +7,7 @@ const path = require("path");
 const getPort = require("get-port");
 const chokidar = require("chokidar");
 const jwtDecode = require("jwt-decode");
-// const chalk = require("chalk");
+const chalk = require("chalk");
 const {
   NETLIFYDEVLOG,
   // NETLIFYDEVWARN,
@@ -27,52 +27,10 @@ function handleErr(err, response) {
   console.log(`${NETLIFYDEVERR} Error during invocation: `, err); // eslint-disable-line no-console
 }
 
-function createCallback(response) {
-  return function(err, lambdaResponse) {
-    if (err) {
-      return handleErr(err, response);
-    }
-    if (lambdaResponse === undefined) {
-      return handleErr(
-        "lambda response was undefined. check your function code again.",
-        response
-      );
-    }
-    if (!Number(lambdaResponse.statusCode)) {
-      console.log(
-        `${NETLIFYDEVERR} Your function response must have a numerical statusCode. You gave: $`,
-        lambdaResponse.statusCode
-      );
-      return handleErr("Incorrect function response statusCode", response);
-    }
-    if (typeof lambdaResponse.body !== "string") {
-      console.log(
-        `${NETLIFYDEVERR} Your function response must have a string body. You gave:`,
-        lambdaResponse.body
-      );
-      return handleErr("Incorrect function response body", response);
-    }
-
-    response.statusCode = lambdaResponse.statusCode;
-    // eslint-disable-line guard-for-in
-    for (const key in lambdaResponse.headers) {
-      response.setHeader(key, lambdaResponse.headers[key]);
-    }
-    console.log({ lambdaResponse });
-    response.write(
-      lambdaResponse.isBase64Encoded
-        ? Buffer.from(lambdaResponse.body, "base64")
-        : lambdaResponse.body
-    );
-    response.end();
-  };
-}
-
 // function getHandlerPath(functionPath) {
 //   if (functionPath.match(/\.js$/)) {
 //     return functionPath;
 //   }
-
 //   return path.join(functionPath, `${path.basename(functionPath)}.js`);
 // }
 
@@ -122,7 +80,12 @@ function createHandler(dir) {
 
   Object.keys(functions).forEach(name => {
     const fn = functions[name];
-    const clearCache = () => {
+    const clearCache = action => () => {
+      console.log(
+        `${NETLIFYDEVLOG} function ${chalk.yellow(
+          name
+        )} ${action}, reloading...`
+      ); // eslint-disable-line no-console
       const before = module.paths;
       module.paths = [fn.moduleDir];
       delete require.cache[require.resolve(fn.functionPath)];
@@ -136,9 +99,9 @@ function createHandler(dir) {
       ignored: /node_modules/
     });
     fn.watcher
-      .on("add", clearCache)
-      .on("change", clearCache)
-      .on("unlink", clearCache);
+      .on("add", clearCache("added"))
+      .on("change", clearCache("modified"))
+      .on("unlink", clearCache("deleted"));
   });
 
   return function(request, response) {
@@ -177,7 +140,7 @@ function createHandler(dir) {
     if (body instanceof Buffer) {
       isBase64Encoded = true;
       body = body.toString("base64");
-    } else if(typeof(body) === "string") {
+    } else if (typeof body === "string") {
       // body is already processed as string
     } else {
       body = "";
@@ -192,13 +155,64 @@ function createHandler(dir) {
       isBase64Encoded: isBase64Encoded
     };
 
+    let callbackWasCalled = false;
     const callback = createCallback(response);
     const promise = handler.handler(
       lambdaRequest,
       { clientContext: buildClientContext(request.headers) || {} },
       callback
     );
-    promiseCallback(promise, callback);
+    /** guard against using BOTH async and callback */
+    if (callbackWasCalled && promise && typeof promise.then === "function") {
+      throw new Error(
+        "Error: your function seems to be using both a callback and returning a promise (aka async function). This is invalid, pick one. (Hint: async!)"
+      );
+    } else {
+      // it is definitely an async function with no callback called, good.
+      promiseCallback(promise, callback);
+    }
+
+    /** need to keep createCallback in scope so we can know if cb was called AND handler is async */
+    function createCallback(response) {
+      return function(err, lambdaResponse) {
+        callbackWasCalled = true;
+        if (err) {
+          return handleErr(err, response);
+        }
+        if (lambdaResponse === undefined) {
+          return handleErr(
+            "lambda response was undefined. check your function code again.",
+            response
+          );
+        }
+        if (!Number(lambdaResponse.statusCode)) {
+          console.log(
+            `${NETLIFYDEVERR} Your function response must have a numerical statusCode. You gave: $`,
+            lambdaResponse.statusCode
+          );
+          return handleErr("Incorrect function response statusCode", response);
+        }
+        if (typeof lambdaResponse.body !== "string") {
+          console.log(
+            `${NETLIFYDEVERR} Your function response must have a string body. You gave:`,
+            lambdaResponse.body
+          );
+          return handleErr("Incorrect function response body", response);
+        }
+
+        response.statusCode = lambdaResponse.statusCode;
+        // eslint-disable-line guard-for-in
+        for (const key in lambdaResponse.headers) {
+          response.setHeader(key, lambdaResponse.headers[key]);
+        }
+        response.write(
+          lambdaResponse.isBase64Encoded
+            ? Buffer.from(lambdaResponse.body, "base64")
+            : lambdaResponse.body
+        );
+        response.end();
+      };
+    }
   };
 }
 
@@ -225,7 +239,12 @@ async function serveFunctions(settings) {
     port: assignLoudly(settings.port, defaultPort)
   });
 
-  app.use(bodyParser.text({ limit: "6mb", type: ["text/*", "application/json", "multipart/form-data"] }));
+  app.use(
+    bodyParser.text({
+      limit: "6mb",
+      type: ["text/*", "application/json", "multipart/form-data"]
+    })
+  );
   app.use(bodyParser.raw({ limit: "6mb", type: "*/*" }));
   app.use(
     expressLogging(console, {
