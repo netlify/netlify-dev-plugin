@@ -13,7 +13,25 @@ Netlify CLI plugin for local dev experience. [If you're interested to work on Ne
 
 Netlify Dev brings the power of Netlify's Edge Logic layer, [serverless functions](#netlify-functions) and [add-on ecosystem](#using-add-ons) to your local machine. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
 
-It automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them.
+```
+                            ┌───────────────┐                     
+                            │   Project     │                     
+                            │               │                     
+                            └localhost:5000─┘                     
+                                    │                             
+                                    │                             
+       ┌──────────┐                 │                             
+       │  Addons  ├────┐            ▼                             
+       └──────────┘    │    ┌localhost:5000─┐     ┌──────────────┐
+       ┌──────────┐    └───▶│               │     │              │
+       │functions ├────────▶│    Netlify    │     │   Browser    │
+       └──────────┘    ┌───▶│      Dev      │     │              │
+       ┌──────────┐    │    │               │     │              │
+       │_redirects│────┘    └──localhost:8888───▶ localhost:8888─┘
+       └──────────┘                                               
+```
+
+With project detectors, it automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them. Read our blogpost for [more on detectors and how you can contribute](https://www.netlify.com/blog/2019/04/24/zero-config-yet-technology-agnostic-how-netlify-dev-detectors-work/)!
 
 ## Prerequisites
 
