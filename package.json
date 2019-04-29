@@ -1,7 +1,7 @@
 {
   "name": "netlify-dev-plugin",
   "description": "Netlify development tools plugin",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "author": "David Calavera @calavera",
   "bugs": "https://github.com/netlify/netlify-dev-plugin/issues",
   "dependencies": {
