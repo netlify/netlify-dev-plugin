@@ -7,7 +7,7 @@ function createFaunaGraphQL() {
   }
   console.log("Upload GraphQL Schema!");
 
-  var request = require("request");
+  const fetch = require("node-fetch");
   const fs = require("fs");
   const path = require("path");
   var dataString = fs
@@ -15,7 +15,6 @@ function createFaunaGraphQL() {
     .toString(); // name of your schema file
 
   var options = {
-    url: "https://graphql.fauna.com/import",
     method: "POST",
     body: dataString,
     auth: {
@@ -24,16 +23,12 @@ function createFaunaGraphQL() {
     }
   };
 
-  request(options, callback);
-
-  function callback(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      // // for debugging
+  fetch("https://graphql.fauna.com/import", options)
+    .then(body => {
+      // // uncomment for debugging
       // console.log("body", body);
-    } else {
-      console.error("something wrong happened: ", { error, body });
-    }
-  }
+    })
+    .catch(err => console.error("something wrong happened: ", { err }));
 }
 
 createFaunaGraphQL();

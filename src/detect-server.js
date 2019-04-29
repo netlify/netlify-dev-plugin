@@ -117,19 +117,11 @@ module.exports.serverSettings = async devConfig => {
       ); // if settings.command is empty, its bc no settings matched
     }
     if (devConfig.port) {
-      settings.proxyPort = assignLoudly(
-        devConfig.port,
-        settings.proxyPort || null,
-        tellUser("proxyPort")
-      ); // if settings.proxyPort is empty, its bc no settings matched
+      settings.proxyPort = devConfig.port || settings.proxyPort;
       const regexp =
         devConfig.urlRegexp ||
         new RegExp(`(http://)([^:]+:)${devConfig.port}(/)?`, "g");
-      settings.urlRegexp = assignLoudly(
-        settings.urlRegexp,
-        regexp,
-        tellUser("urlRegexp")
-      );
+      settings.urlRegexp = settings.urlRegexp || regexp;
     }
     settings.dist = devConfig.publish || settings.dist; // dont loudassign if they dont need it
   }
