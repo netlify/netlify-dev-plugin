@@ -155,7 +155,9 @@ function startDevServer(settings, log) {
     return;
   }
   log(`${NETLIFYDEVLOG} Starting Netlify Dev with ${settings.type}`);
-  const ps = execa(settings.command, settings.args, {
+  const args =
+    settings.command === "npm" ? ["run", ...settings.args] : settings.args;
+  const ps = execa(settings.command, args, {
     env: settings.env,
     stdio: "inherit"
   });
