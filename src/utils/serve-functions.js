@@ -78,33 +78,16 @@ function createHandler(dir) {
     }
   });
 
-  Object.keys(functions).forEach(name => {
-    const fn = functions[name];
-    const clearCache = action => () => {
-      if (action !== "added") {
-        console.log(
-          `${NETLIFYDEVLOG} function ${chalk.yellow(
-            name
-          )} ${action}, reloading...`
-        ); // eslint-disable-line no-console
-      }
-      const before = module.paths;
-      module.paths = [fn.moduleDir];
-      delete require.cache[require.resolve(fn.functionPath)];
-      module.paths = before;
-    };
-    const pathsToWatch = [fn.functionPath];
-    if (fn.moduleDir) {
-      pathsToWatch.push(path.join(fn.moduleDir, "package.json"));
-    }
-    fn.watcher = chokidar.watch(pathsToWatch, {
-      ignored: /node_modules/
+  const clearCache = action => path => {
+    console.log(`${NETLIFYDEVLOG} ${path} ${action}, reloading...`); // eslint-disable-line no-console
+    Object.keys(require.cache).forEach(k => {
+      delete require.cache[k];
     });
-    fn.watcher
-      .on("add", clearCache("added"))
-      .on("change", clearCache("modified"))
-      .on("unlink", clearCache("deleted"));
-  });
+  };
+  const watcher = chokidar.watch(dir, { ignored: /node_modules/ });
+  watcher
+    .on("change", clearCache("modified"))
+    .on("unlink", clearCache("deleted"));
 
   return function(request, response) {
     // handle proxies without path re-writes (http-servr)
