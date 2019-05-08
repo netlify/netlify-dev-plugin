@@ -27,7 +27,7 @@ module.exports = {
       console.log(
         `Set them at: https://app.netlify.com/sites/${
           siteData.name
-        }/settings/deploys#build-environment-variables (must have CD setup)`
+        }/settings/deploys#environment-variables (must have CD setup)`
       );
     }
   }
