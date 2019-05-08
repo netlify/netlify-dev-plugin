@@ -12,7 +12,7 @@ module.exports = function() {
   if (!hasRequiredDeps(["@quasar/app"])) return false;
 
   /** everything below now assumes that we are within Quasar */
-  
+
   const possibleArgsArrs = scanScripts({
     preferredScriptsArr: ["serve", "start", "run", "dev"]
     // NOTE: this is comented out as it was picking this up in cordova related scripts.

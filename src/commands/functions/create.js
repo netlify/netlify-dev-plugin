@@ -201,9 +201,7 @@ async function pickTemplate() {
 function ensureFunctionDirExists(flags, config) {
   const functionsDir = config.build && config.build.functions;
   if (!functionsDir) {
-    this.log(
-      `${NETLIFYDEVLOG} No functions folder specified in netlify.toml`
-    );
+    this.log(`${NETLIFYDEVLOG} No functions folder specified in netlify.toml`);
     process.exit(1);
   }
   if (!fs.existsSync(functionsDir)) {
