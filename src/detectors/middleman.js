@@ -1,7 +1,9 @@
 const { existsSync } = require("fs");
 
 module.exports = function() {
-  if (!hasRequiredFiles(["config.rb"])) return false;
+  if (!existsSync("config.rb")) {
+    return false;
+  }
 
   return {
     type: "middleman",
