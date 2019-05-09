@@ -1,11 +1,6 @@
 const path = require("path");
 const chalk = require("chalk");
-const {
-  // NETLIFYDEV,
-  NETLIFYDEVLOG
-  // NETLIFYDEVWARN,
-  // NETLIFYDEVERR
-} = require("netlify-cli-logo");
+const { NETLIFYDEVLOG } = require("netlify-cli-logo");
 const inquirer = require("inquirer");
 const fs = require("fs");
 const detectors = fs
