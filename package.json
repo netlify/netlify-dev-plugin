@@ -17,10 +17,6 @@
     "chokidar": "^2.1.5",
     "copy-template-dir": "^1.4.0",
     "debug": "^4.1.1",
-    "npm-packlist": "^1.4.1",
-    "precinct": "^6.1.2",
-    "read-pkg-up": "^5.0.0",
-    "require-package-name": "^2.0.1",
     "execa": "^1.0.0",
     "express": "^4.16.4",
     "express-logging": "^1.1.1",
@@ -35,7 +31,11 @@
     "netlify": "2.4.1",
     "netlify-cli-logo": "^1.0.0",
     "node-fetch": "^2.3.0",
+    "npm-packlist": "^1.4.1",
     "ora": "^3.4.0",
+    "precinct": "^6.1.2",
+    "read-pkg-up": "^5.0.0",
+    "require-package-name": "^2.0.1",
     "resolve": "^1.10.0",
     "safe-join": "^0.1.2",
     "static-server": "^2.2.1",
@@ -55,6 +55,8 @@
     "eslint-plugin-prettier": "^3.0.1",
     "gh-release": "^3.5.0",
     "globby": "^8",
+    "husky": "^2.2.0",
+    "lint-staged": "^8.1.6",
     "mocha": "^5",
     "nock": "^10.0.6",
     "npm-run-all": "^4.1.5",
@@ -80,6 +82,17 @@
     "bin": "netlify",
     "devPlugins": [
       "@oclif/plugin-help"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/*.js": [
+      "npm run format",
+      "git add"
     ]
   },
   "repository": "netlify/netlify-dev-plugin",
