@@ -14,21 +14,21 @@ Netlify CLI plugin for local dev experience. [If you're interested to work on Ne
 Netlify Dev brings the power of Netlify's Edge Logic layer, [serverless functions](#netlify-functions) and [add-on ecosystem](#using-add-ons) to your local machine. It runs Netlify's production routing engine in a local dev server to make all redirects, proxy rules, function routes or add-on routes available locally and injects the correct environment variables from your site environment, installed add-ons or your netlify.toml file into your build and function environment.
 
 ```
-                            ┌───────────────┐                     
-                            │   Project     │                     
-                            │               │                     
-                            └localhost:5000─┘                     
-                                    │                             
-                                    │                             
-       ┌──────────┐                 │                             
-       │  Addons  ├────┐            ▼                             
+                            ┌───────────────┐
+                            │   Project     │
+                            │               │
+                            └localhost:5000─┘
+                                    │
+                                    │
+       ┌──────────┐                 │
+       │  Addons  ├────┐            ▼
        └──────────┘    │    ┌localhost:5000─┐     ┌──────────────┐
        ┌──────────┐    └───▶│               │     │              │
        │functions ├────────▶│    Netlify    │     │   Browser    │
        └──────────┘    ┌───▶│      Dev      │     │              │
        ┌──────────┐    │    │               │     │              │
        │_redirects│────┘    └──localhost:8888───▶ localhost:8888─┘
-       └──────────┘                                               
+       └──────────┘
 ```
 
 With project detectors, it automatically detects common tools like Gatsby, Hugo, React Static, Eleventy, and more, to give a zero config setup for your local dev server and can help scaffolding new functions as you work on them. Read our blogpost for [more on detectors and how you can contribute](https://www.netlify.com/blog/2019/04/24/zero-config-yet-technology-agnostic-how-netlify-dev-detectors-work/)!
@@ -266,11 +266,17 @@ For now, it is important to include instructions to create addons for each membe
 
 Thanks for contributing! You'll need to follow these steps to run Netlify CLI and `netlify-dev-plugin` locally:
 
-0. uninstall any globally installed versions of `netlify-cli`
-1. clone and install deps for https://github.com/netlify/cli
-1. `npm link` from inside the `cli` folder
-1. clone and install deps for this repo
-1. inside the `netlify-dev-plugin` folder, run `yarn link`
-1. inside the `cli` folder, run `yarn link "netlify-dev-plugin"`
+1. uninstall any globally installed versions of `netlify-cli`
+2. clone and install deps for https://github.com/netlify/cli
+3. `npm link` from inside the `cli` folder
+4. clone and install deps for this repo
+5. inside the `netlify-dev-plugin` folder, run `yarn link`
+6. inside the `cli` folder, run `yarn link "netlify-dev-plugin"`
 
 Now you're both ready to start testing `netlify dev` and to contribute to the project! Note these are untested instructions, please get in touch if you're unable to follow them clearly and we'll work with you. Or ping [@swyx](https://twitter.com/swyx).
+
+Note that code that you may be debugging or investigating may be in some transitive dependencies we have published as separate libraries:
+
+- https://github.com/netlify/netlify-rules-proxy/ ([npm](https://www.npmjs.com/package/@netlify/rules-proxy))
+- https://github.com/netlify/node-redirects-parser ([npm](https://www.npmjs.com/package/netlify-redirect-parser))
+- (not open source) https://www.npmjs.com/package/netlify-redirector
