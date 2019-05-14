@@ -19,40 +19,40 @@ exports.handler = async function(event, context) {
   const schema2 = await getSchema("graphql-2"); // other Netlify functions which are graphql lambdas
   const schemas = [schema1, schema2];
 
-  // /**
-  //  * resolving -between- schemas
-  //  * https://www.apollographql.com/docs/graphql-tools/schema-stitching#adding-resolvers
-  //  */
-  // const linkTypeDefs = `
-  //   extend type Book {
-  //     author: Author
-  //   }
-  // `
-  // schemas.push(linkTypeDefs)
-  // const resolvers = {
-  //   Book: {
-  //     author: {
-  //       fragment: `... on Book { authorName }`,
-  //       resolve(book, args, context, info) {
-  //         return info.mergeInfo.delegateToSchema({
-  //           schema: schema1,
-  //           operation: "query",
-  //           fieldName: "authorByName", // reuse what's implemented in schema1
-  //           args: {
-  //             name: book.authorName,
-  //           },
-  //           context,
-  //           info,
-  //         })
-  //       },
-  //     },
-  //   },
-  // }
+  /**
+   * resolving -between- schemas
+   * https://www.apollographql.com/docs/graphql-tools/schema-stitching#adding-resolvers
+   */
+  const linkTypeDefs = `
+    extend type Book {
+      author: Author
+    }
+  `;
+  schemas.push(linkTypeDefs);
+  const resolvers = {
+    Book: {
+      author: {
+        fragment: `... on Book { authorName }`,
+        resolve(book, args, context, info) {
+          return info.mergeInfo.delegateToSchema({
+            schema: schema1,
+            operation: "query",
+            fieldName: "authorByName", // reuse what's implemented in schema1
+            args: {
+              name: book.authorName
+            },
+            context,
+            info
+          });
+        }
+      }
+    }
+  };
 
   // more docs https://www.apollographql.com/docs/graphql-tools/schema-stitching#api
   const schema = mergeSchemas({
-    schemas
-    // ,resolvers
+    schemas,
+    resolvers
   });
   const server = new ApolloServer({ schema });
   return new Promise((yay, nay) => {

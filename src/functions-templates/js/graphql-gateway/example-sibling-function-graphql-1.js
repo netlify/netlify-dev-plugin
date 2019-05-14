@@ -13,14 +13,14 @@ const typeDefs = gql`
   type Author {
     id: ID!
     name: String!
-    married: Boolean!
+    age: Int!
   }
 `;
 
 const authors = [
-  { id: 1, name: "Terry Pratchett", married: false },
-  { id: 2, name: "Stephen King", married: true },
-  { id: 3, name: "JK Rowling", married: false }
+  { id: 1, name: "Terry Pratchett", age: 67 },
+  { id: 2, name: "Stephen King", age: 71 },
+  { id: 3, name: "JK Rowling", age: 53 }
 ];
 
 const resolvers = {
@@ -35,7 +35,6 @@ const resolvers = {
       return;
     },
     authorByName: (root, args, context) => {
-      console.log("hihhihi", args.name);
       return authors.find(x => x.name === args.name) || "NOTFOUND";
     }
   }
