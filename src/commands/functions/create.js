@@ -175,6 +175,7 @@ async function pickTemplate() {
   function formatRegistryArrayForInquirer(lang) {
     const folderNames = fs.readdirSync(path.join(templatesDir, lang));
     const registry = folderNames
+      .filter(x => !x.endsWith(".md")) // filter out markdown files
       .map(name =>
         require(path.join(
           templatesDir,
