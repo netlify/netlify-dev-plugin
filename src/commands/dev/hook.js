@@ -57,7 +57,7 @@ Used with \`netlify dev --live\` to handle updates on webhooks triggered
 by external systems like Contentful, Sanity, etc...
 `;
 
-HookCommand.examples = ["$ netlify hook Contentful"];
+HookCommand.examples = ["$ netlify dev:hook Contentful"];
 
 HookCommand.strict = false;
 HookCommand.parse = false;
