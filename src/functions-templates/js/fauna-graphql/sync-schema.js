@@ -14,19 +14,25 @@ function createFaunaGraphQL() {
     .readFileSync(path.join(__dirname, "schema.graphql"))
     .toString(); // name of your schema file
 
+  // encoded authorization header similar to https://www.npmjs.com/package/request#http-authentication
+  const Authorization = Buffer.from(
+    process.env.FAUNADB_SERVER_SECRET + ":"
+  ).toString("base64");
+
   var options = {
     method: "POST",
     body: dataString,
-    auth: {
-      user: process.env.FAUNADB_SERVER_SECRET,
-      pass: ""
-    }
+    headers: { Authorization }
   };
 
   fetch("https://graphql.fauna.com/import", options)
+    // // uncomment for debugging
+    .then(res => res.text())
     .then(body => {
-      // // uncomment for debugging
-      // console.log("body", body);
+      console.log(
+        "Netlify Functions:Create - `fauna-graphql/sync-schema.js` success!"
+      );
+      console.log(body);
     })
     .catch(err => console.error("something wrong happened: ", { err }));
 }
