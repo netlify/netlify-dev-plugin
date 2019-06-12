@@ -43,6 +43,8 @@ This is how we pull down your build environment variables and manage your addons
 
 ## Usage
 
+*Watch [a 10 minute intro](https://www.youtube.com/watch?v=pIOOJD4z-Qo&feature=youtu.be) video on how to use Netlify Dev on your project.*
+
 - `netlify dev` start a local dev server for the build tool you're using
 - `netlify dev:exec <command>` runs a shell command within the netlify dev environment
 - `netlify functions:create` bootstrap a new function

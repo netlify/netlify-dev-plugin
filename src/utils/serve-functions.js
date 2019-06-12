@@ -56,27 +56,29 @@ function buildClientContext(headers) {
 
 function createHandler(dir) {
   const functions = {};
-  fs.readdirSync(dir).forEach(file => {
-    if (dir === "node_modules") {
-      return;
-    }
-    const functionPath = path.resolve(path.join(dir, file));
-    const handlerPath = findHandler(functionPath);
-    if (!handlerPath) {
-      return;
-    }
-    if (path.extname(functionPath) === ".js") {
-      functions[file.replace(/\.js$/, "")] = {
-        functionPath,
-        moduleDir: findModuleDir(functionPath)
-      };
-    } else if (fs.lstatSync(functionPath).isDirectory()) {
-      functions[file] = {
-        functionPath: handlerPath,
-        moduleDir: findModuleDir(functionPath)
-      };
-    }
-  });
+  if (fs.existsSync(dir)) {
+    fs.readdirSync(dir).forEach(file => {
+      if (dir === "node_modules") {
+        return;
+      }
+      const functionPath = path.resolve(path.join(dir, file));
+      const handlerPath = findHandler(functionPath);
+      if (!handlerPath) {
+        return;
+      }
+      if (path.extname(functionPath) === ".js") {
+        functions[file.replace(/\.js$/, "")] = {
+          functionPath,
+          moduleDir: findModuleDir(functionPath)
+        };
+      } else if (fs.lstatSync(functionPath).isDirectory()) {
+        functions[file] = {
+          functionPath: handlerPath,
+          moduleDir: findModuleDir(functionPath)
+        };
+      }
+    });
+  }
 
   const clearCache = action => path => {
     console.log(`${NETLIFYDEVLOG} ${path} ${action}, reloading...`); // eslint-disable-line no-console
