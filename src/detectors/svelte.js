@@ -11,7 +11,7 @@ module.exports = function() {
   // REQUIRED DEPS
   if (!hasRequiredDeps(["svelte"])) return false;
 
-  /** everything below now assumes that we are within vue */
+  /** everything below now assumes that we are within svelte */
 
   const possibleArgsArrs = scanScripts({
     preferredScriptsArr: ["dev", "start", "run"],
@@ -31,6 +31,6 @@ module.exports = function() {
     env: { ...process.env },
     possibleArgsArrs,
     urlRegexp: new RegExp(`(http://)([^:]+:)${5000}(/)?`, "g"),
-    dist: "dist"
+    dist: "static"
   };
 };

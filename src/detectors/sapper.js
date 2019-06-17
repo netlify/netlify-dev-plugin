@@ -11,7 +11,7 @@ module.exports = function() {
   // REQUIRED DEPS
   if (!hasRequiredDeps(["sapper"])) return false;
 
-  /** everything below now assumes that we are within vue */
+  /** everything below now assumes that we are within Sapper */
 
   const possibleArgsArrs = scanScripts({
     preferredScriptsArr: ["dev", "start"],
@@ -24,13 +24,13 @@ module.exports = function() {
   }
 
   return {
-    type: "vue-cli",
+    type: "sapper",
     command: getYarnOrNPMCommand(),
     port: 8888,
     proxyPort: 3000,
     env: { ...process.env },
     possibleArgsArrs,
     urlRegexp: new RegExp(`(http://)([^:]+:)${3000}(/)?`, "g"),
-    dist: "dist"
+    dist: "static"
   };
 };
