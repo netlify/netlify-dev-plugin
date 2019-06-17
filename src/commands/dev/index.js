@@ -97,7 +97,7 @@ async function startProxy(settings, addonUrls) {
   if (settings.functionsPort) {
     await waitPort({ port: settings.functionsPort });
   }
-  const port = await getPort({ port: settings.port });
+  const port = await getPort({ port: settings.port || 8888 });
   const functionsServer = settings.functionsPort
     ? `http://localhost:${settings.functionsPort}`
     : null;
