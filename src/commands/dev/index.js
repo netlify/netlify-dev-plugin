@@ -212,8 +212,16 @@ class DevCommand extends Command {
       settings = {
         noCmd: true,
         port: 8888,
-        proxyPort: 3999,
+        proxyPort: await getPort({ port: 3999 }),
         dist
+      };
+    }
+
+    // Reset port if not manually specified, to make it dynamic
+    if (!(config.dev && config.dev.port)) {
+      settings = {
+        port: await getPort({ port: settings.port }),
+        ...settings
       };
     }
 
