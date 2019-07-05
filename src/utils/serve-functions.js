@@ -13,8 +13,7 @@ const {
   // NETLIFYDEVWARN,
   NETLIFYDEVERR
 } = require("netlify-cli-logo");
-
-const { findModuleDir, findHandler } = require("./finders");
+const { getFunctions } = require("./get-functions");
 
 const defaultPort = 34567;
 
@@ -55,30 +54,7 @@ function buildClientContext(headers) {
 }
 
 function createHandler(dir) {
-  const functions = {};
-  if (fs.existsSync(dir)) {
-    fs.readdirSync(dir).forEach(file => {
-      if (dir === "node_modules") {
-        return;
-      }
-      const functionPath = path.resolve(path.join(dir, file));
-      const handlerPath = findHandler(functionPath);
-      if (!handlerPath) {
-        return;
-      }
-      if (path.extname(functionPath) === ".js") {
-        functions[file.replace(/\.js$/, "")] = {
-          functionPath,
-          moduleDir: findModuleDir(functionPath)
-        };
-      } else if (fs.lstatSync(functionPath).isDirectory()) {
-        functions[file] = {
-          functionPath: handlerPath,
-          moduleDir: findModuleDir(functionPath)
-        };
-      }
-    });
-  }
+  const functions = getFunctions(dir);
 
   const clearCache = action => path => {
     console.log(`${NETLIFYDEVLOG} ${path} ${action}, reloading...`); // eslint-disable-line no-console
@@ -144,6 +120,7 @@ function createHandler(dir) {
 
     let callbackWasCalled = false;
     const callback = createCallback(response);
+    // we already checked that it exports a function named handler above
     const promise = handler.handler(
       lambdaRequest,
       { clientContext: buildClientContext(request.headers) || {} },
