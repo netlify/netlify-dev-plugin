@@ -1,3 +1,4 @@
+const chalk = require("chalk");
 const Command = require("@netlify/cli-utils");
 const { flags } = require("@oclif/command");
 const AsciiTable = require("ascii-table");
@@ -6,24 +7,59 @@ class FunctionsListCommand extends Command {
   async run() {
     let { flags } = this.parse(FunctionsListCommand);
     const { api, site, config } = this.netlify;
+
+    // get deployed site details
+    // copied from `netlify status`
+    const siteId = site.id;
+    if (!siteId) {
+      this.warn("Did you run `netlify link` yet?");
+      this.error(`You don't appear to be in a folder that is linked to a site`);
+    }
+    let siteData;
+    try {
+      siteData = await api.getSite({ siteId });
+    } catch (e) {
+      if (e.status === 401 /* unauthorized*/) {
+        this.warn(
+          `Log in with a different account or re-link to a site you have permission for`
+        );
+        this.error(
+          `Not authorized to view the currently linked site (${siteId})`
+        );
+      }
+      if (e.status === 404 /* missing */) {
+        this.error(`The site this folder is linked to can't be found`);
+      }
+      this.error(e);
+    }
+    const deploy = siteData.published_deploy || {};
+    const deployed_functions = deploy.available_functions || [];
+
     const functionsDir =
       flags.functions ||
       (config.dev && config.dev.functions) ||
       (config.build && config.build.functions);
-    var table = new AsciiTable("Netlify Functions");
+    // var table = new AsciiTable("Netlify Functions");
     const functions = getFunctions(functionsDir);
 
-    table.setHeading("Name", "Url", "moduleDir");
-
+    // table.setHeading("Name", "Url", "moduleDir", "deployed");
     Object.entries(functions).forEach(([functionName, { moduleDir }]) => {
-      table.addRow(
-        functionName,
-        `/.netlify/functions/${functionName}`,
-        moduleDir
+      const isDeployed = deployed_functions
+        .map(({ n }) => n)
+        .includes(functionName);
+
+      this.log(`function name: ${chalk.yellow(functionName)}`);
+      this.log(
+        `          url: ${chalk.yellow(`/.netlify/functions/${functionName}`)}`
       );
+      this.log(`    moduleDir: ${chalk.yellow(moduleDir)}`);
+      this.log(
+        `     deployed: ${isDeployed ? chalk.green("yes") : chalk.yellow("no")}`
+      );
+      this.log("----------");
     });
-    this.log(`netlify functions:list NOT NOT IMPLEMENTED YET`);
-    this.log(table.toString());
+    // this.log(`netlify functions:list NOT NOT IMPLEMENTED YET`);
+    // this.log(table.toString());
   }
 }
 
