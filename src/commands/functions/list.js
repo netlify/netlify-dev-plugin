@@ -39,31 +39,36 @@ class FunctionsListCommand extends Command {
       flags.functions ||
       (config.dev && config.dev.functions) ||
       (config.build && config.build.functions);
-    // var table = new AsciiTable("Netlify Functions");
+    var table = new AsciiTable("Netlify Functions");
     const functions = getFunctions(functionsDir);
 
-    // table.setHeading("Name", "Url", "moduleDir", "deployed");
+    table.setHeading("Name", "Url", "moduleDir", "deployed");
     Object.entries(functions).forEach(([functionName, { moduleDir }]) => {
       const isDeployed = deployed_functions
         .map(({ n }) => n)
         .includes(functionName);
 
-      this.log(`${chalk.yellow("function name")}: ${functionName}`);
-      this.log(
-        `          ${chalk.yellow(
-          "url"
-        )}: ${`/.netlify/functions/${functionName}`}`
+      // this.log(`${chalk.yellow("function name")}: ${functionName}`);
+      // this.log(
+      //   `          ${chalk.yellow(
+      //     "url"
+      //   )}: ${`/.netlify/functions/${functionName}`}`
+      // );
+      // this.log(`    ${chalk.yellow("moduleDir")}: ${moduleDir}`);
+      // this.log(
+      //   `     ${chalk.yellow("deployed")}: ${
+      //     isDeployed ? chalk.green("yes") : chalk.yellow("no")
+      //   }`
+      // );
+      // this.log("----------");
+      table.addRow(
+        functionName,
+        `/.netlify/functions/${functionName}`,
+        moduleDir,
+        isDeployed ? "yes" : "no"
       );
-      this.log(`    ${chalk.yellow("moduleDir")}: ${moduleDir}`);
-      this.log(
-        `     ${chalk.yellow("deployed")}: ${
-          isDeployed ? chalk.green("yes") : chalk.yellow("no")
-        }`
-      );
-      this.log("----------");
     });
-    // this.log(`netlify functions:list NOT NOT IMPLEMENTED YET`);
-    // this.log(table.toString());
+    this.log(table.toString());
   }
 }
 
