@@ -48,13 +48,17 @@ class FunctionsListCommand extends Command {
         .map(({ n }) => n)
         .includes(functionName);
 
-      this.log(`function name: ${chalk.yellow(functionName)}`);
+      this.log(`${chalk.yellow("function name")}: ${functionName}`);
       this.log(
-        `          url: ${chalk.yellow(`/.netlify/functions/${functionName}`)}`
+        `          ${chalk.yellow(
+          "url"
+        )}: ${`/.netlify/functions/${functionName}`}`
       );
-      this.log(`    moduleDir: ${chalk.yellow(moduleDir)}`);
+      this.log(`    ${chalk.yellow("moduleDir")}: ${moduleDir}`);
       this.log(
-        `     deployed: ${isDeployed ? chalk.green("yes") : chalk.yellow("no")}`
+        `     ${chalk.yellow("deployed")}: ${
+          isDeployed ? chalk.green("yes") : chalk.yellow("no")
+        }`
       );
       this.log("----------");
     });
