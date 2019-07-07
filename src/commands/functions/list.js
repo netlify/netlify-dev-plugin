@@ -39,7 +39,15 @@ class FunctionsListCommand extends Command {
       flags.functions ||
       (config.dev && config.dev.functions) ||
       (config.build && config.build.functions);
-    var table = new AsciiTable("Netlify Functions");
+    if (typeof functionsDir === "undefined") {
+      this.error(
+        "functions directory is undefined, did you forget to set it in netlify.toml?"
+      );
+      process.exit(1);
+    }
+    var table = new AsciiTable(
+      `Netlify Functions (based on local functions folder "${functionsDir}")`
+    );
     const functions = getFunctions(functionsDir);
 
     table.setHeading("Name", "Url", "moduleDir", "deployed");
