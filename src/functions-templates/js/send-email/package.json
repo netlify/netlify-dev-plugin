@@ -1,7 +1,7 @@
 {
   "name": "send-email",
   "version": "1.0.0",
-  "description": "netlify functions:create - Send email with no STMP server via 'sendmail' pkg",
+  "description": "netlify functions:create - Send email with no SMTP server via 'sendmail' pkg",
   "main": "send-email.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
