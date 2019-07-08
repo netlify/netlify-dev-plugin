@@ -218,7 +218,7 @@ class DevCommand extends Command {
     }
 
     // Reset port if not manually specified, to make it dynamic
-    if (!(config.dev && config.dev.port)) {
+    if (!(config.dev && config.dev.port) && !flags.port) {
       settings = {
         port: await getPort({ port: settings.port }),
         ...settings
