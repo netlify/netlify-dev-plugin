@@ -1,13 +1,9 @@
-# netlify-dev-plugin
-
-Netlify CLI plugin for local dev experience. [If you're interested to work on Netlify Dev and other product initatives fulltime, we are hiring.](https://boards.greenhouse.io/netlify/jobs/4215780002)
-
 ## What is Netlify Dev?
 
 <div align="center">
   <h3>Watch the introduction (24 minutes)</h3>
   <a href="https://youtu.be/RL_gtVZ_79Q?t=812">
-    <img src="http://i3.ytimg.com/vi/RL_gtVZ_79Q/hqdefault.jpg" alt="link to netlify dev talk" />
+    <img src="http://i3.ytimg.com/vi/RL_gtVZ_79Q/hqdefault.jpg" height=200 alt="link to netlify dev talk" />
   </a>
 </div>
 
@@ -42,8 +38,6 @@ With project detectors, it automatically detects common tools like Gatsby, Hugo,
 This is how we pull down your build environment variables and manage your addons on your local machine.
 
 ## Usage
-
-*Watch [a 10 minute intro](https://www.youtube.com/watch?v=pIOOJD4z-Qo&feature=youtu.be) video on how to use Netlify Dev on your project.*
 
 - `netlify dev` start a local dev server for the build tool you're using
 - `netlify dev:exec <command>` runs a shell command within the netlify dev environment
@@ -102,7 +96,25 @@ netlify dev --live
 
 You will get a URL that looks like `https://clever-cray-2aa156-6639f3.netlify.live/`. This can be accessed by anyone as long as you keep your session open.
 
-> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases. In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
+> Note: there are currently known issues with ending the live session alongside your webdevserver, as well as with live reloading. We are working on fixing it, and would appreciate repro cases, or you may check [existing issues with the `--live` tag](https://github.com/netlify/netlify-dev-plugin/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A--live). In the mean time you can run `ps aux | grep live-tunnel` and kill these sessions manually.
+
+## netlify.toml [dev] block
+
+Netlify Dev is meant to work with zero config for the majority of users, by using its detector system. However you may wish to assert more control over its behavior, and should make use of the new `[dev]` block in `netlify.toml` to do so:
+
+```toml
+# sample netlify.toml
+[build]
+  command = "yarn run build"
+  functions = "functions" # netlify dev uses this to know where to scaffold and serve your functions
+  publish = "dist"
+
+# note: each of these fields are OPTIONAL
+[dev]
+  command = "yarn start" # Command to start your dev server
+  port = 3000 # Port that the dev server will be listening on
+  publish = "dist" # If you use a _redirect file, provide the path to your static content folder
+```
 
 ## Project detection
 
