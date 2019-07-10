@@ -232,6 +232,13 @@ class DevCommand extends Command {
     if (functionsDir) {
       const functionBuilder = await detectFunctionsBuilder(settings);
       if (functionBuilder) {
+        this.log(
+          `running npm script ${chalk.yellow(
+            functionBuilder.npmScript
+          )} with detected function builder ${chalk.yellow(
+            functionBuilder.builderName
+          )}`
+        );
         await functionBuilder.build();
         const functionWatcher = chokidar.watch(functionBuilder.src);
         functionWatcher.on("add", functionBuilder.build);

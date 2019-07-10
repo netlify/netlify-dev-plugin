@@ -35,6 +35,7 @@ module.exports = function() {
   if (settings.npmScript) {
     settings.build = () =>
       execa(yarnExists ? "yarn" : "npm", ["run", settings.npmScript]);
+    settings.builderName = "netlify-lambda";
     return settings;
   }
 };
