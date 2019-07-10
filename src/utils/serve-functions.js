@@ -43,8 +43,16 @@ function buildClientContext(headers) {
   try {
     return {
       identity: {
-        url: "NETLIFY_LAMBDA_LOCALLY_EMULATED_IDENTITY_URL",
-        token: "NETLIFY_LAMBDA_LOCALLY_EMULATED_IDENTITY_TOKEN"
+        url:
+          "https://netlify-dev-locally-emulated-identity.netlify.com/.netlify/identity",
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb3VyY2UiOiJuZXRsaWZ5IGRldiIsInRlc3REYXRhIjoiTkVUTElGWV9ERVZfTE9DQUxMWV9FTVVMQVRFRF9JREVOVElUWSJ9.2eSDqUOZAOBsx39FHFePjYj12k0LrxldvGnlvDu3GMI"
+        // you can decode this with https://jwt.io/
+        // just says
+        // {
+        //   "source": "netlify dev",
+        //   "testData": "NETLIFY_DEV_LOCALLY_EMULATED_IDENTITY"
+        // }
       },
       user: jwtDecode(parts[1])
     };
