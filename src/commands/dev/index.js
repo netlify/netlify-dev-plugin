@@ -233,11 +233,14 @@ class DevCommand extends Command {
       const functionBuilder = await detectFunctionsBuilder(settings);
       if (functionBuilder) {
         this.log(
-          `running npm script ${chalk.yellow(
-            functionBuilder.npmScript
-          )} with detected function builder ${chalk.yellow(
+          `${NETLIFYDEVLOG} Function builder ${chalk.yellow(
             functionBuilder.builderName
+          )} detected: Running npm script ${chalk.yellow(
+            functionBuilder.npmScript
           )}`
+        );
+        this.warn(
+          `${NETLIFYDEVWARN} This is a beta feature, please give us feedback on how to improve at https://github.com/netlify/netlify-dev-plugin/`
         );
         await functionBuilder.build();
         const functionWatcher = chokidar.watch(functionBuilder.src);
