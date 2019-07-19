@@ -312,9 +312,17 @@ DevCommand.examples = [
 DevCommand.strict = false;
 
 DevCommand.flags = {
-  command: flags.string({ char: "c", description: "command to run" }),
-  port: flags.integer({ char: "p", description: "port of netlify dev" }),
-  dir: flags.integer({ char: "d", description: "dir with static files" }),
+  command: flags.string({
+    char: "c",
+    description: "command to run"
+  }),
+  port: flags.integer({
+    char: "p",
+    description: "port of netlify dev" }),
+  dir: flags.string({
+    char: "d",
+    description: "dir with static files"
+  }),
   functions: flags.string({
     char: "f",
     description: "Specify a functions folder to serve"
@@ -323,7 +331,10 @@ DevCommand.flags = {
     char: "o",
     description: "disables any features that require network access"
   }),
-  live: flags.boolean({ char: "l", description: "Start a public live session" })
+  live: flags.boolean({
+    char: "l",
+    description: "Start a public live session"
+  })
 };
 
 module.exports = DevCommand;

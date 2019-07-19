@@ -231,7 +231,10 @@ FunctionsInvokeCommand.args = [
 ];
 
 FunctionsInvokeCommand.flags = {
-  name: flags.string({ char: "n", description: "function name to invoke" }),
+  name: flags.string({
+    char: "n",
+    description: "function name to invoke"
+  }),
   functions: flags.string({
     char: "f",
     description: "Specify a functions folder to parse, overriding netlify.toml"

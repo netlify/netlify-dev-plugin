@@ -88,7 +88,10 @@ NOT the same as listing the functions that have been deployed. For that info you
 `;
 FunctionsListCommand.aliases = ["function:list"];
 FunctionsListCommand.flags = {
-  name: flags.string({ char: "n", description: "name to print" }),
+  name: flags.string({
+    char: "n",
+    description: "name to print"
+  }),
   functions: flags.string({
     char: "f",
     description: "Specify a functions folder to serve"
