@@ -83,18 +83,18 @@ class FunctionsInvokeCommand extends Command {
     } else {
       // NOT an event triggered function, but may still want to simulate authentication locally
       let _isAuthed = false;
-      if (typeof flags.auth === "undefined") {
+      if (typeof flags.identity === "undefined") {
         const { isAuthed } = await inquirer.prompt([
           {
             type: "confirm",
             name: "isAuthed",
-            message: `Invoke with emulated Netlify Identity authentication headers? (pass -auth/--no-auth to override)`,
+            message: `Invoke with emulated Netlify Identity authentication headers? (pass --identity/--no-identity to override)`,
             default: true
           }
         ]);
         _isAuthed = isAuthed;
       } else {
-        _isAuthed = flags.auth;
+        _isAuthed = flags.identity;
       }
       if (_isAuthed) {
         headers = {
@@ -217,8 +217,8 @@ FunctionsInvokeCommand.examples = [
   "$ netlify functions:invoke",
   "$ netlify functions:invoke myfunction",
   "$ netlify functions:invoke --name myfunction",
-  "$ netlify functions:invoke --name myfunction --auth",
-  "$ netlify functions:invoke --name myfunction --no-auth",
+  "$ netlify functions:invoke --name myfunction --identity",
+  "$ netlify functions:invoke --name myfunction --no-identity",
   '$ netlify functions:invoke myfunction --payload "{"foo": 1}"',
   '$ netlify functions:invoke myfunction --querystring "foo=1',
   '$ netlify functions:invoke myfunction --payload "./pathTo.json"'
@@ -248,10 +248,9 @@ FunctionsInvokeCommand.flags = {
     description:
       "Supply POST payload in stringified json, or a path to a json file"
   }),
-  auth: flags.boolean({
-    char: "a",
+  identity: flags.boolean({
     description:
-      "simulate Netlify Identity authentication JWT. pass --no-auth to affirm unauthenticated request",
+      "simulate Netlify Identity authentication JWT. pass --no-identity to affirm unauthenticated request",
     allowNo: true
   })
 };
