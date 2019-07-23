@@ -201,13 +201,13 @@ $ netlify functions:create hello-world --url https://github.com/netlify-labs/all
 
 **Deploying unbundled function folders**
 
-Functions that have `node_modules` inside their own folders require these `node_modules` to be installed when deployed. For the time being, the Netlify build process does not recursively install dependencies for your function folders yet. So the recommended way to deploy these functions is to use the CLI command:
+Functions that have `node_modules` inside their own folders require these `node_modules` to be installed when deployed. For the time being, **the Netlify build process does not recursively install dependencies for your function folders yet**. So the recommended way to deploy these functions is to use the CLI command:
 
 ```
 netlify deploy --prod
 ```
 
-Opt out of the continuous deployment flow and use [zip-it-and-ship-it](https://github.com/netlify/zip-it-and-ship-it) instead. [Follow this issue for more updates](https://github.com/netlify/netlify-dev-plugin/issues/140).
+Or write a `prebuild` npm script yourself to `cd` into your function folders and install them yourself. We are hoping to improve this flow in future, [follow this issue for more updates](https://github.com/netlify/netlify-dev-plugin/issues/140).
 
 **Writing your own Function Templates**
 
@@ -231,6 +231,34 @@ module.exports = {
 Instead of using our basic templates, you can use your own by passing it with a --url flag: `netlify functions:create hello-world --url https://github.com/netlify-labs/all-the-functions/tree/master/functions/9-using-middleware`, specifying any addons and postinstall/complete steps as shown above.
 
 </details>
+
+### Locally Testing Functions with `netlify functions:invoke`
+
+`netlify functions:invoke` allows you to locally test functions going above and beyond a simple GET request in browser. (we only model POSTs now but could easily expand from here).
+
+If you have Netlify Dev running your functions, you can then test sending payloads of data, or authentication payloads:
+
+```bash
+
+# with prompting
+netlify functions:invoke # we will prompt you at each step
+netlify functions:invoke myfunction # invoke a specific function
+netlify functions:invoke --name myfunction # invoke a specific function
+
+# no prompting (good for CI)
+netlify functions:invoke --name myfunction --identity # invoke a specific function with netlify identity headers
+netlify functions:invoke --name myfunction --no-identity # invoke a specific function without netlify identity headers
+
+# sending payloads
+netlify functions:invoke myfunction --payload "{"foo": 1}"
+netlify functions:invoke myfunction --querystring "foo=1
+netlify functions:invoke myfunction --payload "./pathTo.json"
+```
+
+There are special cases for [event triggered functions](https://www.netlify.com/docs/functions/?utm_source=blog&utm_medium=netlifydev&utm_campaign=devex#event-triggered-functions) (eg `identity-signup`) which will also give you mock data for testing. This makes manual local testing of event triggered functions possible, which drastically improves the development experience.
+
+This is a new feature; ideas and feedback and issues and PR's welcome!
+
 
 ### Function Builders, Function Builder Detection, and Relationship with `netlify-lambda`
 
