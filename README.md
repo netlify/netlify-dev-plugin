@@ -172,7 +172,14 @@ See the [Redirects Documentation](https://www.netlify.com/docs/redirects/) for m
 
 Netlify can also create serverless functions for you locally as part of Netlify Functions. The serverless functions can then be run by Netlify Dev in the same way that wold be when deployed to the cloud.
 
-A number of function templates are available to get you started, and you can add your own utility functions to suit your own project development needs.
+```
+## list of major functionality
+netlify functions:list
+netlify functions:create
+netlify functions:invoke
+```
+
+A number of function templates are available to get you started, and you can add your own utility functions to suit your own project development needs. You can also locally invoke them with test payload data.
 
 **Create a new function**
 
@@ -250,8 +257,8 @@ netlify functions:invoke --name myfunction --identity # invoke a specific functi
 netlify functions:invoke --name myfunction --no-identity # invoke a specific function without netlify identity headers
 
 # sending payloads
-netlify functions:invoke myfunction --payload "{"foo": 1}"
-netlify functions:invoke myfunction --querystring "foo=1
+netlify functions:invoke myfunction --payload '{"foo": 1}'
+netlify functions:invoke myfunction --querystring "foo=1"
 netlify functions:invoke myfunction --payload "./pathTo.json"
 ```
 
