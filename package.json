@@ -5,7 +5,7 @@
   "author": "David Calavera @calavera",
   "bugs": "https://github.com/netlify/netlify-dev-plugin/issues",
   "dependencies": {
-    "@netlify/cli-utils": "^1.0.1",
+    "@netlify/cli-utils": "^1.0.7",
     "@netlify/rules-proxy": "^0.1.3",
     "@netlify/zip-it-and-ship-it": "^0.3.0",
     "@oclif/command": "^1",
