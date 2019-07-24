@@ -118,13 +118,14 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
-"@netlify/cli-utils@^1.0.1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@netlify/cli-utils/-/cli-utils-1.0.2.tgz#46443edb40f48ab619bf51bf4187cf1d09ac6f6e"
-  integrity sha512-iAZaZttAmfP/mubRyQIQ83X8cGhHgoRKw3MVp/wvcHMuRmFJ2AbwyItpKfVpyeA8p3reK233n6feRYehm3u4Yg==
+"@netlify/cli-utils@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@netlify/cli-utils/-/cli-utils-1.0.7.tgz#67b82743ac25e26904a8a552e1bfc3d6bdc34ad0"
+  integrity sha512-Tt7vVjutcuW9a4QxQ9CmJ38uaGqffk1zd6wJg6TMcy6/x/3bW4J1BdEiz7ZZ5OGidvtx5QaLv51ExNHtEFsZ8g==
   dependencies:
     "@iarna/toml" "^2.2.1"
     "@oclif/command" "^1.5.8"
+    "@oclif/parser" "^3.8.3"
     chalk "^2.4.1"
     ci-info "^2.0.0"
     cli-ux "^5.0.0"
@@ -135,6 +136,7 @@
     lodash.merge "^4.6.1"
     lodash.snakecase "^4.1.1"
     make-dir "^1.3.0"
+    minimist "^1.2.0"
     netlify "^2.2.1"
     node-fetch "^2.3.0"
     uuid "^3.3.2"
@@ -259,6 +261,15 @@
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/@oclif/parser/-/parser-3.8.0.tgz#397c73f92cf8ac82daa7448a916638a312775e3b"
   integrity sha512-w1fCz0bpg1ukbYKLxQn3cYQS9hiqNgmFhlqAqqfr1k0ijMhA/g8Z+7mshiFs1w7OsxxnKhmRxPn7EZR4EJcemA==
+  dependencies:
+    "@oclif/linewrap" "^1.0.0"
+    chalk "^2.4.2"
+    tslib "^1.9.3"
+
+"@oclif/parser@^3.8.3":
+  version "3.8.3"
+  resolved "https://registry.yarnpkg.com/@oclif/parser/-/parser-3.8.3.tgz#717fbbe5bfafef4270224b8bd41a2d3c80b9554e"
+  integrity sha512-zN+3oGuv9Lg8NjFvxZTDKFEmhAMfAvd/JWeQp3Ri8pDezoyJQi4OSHHLM8sdHjBh8sePewfWI7+fDUXdrVbrqg==
   dependencies:
     "@oclif/linewrap" "^1.0.0"
     chalk "^2.4.2"

@@ -46,8 +46,7 @@ class FunctionsInvokeCommand extends Command {
       settings = {
         noCmd: true,
         port: 8888,
-        proxyPort: 3999,
-        dist
+        proxyPort: 3999
       };
     }
 
@@ -190,7 +189,7 @@ async function getNameFromArgs(functions, args, flags) {
   const isValidFn = Object.keys(functions).includes(functionToTrigger);
   if (!functionToTrigger || !isValidFn) {
     if (!isValidFn) {
-      this.warn(
+      console.warn(
         `Function name ${chalk.yellow(
           functionToTrigger
         )} supplied but no matching function found in your functions folder, forcing you to pick a valid one...`
