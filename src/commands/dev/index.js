@@ -159,7 +159,6 @@ function startDevServer(settings, log) {
     settings.command === "npm" ? ["run", ...settings.args] : settings.args;
   const ps = execa(settings.command, args, {
     env: settings.env,
-    stdio: "inherit"
   });
   ps.on("close", code => process.exit(code));
   ps.on("SIGINT", process.exit);
