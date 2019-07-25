@@ -5,7 +5,6 @@ const httpProxy = require("http-proxy");
 const waitPort = require("wait-port");
 const getPort = require("get-port");
 const chokidar = require("chokidar");
-const stripAnsi = require("strip-ansi")
 const { serveFunctions } = require("../../utils/serve-functions");
 const { serverSettings } = require("../../detect-server");
 const { detectFunctionsBuilder } = require("../../detect-functions-builder");
@@ -159,14 +158,14 @@ function startDevServer(settings, log) {
   const args =
     settings.command === "npm" ? ["run", ...settings.args] : settings.args;
   const ps = execa(settings.command, args, {
-    env: settings.env,
+    env: settings.env
   });
-  ps.stdout.on('data', function(buffer) {
-    process.stdout.write(stripAnsi(buffer.toString('utf8')))
-  })
-  ps.stderr.on('data', function(buffer) {
-    process.stderr.write(stripAnsi(buffer.toString('utf8')))
-  })
+  ps.stdout.on("data", function(buffer) {
+    process.stdout.write(buffer.toString("utf8"));
+  });
+  ps.stderr.on("data", function(buffer) {
+    process.stderr.write(buffer.toString("utf8"));
+  });
   ps.on("close", code => process.exit(code));
   ps.on("SIGINT", process.exit);
   ps.on("SIGTERM", process.exit);
@@ -324,7 +323,8 @@ DevCommand.flags = {
   }),
   port: flags.integer({
     char: "p",
-    description: "port of netlify dev" }),
+    description: "port of netlify dev"
+  }),
   dir: flags.string({
     char: "d",
     description: "dir with static files"
