@@ -158,7 +158,8 @@ function startDevServer(settings, log) {
   const args =
     settings.command === "npm" ? ["run", ...settings.args] : settings.args;
   const ps = execa(settings.command, args, {
-    env: settings.env
+    env: settings.env,
+    stdio: ["inherit", "pipe", "pipe"]
   });
   ps.stdout.on("data", function(buffer) {
     process.stdout.write(buffer.toString("utf8"));
