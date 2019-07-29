@@ -158,8 +158,14 @@ function startDevServer(settings, log) {
   const args =
     settings.command === "npm" ? ["run", ...settings.args] : settings.args;
   const ps = execa(settings.command, args, {
-    env: settings.env,
-    stdio: "inherit"
+    env: { ...settings.env, FORCE_COLOR: "true" },
+    stdio: ["inherit", "pipe", "pipe"]
+  });
+  ps.stdout.on("data", function(buffer) {
+    process.stdout.write(buffer.toString("utf8"));
+  });
+  ps.stderr.on("data", function(buffer) {
+    process.stderr.write(buffer.toString("utf8"));
   });
   ps.on("close", code => process.exit(code));
   ps.on("SIGINT", process.exit);
@@ -318,7 +324,8 @@ DevCommand.flags = {
   }),
   port: flags.integer({
     char: "p",
-    description: "port of netlify dev" }),
+    description: "port of netlify dev"
+  }),
   dir: flags.string({
     char: "d",
     description: "dir with static files"
