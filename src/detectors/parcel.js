@@ -10,9 +10,8 @@ module.exports = function() {
   if (!hasRequiredFiles(["package.json"])) return false;
 
   /* REQUIRED DEPS */
-  if (!hasRequiredDeps(["parcel-bundler"])) return false;
-  /* The package "parcel" also works, but the Parcel docs say to use
-   * "parcel-bundler" */
+  if (!(hasRequiredDeps(["parcel-bundler"]) || hasRequiredDeps(["parcel"])))
+    return false;
 
   /* Everything below now assumes that we are within parcel */
 
